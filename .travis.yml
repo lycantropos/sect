@@ -1,0 +1,25 @@
+dist: xenial
+
+language: python
+
+matrix:
+  include:
+    - python: pypy3.5-6.0.0
+    - python: pypy3.6-7.0.0
+    - python: 3.5
+    - python: 3.6
+    - python: 3.7
+    - python: 3.8
+
+install:
+  - python -m pip install --upgrade pip setuptools
+  - python -m pip install --upgrade codecov
+  - python -m pip install --force-reinstall -r requirements.txt
+  - python -m pip install --force-reinstall -r requirements-tests.txt
+
+script:
+  - pytest
+  - python -m doctest README.md
+
+after_success:
+  - python -m codecov -f coverage.xml -X gcov

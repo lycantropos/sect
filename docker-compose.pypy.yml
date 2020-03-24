@@ -1,0 +1,19 @@
+version: '3'
+
+services:
+  sect-pypy:
+    build:
+      context: .
+      args:
+        - PYTHON_IMAGE=${PYPY_IMAGE_NAME}
+        - PYTHON_IMAGE_VERSION=${PYPY_IMAGE_VERSION}
+    image: lycantropos/sect-pypy:0.0.0
+    volumes:
+      - ./sect/:/opt/sect/sect/
+      - ./tests/:/opt/sect/tests/
+      - ./README.md:/opt/sect/README.md
+      - ./requirements.txt:/opt/sect/requirements.txt
+      - ./requirements-tests.txt:/opt/sect/requirements-tests.txt
+      - ./setup.py:/opt/sect/setup.py
+      - ./pytest.ini:/opt/sect/pytest.ini
+    entrypoint: pytest
