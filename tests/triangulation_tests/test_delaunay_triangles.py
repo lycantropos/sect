@@ -4,13 +4,13 @@ from typing import Sequence
 from hypothesis import given
 
 from sect.core.contracts import is_point_inside_circumcircle
-from sect.core.utils import (normalize_triangle,
+from sect.core.utils import (contour_to_segments,
+                             normalize_triangle,
                              to_convex_hull)
 from sect.hints import (Point,
                         Triangle)
 from sect.triangulation import delaunay_triangles
-from tests.utils import (contour_to_segments,
-                         to_boundary_endpoints)
+from tests.utils import to_boundary_endpoints
 from . import strategies
 
 

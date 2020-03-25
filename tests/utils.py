@@ -1,6 +1,5 @@
 from collections import defaultdict
 from typing import (Iterable,
-                    List,
                     Sequence,
                     Set)
 
@@ -9,11 +8,12 @@ from robust.angular import (Orientation,
                             orientation)
 
 from sect.core.hints import Endpoints
-from sect.hints import (Point,
+from sect.core.utils import contour_to_segments
+from sect.hints import (Contour,
+                        Point,
                         Segment)
 
 Strategy = SearchStrategy
-Contour = Sequence[Point]
 
 
 def points_do_not_lie_on_the_same_line(points: Sequence[Point]) -> bool:
@@ -62,8 +62,3 @@ def replace_segment(segments: Set[Segment],
                     target: Segment) -> None:
     segments.remove(source)
     segments.add(target)
-
-
-def contour_to_segments(contour: Contour) -> List[Segment]:
-    return [(contour[index - 1], contour[index])
-            for index in range(len(contour))]
