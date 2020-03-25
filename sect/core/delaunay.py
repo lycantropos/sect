@@ -1,10 +1,13 @@
 from collections import deque
 from itertools import chain
-from typing import (Iterable,
+from typing import (Dict,
+                    FrozenSet,
+                    Iterable,
                     List,
                     Optional,
                     Sequence,
-                    Set)
+                    Set,
+                    ValuesView)
 
 from reprit.base import generate_repr
 from robust.angular import (Orientation,
@@ -89,10 +92,13 @@ class Triangulation:
             if constraint_endpoints in endpoints:
                 continue
             crossed_edges = self._find_crossed_edges(constraint)
-            new_edges = self._resolve_crossings(crossed_edges, constraint)
+            endpoints.difference_update(crossed_edges.keys())
+            new_edges = self._resolve_crossings(crossed_edges.values(),
+                                                constraint)
             _set_criterion(edge
                            for edge in new_edges
                            if edge_to_endpoints(edge) != constraint_endpoints)
+            endpoints.update(edge_to_endpoints(edge) for edge in new_edges)
 
     def _bound(self, border: Sequence[Segment]) -> None:
         border_endpoints = {frozenset(segment) for segment in border}
@@ -126,14 +132,14 @@ class Triangulation:
             other.right_edge = base_edge
         return base_edge
 
-    def _find_crossed_edges(self, constraint: Segment) -> Set[QuadEdge]:
-        return set({edge_to_endpoints(edge): edge
-                    for edge in self._to_inner_edges()
-                    if segments_relationship(edge_to_segment(edge), constraint)
-                    is SegmentsRelationship.CROSS}
-                   .values())
+    def _find_crossed_edges(self, constraint: Segment
+                            ) -> Dict[FrozenSet[Point], QuadEdge]:
+        return {edge_to_endpoints(edge): edge
+                for edge in self._to_inner_edges()
+                if segments_relationship(edge_to_segment(edge), constraint)
+                is SegmentsRelationship.CROSS}
 
-    def _resolve_crossings(self, crossed_edges: Set[QuadEdge],
+    def _resolve_crossings(self, crossed_edges: ValuesView[QuadEdge],
                            constraint: Segment) -> Set[QuadEdge]:
         result = set()
         crossed_edges = deque(crossed_edges,
