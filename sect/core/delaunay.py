@@ -54,13 +54,8 @@ class Triangulation:
     def constrain(self,
                   border: Sequence[Segment],
                   extra_constraints: Optional[Sequence[Segment]]) -> None:
-        initial_boundary_endpoints = frozenset(map(edge_to_endpoints,
-                                                   self._to_boundary_edges()))
-        if not extra_constraints and all(edge in initial_boundary_endpoints
-                                         for edge in border):
-            return
         self._constrain(border
-                        if extra_constraints is None
+                        if not extra_constraints
                         else chain(border, extra_constraints))
         self._bound(border)
 
