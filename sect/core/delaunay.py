@@ -24,7 +24,8 @@ from .subdivisional import (QuadEdge,
                             edge_to_segment)
 from .utils import (flatten,
                     normalize_triangle,
-                    split_sequence)
+                    split_sequence,
+                    to_unique_objects)
 
 
 class Triangulation:
@@ -38,7 +39,7 @@ class Triangulation:
 
     @classmethod
     def from_points(cls, points: Sequence[Point]) -> 'Triangulation':
-        result = [sorted(points)]
+        result = [sorted(to_unique_objects(points))]
         while max(map(len, result)) > max(_initializers):
             result = list(
                     flatten(split_sequence(part) if len(part) > max(

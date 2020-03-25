@@ -1,3 +1,5 @@
+import sys
+from collections import OrderedDict
 from itertools import chain
 from typing import (Iterable,
                     List,
@@ -53,3 +55,8 @@ def normalize_triangle(triangle: Triangle) -> Triangle:
                    triangle[1]) is Orientation.COUNTERCLOCKWISE:
         triangle = triangle[:1] + triangle[1:][::-1]
     return triangle
+
+
+to_unique_objects = (OrderedDict
+                     if sys.version_info < (3, 6)
+                     else dict).fromkeys
