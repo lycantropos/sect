@@ -255,7 +255,7 @@ def _set_criterion(target_edges: Iterable[QuadEdge]) -> None:
     while True:
         edges_to_swap = {edge
                          for edge in target_edges
-                         if _should_be_swapped(edge)}
+                         if _edge_should_be_swapped(edge)}
         if not edges_to_swap:
             break
         for edge in edges_to_swap:
@@ -263,20 +263,16 @@ def _set_criterion(target_edges: Iterable[QuadEdge]) -> None:
         target_edges.difference_update(edges_to_swap)
 
 
-def _should_be_swapped(edge: QuadEdge) -> bool:
+def _edge_should_be_swapped(edge: QuadEdge) -> bool:
     return (points_form_convex_quadrilateral(
             (edge.start, edge.left_from_start.end,
              edge.end, edge.right_from_start.end))
-            and _is_non_delaunay(edge))
-
-
-def _is_non_delaunay(edge: QuadEdge) -> bool:
-    return (is_point_inside_circumcircle(edge.start, edge.end,
-                                         edge.left_from_start.end,
-                                         edge.right_from_start.end)
-            or is_point_inside_circumcircle(edge.end, edge.start,
-                                            edge.right_from_start.end,
-                                            edge.left_from_start.end))
+            and (is_point_inside_circumcircle(edge.start, edge.end,
+                                              edge.left_from_start.end,
+                                              edge.right_from_start.end)
+                 or is_point_inside_circumcircle(edge.end, edge.start,
+                                                 edge.right_from_start.end,
+                                                 edge.left_from_start.end)))
 
 
 def _triangulate_two_points(sorted_points: Sequence[Point]) -> Triangulation:
