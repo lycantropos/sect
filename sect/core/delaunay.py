@@ -1,13 +1,10 @@
 from collections import deque
 from itertools import chain
-from typing import (Dict,
-                    FrozenSet,
-                    Iterable,
+from typing import (Iterable,
                     List,
                     Optional,
                     Sequence,
-                    Set,
-                    ValuesView)
+                    Set)
 
 from reprit.base import generate_repr
 from robust.angular import (Orientation,
@@ -22,6 +19,8 @@ from .contracts import (is_point_inside_circumcircle,
                         points_form_convex_quadrilateral)
 from .subdivisional import (QuadEdge,
                             edge_to_endpoints,
+                            edge_to_neighbours,
+                            edge_to_non_adjacent_vertices,
                             edge_to_segment)
 from .utils import (flatten,
                     normalize_triangle,
@@ -87,18 +86,21 @@ class Triangulation:
 
     def _constrain(self, constraints: Sequence[Segment]) -> None:
         endpoints = {edge_to_endpoints(edge) for edge in self._to_edges()}
+        inner_edges = self._to_inner_edges()
         for constraint in constraints:
             constraint_endpoints = frozenset(constraint)
             if constraint_endpoints in endpoints:
                 continue
-            crossed_edges = self._find_crossed_edges(constraint)
-            endpoints.difference_update(crossed_edges.keys())
-            new_edges = self._resolve_crossings(crossed_edges.values(),
-                                                constraint)
+            crossings = _detect_crossings(inner_edges, constraint)
+            inner_edges.difference_update(crossings)
+            endpoints.difference_update(edge_to_endpoints(edge)
+                                        for edge in crossings)
+            new_edges = _resolve_crossings(crossings, constraint)
             _set_criterion(edge
                            for edge in new_edges
                            if edge_to_endpoints(edge) != constraint_endpoints)
             endpoints.update(edge_to_endpoints(edge) for edge in new_edges)
+            inner_edges.update(new_edges)
 
     def _bound(self, border: Sequence[Segment]) -> None:
         border_endpoints = {frozenset(segment) for segment in border}
@@ -108,7 +110,7 @@ class Triangulation:
         while non_boundary:
             edge = non_boundary.pop()
             non_boundary.remove(edge.opposite)
-            candidates = self._to_neighbours(edge)
+            candidates = edge_to_neighbours(edge)
             self.delete(edge)
             non_boundary.update(flatten(
                     (candidate, candidate.opposite)
@@ -131,54 +133,6 @@ class Triangulation:
         if other.left_edge.start == other.right_edge.start:
             other.right_edge = base_edge
         return base_edge
-
-    def _find_crossed_edges(self, constraint: Segment
-                            ) -> Dict[FrozenSet[Point], QuadEdge]:
-        return {edge_to_endpoints(edge): edge
-                for edge in self._to_inner_edges()
-                if segments_relationship(edge_to_segment(edge), constraint)
-                is SegmentsRelationship.CROSS}
-
-    def _resolve_crossings(self, crossed_edges: ValuesView[QuadEdge],
-                           constraint: Segment) -> Set[QuadEdge]:
-        result = set()
-        crossed_edges = deque(crossed_edges,
-                              maxlen=len(crossed_edges))
-        while crossed_edges:
-            edge = crossed_edges.popleft()
-            (first_non_edge_vertex,
-             second_non_edge_vertex) = self._non_adjacent_vertices(edge)
-            if points_form_convex_quadrilateral((edge.start, edge.end,
-                                                 first_non_edge_vertex,
-                                                 second_non_edge_vertex)):
-                edge.swap()
-                if (segments_relationship(edge_to_segment(edge), constraint)
-                        is SegmentsRelationship.CROSS):
-                    crossed_edges.append(edge)
-                else:
-                    result.add(edge)
-            else:
-                crossed_edges.append(edge)
-        return result
-
-    @staticmethod
-    def _non_adjacent_vertices(edge: QuadEdge) -> Set[Point]:
-        return {neighbour.end
-                for neighbour in Triangulation._to_incidents(edge)}
-
-    @staticmethod
-    def _to_neighbours(edge: QuadEdge) -> Iterable[QuadEdge]:
-        yield from Triangulation._to_incidents(edge)
-        yield from Triangulation._to_incidents(edge.opposite)
-
-    @staticmethod
-    def _to_incidents(edge: QuadEdge) -> Iterable[QuadEdge]:
-        if (edge.orientation_with(edge.right_from_start.end)
-                is Orientation.CLOCKWISE):
-            yield edge.right_from_start
-        if (edge.orientation_with(edge.left_from_start.end)
-                is Orientation.COUNTERCLOCKWISE):
-            yield edge.left_from_start
 
     def delete(self, edge: QuadEdge) -> None:
         if edge is self.right_edge or edge.opposite is self.right_edge:
@@ -215,9 +169,39 @@ class Triangulation:
                 break
             edge = edge.right_from_end
 
-    def _to_inner_edges(self) -> List[QuadEdge]:
-        return list(set(self._to_edges())
-                    .difference(self._to_boundary_edges()))
+    def _to_inner_edges(self) -> Set[QuadEdge]:
+        return set(self._to_edges()).difference(self._to_boundary_edges())
+
+
+def _resolve_crossings(crossings: List[QuadEdge],
+                       constraint: Segment) -> List[QuadEdge]:
+    result = []
+    crossings = deque(crossings,
+                      maxlen=len(crossings))
+    while crossings:
+        edge = crossings.popleft()
+        (first_non_edge_vertex,
+         second_non_edge_vertex) = edge_to_non_adjacent_vertices(edge)
+        if points_form_convex_quadrilateral((edge.start, edge.end,
+                                             first_non_edge_vertex,
+                                             second_non_edge_vertex)):
+            edge.swap()
+            if (segments_relationship(edge_to_segment(edge), constraint)
+                    is SegmentsRelationship.CROSS):
+                crossings.append(edge)
+            else:
+                result.append(edge)
+        else:
+            crossings.append(edge)
+    return result
+
+
+def _detect_crossings(inner_edges: Iterable[QuadEdge],
+                      constraint: Segment) -> List[QuadEdge]:
+    return [edge
+            for edge in inner_edges
+            if segments_relationship(edge_to_segment(edge), constraint)
+            is SegmentsRelationship.CROSS]
 
 
 def _merge(base_edge: QuadEdge) -> None:

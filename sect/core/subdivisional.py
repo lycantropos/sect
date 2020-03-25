@@ -1,5 +1,6 @@
-from typing import (FrozenSet,
-                    Optional)
+from typing import (Iterable,
+                    Optional,
+                    Set)
 
 from reprit.base import generate_repr
 from robust.angular import (Orientation,
@@ -7,6 +8,7 @@ from robust.angular import (Orientation,
 
 from sect.hints import (Point,
                         Segment)
+from .hints import Endpoints
 
 
 class QuadEdge:
@@ -133,9 +135,28 @@ class QuadEdge:
         return orientation(self.end, self.start, point)
 
 
+def edge_to_neighbours(edge: QuadEdge) -> Iterable[QuadEdge]:
+    yield from edge_to_incidents(edge)
+    yield from edge_to_incidents(edge.opposite)
+
+
+def edge_to_incidents(edge: QuadEdge) -> Iterable[QuadEdge]:
+    if (edge.orientation_with(edge.right_from_start.end)
+            is Orientation.CLOCKWISE):
+        yield edge.right_from_start
+    if (edge.orientation_with(edge.left_from_start.end)
+            is Orientation.COUNTERCLOCKWISE):
+        yield edge.left_from_start
+
+
+def edge_to_non_adjacent_vertices(edge: QuadEdge) -> Set[Point]:
+    return {neighbour.end
+            for neighbour in edge_to_incidents(edge)}
+
+
 def edge_to_segment(edge: QuadEdge) -> Segment:
     return edge.start, edge.end
 
 
-def edge_to_endpoints(edge: QuadEdge) -> FrozenSet[Point]:
+def edge_to_endpoints(edge: QuadEdge) -> Endpoints:
     return frozenset((edge.start, edge.end))
