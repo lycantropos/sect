@@ -1,4 +1,5 @@
 from typing import (Iterable,
+                    List,
                     Optional,
                     Set)
 
@@ -135,23 +136,23 @@ class QuadEdge:
         return orientation(self.end, self.start, point)
 
 
-def edge_to_neighbours(edge: QuadEdge) -> Iterable[QuadEdge]:
-    yield from edge_to_incidents(edge)
-    yield from edge_to_incidents(edge.opposite)
+def edge_to_neighbours(edge: QuadEdge) -> List[QuadEdge]:
+    return (list(_edge_to_incidents(edge))
+            + list(_edge_to_incidents(edge.opposite)))
 
 
-def edge_to_incidents(edge: QuadEdge) -> Iterable[QuadEdge]:
+def edge_to_non_adjacent_vertices(edge: QuadEdge) -> Set[Point]:
+    return {neighbour.end
+            for neighbour in _edge_to_incidents(edge)}
+
+
+def _edge_to_incidents(edge: QuadEdge) -> Iterable[QuadEdge]:
     if (edge.orientation_with(edge.right_from_start.end)
             is Orientation.CLOCKWISE):
         yield edge.right_from_start
     if (edge.orientation_with(edge.left_from_start.end)
             is Orientation.COUNTERCLOCKWISE):
         yield edge.left_from_start
-
-
-def edge_to_non_adjacent_vertices(edge: QuadEdge) -> Set[Point]:
-    return {neighbour.end
-            for neighbour in edge_to_incidents(edge)}
 
 
 def edge_to_segment(edge: QuadEdge) -> Segment:
