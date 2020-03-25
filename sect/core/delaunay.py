@@ -84,7 +84,7 @@ class Triangulation:
         _merge(self._find_base_edge(other))
         return Triangulation(self.left_edge, other.right_edge)
 
-    def _constrain(self, constraints: Sequence[Segment]) -> None:
+    def _constrain(self, constraints: Iterable[Segment]) -> None:
         endpoints = {edge_to_endpoints(edge) for edge in self._to_edges()}
         inner_edges = self._to_inner_edges()
         for constraint in constraints:
@@ -102,7 +102,7 @@ class Triangulation:
             endpoints.update(edge_to_endpoints(edge) for edge in new_edges)
             inner_edges.update(new_edges)
 
-    def _bound(self, border: Sequence[Segment]) -> None:
+    def _bound(self, border: Iterable[Segment]) -> None:
         border_endpoints = {frozenset(segment) for segment in border}
         non_boundary = {edge
                         for edge in self._to_boundary_edges()
