@@ -9,7 +9,9 @@ from typing import (Iterable,
 from robust.angular import (Orientation,
                             orientation)
 
-from sect.hints import (Point,
+from sect.hints import (Contour,
+                        Point,
+                        Segment,
                         Triangle)
 
 Domain = TypeVar('Domain')
@@ -55,6 +57,11 @@ def normalize_triangle(triangle: Triangle) -> Triangle:
                    triangle[1]) is Orientation.COUNTERCLOCKWISE:
         triangle = triangle[:1] + triangle[1:][::-1]
     return triangle
+
+
+def contour_to_segments(contour: Contour) -> List[Segment]:
+    return [(contour[index - 1], contour[index])
+            for index in range(len(contour))]
 
 
 to_unique_objects = (OrderedDict
