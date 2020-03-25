@@ -41,7 +41,7 @@ def delaunay_triangles(points: Sequence[Point]) -> List[Triangle]:
 def constrained_delaunay_triangles(border: Contour,
                                    holes: Sequence[Contour] = (),
                                    *,
-                                   extra_points: Sequence[Point],
+                                   extra_points: Sequence[Point] = (),
                                    extra_constraints: Sequence[Segment] = ()
                                    ) -> List[Triangle]:
     return (constrained_delaunay(border, holes,
