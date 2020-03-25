@@ -95,10 +95,10 @@ class Triangulation:
                            if edge_to_endpoints(edge) != constraint_endpoints)
 
     def _bound(self, border: Sequence[Segment]) -> None:
-        border = {frozenset(segment) for segment in border}
+        border_endpoints = {frozenset(segment) for segment in border}
         non_boundary = {edge
                         for edge in self._to_boundary_edges()
-                        if edge_to_endpoints(edge) not in border}
+                        if edge_to_endpoints(edge) not in border_endpoints}
         while non_boundary:
             edge = non_boundary.pop()
             non_boundary.remove(edge.opposite)
@@ -107,7 +107,7 @@ class Triangulation:
             non_boundary.update(flatten(
                     (candidate, candidate.opposite)
                     for candidate in candidates
-                    if edge_to_endpoints(candidate) not in border))
+                    if edge_to_endpoints(candidate) not in border_endpoints))
 
     def _find_base_edge(self, other: 'Triangulation') -> QuadEdge:
         while True:
