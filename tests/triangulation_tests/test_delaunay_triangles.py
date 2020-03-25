@@ -1,4 +1,3 @@
-from collections import abc
 from typing import Sequence
 
 from hypothesis import given
@@ -18,8 +17,8 @@ from . import strategies
 def test_basic(points: Sequence[Point]) -> None:
     result = delaunay_triangles(points)
 
-    assert isinstance(result, abc.Sequence)
-    assert all(isinstance(element, abc.Sequence)
+    assert isinstance(result, list)
+    assert all(isinstance(element, tuple)
                for element in result)
 
 
