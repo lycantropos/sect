@@ -231,8 +231,8 @@ def _detect_crossings(inner_edges: Iterable[QuadEdge],
 
 def _merge(base_edge: QuadEdge) -> None:
     while True:
-        left_candidate = _to_left_candidate(base_edge)
-        right_candidate = _to_right_candidate(base_edge)
+        left_candidate, right_candidate = (_to_left_candidate(base_edge),
+                                           _to_right_candidate(base_edge))
         if left_candidate is right_candidate is None:
             break
         elif (left_candidate is None
