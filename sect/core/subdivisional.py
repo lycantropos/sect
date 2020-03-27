@@ -104,12 +104,12 @@ class QuadEdge:
     __repr__ = generate_repr(factory)
 
     def splice(self, other: 'QuadEdge') -> None:
-        alpha = self.left_from_start.rotated
-        beta = other.left_from_start.rotated
-        self._left_from_start, other._left_from_start = (other.left_from_start,
-                                                         self.left_from_start)
-        alpha._left_from_start, beta._left_from_start = (beta.left_from_start,
-                                                         alpha.left_from_start)
+        alpha = self._left_from_start.rotated
+        beta = other._left_from_start.rotated
+        self._left_from_start, other._left_from_start = (
+            other._left_from_start, self._left_from_start)
+        alpha._left_from_start, beta._left_from_start = (
+            beta._left_from_start, alpha._left_from_start)
 
     def swap(self) -> None:
         side = self.right_from_start
