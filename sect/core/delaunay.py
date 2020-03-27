@@ -123,10 +123,9 @@ class Triangulation:
                     is Orientation.COUNTERCLOCKWISE):
                 triangle = (edge.start, edge.end, edge.left_from_start.end)
                 vertices = frozenset(triangle)
-                if vertices not in visited_vertices:
-                    if (frozenset((edge.end, edge.left_from_start.end))
-                            not in edges_endpoints):
-                        continue
+                if (vertices not in visited_vertices
+                        and (frozenset((edge.end, edge.left_from_start.end))
+                             in edges_endpoints)):
                     visited_vertices.add(vertices)
                     yield normalize_triangle(triangle)
 
