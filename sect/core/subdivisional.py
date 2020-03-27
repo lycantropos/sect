@@ -43,7 +43,7 @@ class QuadEdge:
         """
         aka "Dest" in L. Guibas and J. Stolfi notation.
         """
-        return self.opposite.start
+        return self.opposite._start
 
     @property
     def rotated(self) -> 'QuadEdge':
@@ -71,21 +71,21 @@ class QuadEdge:
         """
         aka "Oprev" in L. Guibas and J. Stolfi notation.
         """
-        return self.rotated.left_from_start.rotated
+        return self._rotated._left_from_start._rotated
 
     @property
     def right_from_end(self) -> 'QuadEdge':
         """
         aka "Rprev" in L. Guibas and J. Stolfi notation.
         """
-        return self.opposite.left_from_start
+        return self.opposite._left_from_start
 
     @property
     def left_from_end(self) -> 'QuadEdge':
         """
         aka "Lnext" in L. Guibas and J. Stolfi notation.
         """
-        return self.rotated.opposite.left_from_start.rotated
+        return self._rotated.opposite._left_from_start._rotated
 
     @classmethod
     def factory(cls, start: Point, end: Point) -> 'QuadEdge':
@@ -123,7 +123,7 @@ class QuadEdge:
         opposite._start = opposite_side.end
 
     def connect(self, other: 'QuadEdge') -> 'QuadEdge':
-        result = QuadEdge.factory(self.end, other.start)
+        result = QuadEdge.factory(self.end, other._start)
         result.splice(self.left_from_end)
         result.opposite.splice(other)
         return result
@@ -133,7 +133,7 @@ class QuadEdge:
         self.opposite.splice(self.opposite.right_from_start)
 
     def orientation_with(self, point: Point) -> Orientation:
-        return orientation(self.end, self.start, point)
+        return orientation(self.end, self._start, point)
 
 
 def edge_to_neighbours(edge: QuadEdge) -> List[QuadEdge]:
