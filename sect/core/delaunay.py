@@ -44,11 +44,10 @@ class Triangulation:
     def from_points(cls, points: Iterable[Point]) -> 'Triangulation':
         result = [sorted(to_unique_objects(points))]
         while max(map(len, result)) > max(_initializers):
-            result = list(
-                    flatten(split_sequence(part) if len(part) > max(
-                            _initializers)
-                            else [part]
-                            for part in result))
+            result = list(flatten(split_sequence(part)
+                                  if len(part) > max(_initializers)
+                                  else [part]
+                                  for part in result))
         result = [_initialize_triangulation(points) for points in result]
         while len(result) > 1:
             parts_to_merge_count = len(result) // 2 * 2
