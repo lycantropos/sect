@@ -59,7 +59,7 @@ class Triangulation:
 
     def constrain(self, constraints: Iterable[Segment]) -> None:
         endpoints = {edge_to_endpoints(edge) for edge in self._to_edges()}
-        inner_edges = self._to_inner_edges()
+        inner_edges = self._to_unique_inner_edges()
         for constraint in constraints:
             constraint_endpoints = frozenset(constraint)
             if constraint_endpoints in endpoints:
