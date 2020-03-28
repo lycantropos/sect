@@ -1,4 +1,5 @@
 from collections import deque
+from itertools import accumulate
 from typing import (Iterable,
                     List,
                     Optional,
@@ -24,10 +25,11 @@ from .subdivisional import (QuadEdge,
                             edge_to_non_adjacent_vertices,
                             edge_to_segment)
 from .sweep import sweep
-from .utils import (contour_to_segments,
+from .utils import (coin_change,
+                    contour_to_segments,
                     flatten,
                     normalize_triangle,
-                    split_sequence,
+                    pairwise,
                     to_unique_objects)
 
 
@@ -42,13 +44,10 @@ class Triangulation:
 
     @classmethod
     def from_points(cls, points: Iterable[Point]) -> 'Triangulation':
-        result = [sorted(to_unique_objects(points))]
-        while max(map(len, result)) > max(_initializers):
-            result = list(flatten(split_sequence(part)
-                                  if len(part) > max(_initializers)
-                                  else [part]
-                                  for part in result))
-        result = [_initialize_triangulation(points) for points in result]
+        points = sorted(to_unique_objects(points))
+        lengths = coin_change(len(points), _initializers)
+        result = [_initialize_triangulation(points[start:stop])
+                  for start, stop in pairwise(accumulate([0] + lengths))]
         while len(result) > 1:
             parts_to_merge_count = len(result) // 2 * 2
             result = ([result[offset]._merge_with(result[offset + 1])
