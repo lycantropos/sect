@@ -109,9 +109,9 @@ class Triangulation:
         for edge in candidates:
             if edge_to_endpoints(edge) not in hole_segments_endpoints:
                 self.delete(edge)
-        for hole in holes:
-            if len(hole) == 3:
-                self._triangular_holes_vertices.add(frozenset(hole))
+        self._triangular_holes_vertices.update(frozenset(hole)
+                                               for hole in holes
+                                               if len(hole) == 3)
 
     def triangles(self) -> List[Triangle]:
         return list(self._triangles())
