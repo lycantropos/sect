@@ -34,11 +34,12 @@ from .utils import (coin_change,
 
 
 class Triangulation:
-    __slots__ = 'left_edge', 'right_edge'
+    __slots__ = 'left_edge', 'right_edge', '_triangular_holes_vertices'
 
     def __init__(self, left_edge: QuadEdge, right_edge: QuadEdge) -> None:
         self.left_edge = left_edge
         self.right_edge = right_edge
+        self._triangular_holes_vertices = set()
 
     __repr__ = generate_repr(__init__)
 
@@ -108,12 +109,15 @@ class Triangulation:
         for edge in candidates:
             if edge_to_endpoints(edge) not in hole_segments_endpoints:
                 self.delete(edge)
+        for hole in holes:
+            if len(hole) == 3:
+                self._triangular_holes_vertices.add(frozenset(hole))
 
     def triangles(self) -> List[Triangle]:
         return list(self._triangles())
 
     def _triangles(self) -> Iterable[Triangle]:
-        visited_vertices = set()
+        visited_vertices = set(self._triangular_holes_vertices)
         edges = tuple(self._to_edges())
         edges_endpoints = {edge_to_endpoints(edge) for edge in edges}
         for edge in edges:
