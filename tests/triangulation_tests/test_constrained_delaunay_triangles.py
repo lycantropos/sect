@@ -3,8 +3,11 @@ from hypothesis_geometry.hints import Polygon
 
 from sect.core.utils import (contour_to_segments,
                              flatten)
-from sect.triangulation import constrained_delaunay_triangles
-from tests.utils import to_boundary_endpoints
+from sect.hints import Contour
+from sect.triangulation import (constrained_delaunay_triangles,
+                                delaunay_triangles)
+from tests.utils import (is_convex_contour,
+                         to_boundary_endpoints)
 from . import strategies
 
 
@@ -58,3 +61,11 @@ def test_boundary(polygon: Polygon) -> None:
     assert (to_boundary_endpoints(result)
             == set(map(frozenset, sum(map(contour_to_segments, holes),
                                       contour_to_segments(border)))))
+
+
+@given(strategies.contours)
+def test_connection_with_delaunay_triangles(contour: Contour) -> None:
+    result = constrained_delaunay_triangles(contour)
+
+    assert ((result == delaunay_triangles(contour))
+            is is_convex_contour(contour))

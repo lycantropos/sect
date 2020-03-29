@@ -19,4 +19,5 @@ non_triangle_points_lists = (coordinates_strategies
                                               min_size=4)))
 triangles = (coordinates_strategies.flatmap(planar.triangular_contours)
              .map(tuple))
+contours = coordinates_strategies.flatmap(planar.contours)
 polygons = coordinates_strategies.flatmap(planar.polygons)

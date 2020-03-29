@@ -8,7 +8,8 @@ from robust.angular import (Orientation,
                             orientation)
 
 from sect.core.hints import Endpoints
-from sect.core.utils import contour_to_segments
+from sect.core.utils import (contour_to_segments,
+                             normalize_contour)
 from sect.hints import (Contour,
                         Point,
                         Segment)
@@ -62,3 +63,10 @@ def replace_segment(segments: Set[Segment],
                     target: Segment) -> None:
     segments.remove(source)
     segments.add(target)
+
+
+def is_convex_contour(contour: Contour) -> bool:
+    contour = normalize_contour(contour)
+    return all(orientation(contour[index - 2], contour[index - 1],
+                           contour[index]) is Orientation.CLOCKWISE
+               for index in range(len(contour)))
