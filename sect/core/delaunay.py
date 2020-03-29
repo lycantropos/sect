@@ -160,7 +160,7 @@ class Triangulation:
 
     def _to_boundary_edges(self) -> List[QuadEdge]:
         return list(flatten((edge, edge.opposite)
-                            for edge in self._to_ccw_boundary_edges()))
+                            for edge in self._to_unique_boundary_edges()))
 
     def _to_edges(self) -> Iterable[QuadEdge]:
         for edge in self._to_unique_edges():
@@ -181,7 +181,7 @@ class Triangulation:
             queue.extend((edge.left_from_start, edge.left_from_end,
                           edge.right_from_start, edge.right_from_end))
 
-    def _to_ccw_boundary_edges(self) -> Iterable[QuadEdge]:
+    def _to_unique_boundary_edges(self) -> Iterable[QuadEdge]:
         start = self.left_edge
         edge = start
         while True:
