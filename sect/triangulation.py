@@ -43,14 +43,31 @@ def constrained_delaunay(border: Contour,
     Returns constrained Delaunay triangulation of the polygon
     given by border and holes (with potentially extra points and constraints).
 
+    Based on divide-and-conquer algorithm by L. Guibas & J. Stolfi
+    and algorithm for adding constraints by S. W. Sloan.
+
+    Time complexity:
+        ``O(vertices_count * log vertices_count)`` for convex polygons
+        without extra constraints,
+        ``O(vertices_count ** 2)`` otherwise,
+        where ``vertices_count = len(border) + sum(map(len, holes))\
+ + len(extra_points) + len(extra_constraints)``.
+    Memory complexity:
+        ``O(vertices_count)``
+        where ``vertices_count = len(border) + sum(map(len, holes))\
+ + len(extra_points) + len(extra_constraints)``.
+    Reference:
+        https://www.newcastle.edu.au/__data/assets/pdf_file/0019/22519/23_A-fast-algortithm-for-generating-constrained-Delaunay-triangulations.pdf
+
     :param border: border of the polygon.
     :param holes: holes of the polygon.
     :param extra_points:
         additional points to be presented in the triangulation.
     :param extra_constraints:
         additional constraints to be presented in the triangulation.
-    :returns: triangulation of the border, holes & extra points
-    considering constraints.
+    :returns:
+        triangulation of the border, holes & extra points
+        considering constraints.
     """
     result = delaunay(chain(border, _flatten(holes), extra_points))
     border_segments = _contour_to_segments(border)
