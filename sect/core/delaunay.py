@@ -168,6 +168,18 @@ class Triangulation:
             yield edge
             yield edge.opposite
 
+    def _to_inner_edges(self) -> Set[QuadEdge]:
+        return set(self._to_edges()).difference(self._to_boundary_edges())
+
+    def _to_unique_boundary_edges(self) -> Iterable[QuadEdge]:
+        start = self.left_edge
+        edge = start
+        while True:
+            yield edge
+            if edge.right_from_end is start:
+                break
+            edge = edge.right_from_end
+
     def _to_unique_edges(self) -> Iterable[QuadEdge]:
         visited_edges = set()
         is_visited, visit_multiple = (visited_edges.__contains__,
@@ -181,18 +193,6 @@ class Triangulation:
             visit_multiple((edge, edge.opposite))
             queue.extend((edge.left_from_start, edge.left_from_end,
                           edge.right_from_start, edge.right_from_end))
-
-    def _to_unique_boundary_edges(self) -> Iterable[QuadEdge]:
-        start = self.left_edge
-        edge = start
-        while True:
-            yield edge
-            if edge.right_from_end is start:
-                break
-            edge = edge.right_from_end
-
-    def _to_inner_edges(self) -> Set[QuadEdge]:
-        return set(self._to_edges()).difference(self._to_boundary_edges())
 
     def _to_unique_inner_edges(self) -> Set[QuadEdge]:
         return (set(self._to_unique_edges())
