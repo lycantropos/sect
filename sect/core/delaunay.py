@@ -159,8 +159,9 @@ class Triangulation:
         edge.delete()
 
     def _to_boundary_edges(self) -> List[QuadEdge]:
-        return list(flatten((edge, edge.opposite)
-                            for edge in self._to_unique_boundary_edges()))
+        for edge in self._to_unique_boundary_edges():
+            yield edge
+            yield edge.opposite
 
     def _to_edges(self) -> Iterable[QuadEdge]:
         for edge in self._to_unique_edges():
