@@ -30,6 +30,19 @@ def constrained_delaunay(border: Contour,
                          extra_points: Sequence[Point] = (),
                          extra_constraints: Iterable[Segment] = ()
                          ) -> Triangulation:
+    """
+    Returns constrained Delaunay triangulation of the polygon
+    given by border and holes (with potentially extra points and constraints).
+
+    :param border: border of the polygon.
+    :param holes: holes of the polygon.
+    :param extra_points:
+        additional points to be presented in the triangulation.
+    :param extra_constraints:
+        additional constraints to be presented in the triangulation.
+    :returns: triangulation of the border, holes & extra points
+    considering constraints.
+    """
     result = delaunay(chain(border, _flatten(holes), extra_points))
     border_segments = _contour_to_segments(border)
     result.constrain(chain(border_segments,
