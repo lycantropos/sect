@@ -66,6 +66,27 @@ Install:
   pypy setup.py install
   ```
 
+Usage
+-----
+```python
+>>> from sect.triangulation import delaunay_triangles
+>>> delaunay_triangles([(0, 0), (1, 0), (0, 1)])
+[((0, 0), (1, 0), (0, 1))]
+>>> delaunay_triangles([(0, 0), (3, 0), (1, 1), (0, 3)])
+[((0, 0), (3, 0), (1, 1)), ((0, 0), (1, 1), (0, 3)), ((0, 3), (1, 1), (3, 0))]
+>>> delaunay_triangles([(0, 0), (1, 0), (1, 1), (0, 1)])
+[((0, 1), (1, 0), (1, 1)), ((0, 0), (1, 0), (0, 1))]
+>>> from sect.triangulation import constrained_delaunay_triangles
+>>> constrained_delaunay_triangles([(0, 0), (1, 0), (0, 1)])
+[((0, 0), (1, 0), (0, 1))]
+>>> constrained_delaunay_triangles([(0, 0), (3, 0), (1, 1), (0, 3)])
+[((0, 0), (3, 0), (1, 1)), ((0, 0), (1, 1), (0, 3))]
+>>> constrained_delaunay_triangles([(0, 0), (4, 0), (0, 4)],
+...                                [[(0, 0), (2, 1), (1, 2)]])
+[((0, 0), (4, 0), (2, 1)), ((0, 4), (2, 1), (4, 0)), ((0, 0), (1, 2), (0, 4)), ((0, 4), (1, 2), (2, 1))]
+
+```
+
 Development
 -----------
 
