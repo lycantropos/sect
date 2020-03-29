@@ -60,7 +60,7 @@ def constrained_delaunay(border: Contour,
         where ``vertices_count = len(border) + sum(map(len, holes))\
  + len(extra_points) + len(extra_constraints)``.
     Memory complexity:
-        ``O(vertices_count)``
+        ``O(vertices_count)``,
         where ``vertices_count = len(border) + sum(map(len, holes))\
  + len(extra_points) + len(extra_constraints)``.
     Reference:
@@ -148,7 +148,7 @@ def constrained_delaunay_triangles(border: Contour,
         where ``vertices_count = len(border) + sum(map(len, holes))\
  + len(extra_points) + len(extra_constraints)``.
     Memory complexity:
-        ``O(vertices_count)``
+        ``O(vertices_count)``,
         where ``vertices_count = len(border) + sum(map(len, holes))\
  + len(extra_points) + len(extra_constraints)``.
     Reference:
