@@ -54,6 +54,24 @@ def constrained_delaunay(border: Contour,
 
 
 def delaunay_triangles(points: Sequence[Point]) -> List[Triangle]:
+    """
+    Returns Delaunay subdivision of the points into triangles.
+
+    :param points: points to triangulate
+    :returns: Delaunay subdivision of the points into triangles.
+
+    >>> (delaunay_triangles([(0, 0), (3, 0), (0, 3)])
+    ...  == [((0, 0), (3, 0), (0, 3))])
+    True
+    >>> (delaunay_triangles([(0, 0), (3, 0), (3, 3), (0, 3)])
+    ...  == [((0, 3), (3, 0), (3, 3)), ((0, 0), (3, 0), (0, 3))])
+    True
+    >>> (delaunay_triangles([(0, 0), (3, 0), (1, 1), (0, 3)])
+    ...  == [((0, 0), (3, 0), (1, 1)),
+    ...      ((0, 0), (1, 1), (0, 3)),
+    ...      ((0, 3), (1, 1), (3, 0))])
+    True
+    """
     return delaunay(points).triangles()
 
 
