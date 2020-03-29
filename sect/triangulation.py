@@ -15,6 +15,12 @@ Triangulation = Triangulation
 
 
 def delaunay(points: Iterable[Point]) -> Triangulation:
+    """
+    Returns Delaunay triangulation of the points.
+
+    :param points: points to triangulate
+    :returns: triangulation of the points.
+    """
     return Triangulation.from_points(points)
 
 
