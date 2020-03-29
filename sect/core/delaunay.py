@@ -121,7 +121,8 @@ class Triangulation:
         for edge in self._to_edges():
             if (edge.orientation_with(edge.left_from_start.end)
                     is Orientation.COUNTERCLOCKWISE):
-                if edge.left_from_start.end != edge.opposite.right_from_start.end:
+                if (edge.left_from_start.end
+                        != edge.opposite.right_from_start.end):
                     continue
                 triangle = edge.start, edge.end, edge.left_from_start.end
                 vertices = frozenset(triangle)
