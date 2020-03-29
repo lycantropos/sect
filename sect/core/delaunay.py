@@ -162,12 +162,12 @@ class Triangulation:
         return list(flatten((edge, edge.opposite)
                             for edge in self._to_ccw_boundary_edges()))
 
-    def _to_edges(self) -> Set[QuadEdge]:
+    def _to_edges(self) -> Iterable[QuadEdge]:
         for edge in self._to_unique_edges():
             yield edge
             yield edge.opposite
 
-    def _to_unique_edges(self) -> Set[QuadEdge]:
+    def _to_unique_edges(self) -> Iterable[QuadEdge]:
         visited_edges = set()
         is_visited, visit_multiple = (visited_edges.__contains__,
                                       visited_edges.update)
