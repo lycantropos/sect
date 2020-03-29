@@ -132,11 +132,14 @@ def constrained_delaunay_triangles(border: Contour,
     into triangles.
 
     Based on
-    - divide-and-conquer algorithm by L. Guibas & J. Stolfi
-    for generating Delaunay triangulation,
-    - algorithm by S. W. Sloan for adding constraints to Delaunay
-    triangulation,
-    - algorithm by F. Martinez et al. for deleting in-hole triangles.
+
+    * divide-and-conquer algorithm by L. Guibas & J. Stolfi
+      for generating Delaunay triangulation,
+
+    * algorithm by S. W. Sloan for adding constraints to Delaunay
+      triangulation,
+
+    * clipping algorithm by F. Martinez et al. for deleting in-hole triangles.
 
     Time complexity:
         ``O(vertices_count * log vertices_count)`` for convex polygons
