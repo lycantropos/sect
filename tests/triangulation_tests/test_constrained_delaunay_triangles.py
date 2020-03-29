@@ -4,7 +4,7 @@ from hypothesis_geometry.hints import Polygon
 from sect.core.utils import (contour_to_segments,
                              flatten)
 from sect.triangulation import constrained_delaunay_triangles
-from tests import to_boundary_endpoints
+from tests.utils import to_boundary_endpoints
 from . import strategies
 
 
