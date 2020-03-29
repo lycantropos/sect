@@ -43,14 +43,14 @@ def _to_sub_hull(points: Iterable[Point]) -> List[Point]:
 flatten = chain.from_iterable
 
 
-def normalize_triangle(triangle: Triangle) -> Triangle:
-    min_index = min(range(len(triangle)),
-                    key=triangle.__getitem__)
-    triangle = triangle[min_index:] + triangle[:min_index]
-    if orientation(triangle[-1], triangle[0],
-                   triangle[1]) is Orientation.COUNTERCLOCKWISE:
-        triangle = triangle[:1] + triangle[1:][::-1]
-    return triangle
+def normalize_contour(contour: Contour) -> Contour:
+    min_index = min(range(len(contour)),
+                    key=contour.__getitem__)
+    contour = contour[min_index:] + contour[:min_index]
+    if orientation(contour[-1], contour[0],
+                   contour[1]) is Orientation.COUNTERCLOCKWISE:
+        contour = contour[:1] + contour[1:][::-1]
+    return contour
 
 
 def contour_to_segments(contour: Contour) -> List[Segment]:

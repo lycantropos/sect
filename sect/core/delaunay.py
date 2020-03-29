@@ -28,7 +28,7 @@ from .sweep import sweep
 from .utils import (coin_change,
                     contour_to_segments,
                     flatten,
-                    normalize_triangle,
+                    normalize_contour,
                     pairwise,
                     to_unique_objects)
 
@@ -128,7 +128,7 @@ class Triangulation:
                 vertices = frozenset(triangle)
                 if vertices not in visited_vertices:
                     visited_vertices.add(vertices)
-                    yield normalize_triangle(triangle)
+                    yield normalize_contour(triangle)
 
     def _merge_with(self, other: 'Triangulation') -> 'Triangulation':
         _merge(self._find_base_edge(other))

@@ -4,7 +4,7 @@ from hypothesis import given
 
 from sect.core.contracts import is_point_inside_circumcircle
 from sect.core.utils import (contour_to_segments,
-                             normalize_triangle,
+                             normalize_contour,
                              to_convex_hull)
 from sect.hints import (Point,
                         Triangle)
@@ -55,7 +55,7 @@ def test_base_case(triangle: Triangle) -> None:
     result = delaunay_triangles(triangle)
 
     assert len(result) == 1
-    assert normalize_triangle(triangle) in result
+    assert normalize_contour(triangle) in result
 
 
 @given(strategies.non_triangle_points_lists)
