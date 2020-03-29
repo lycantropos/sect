@@ -118,16 +118,14 @@ class Triangulation:
 
     def _triangles(self) -> Iterable[Triangle]:
         visited_vertices = set(self._triangular_holes_vertices)
-        edges = tuple(self._to_edges())
-        edges_endpoints = {edge_to_endpoints(edge) for edge in edges}
-        for edge in edges:
+        for edge in self._to_edges():
             if (edge.orientation_with(edge.left_from_start.end)
                     is Orientation.COUNTERCLOCKWISE):
-                triangle = (edge.start, edge.end, edge.left_from_start.end)
+                if edge.left_from_start.end != edge.opposite.right_from_start.end:
+                    continue
+                triangle = edge.start, edge.end, edge.left_from_start.end
                 vertices = frozenset(triangle)
-                if (vertices not in visited_vertices
-                        and (frozenset((edge.end, edge.left_from_start.end))
-                             in edges_endpoints)):
+                if vertices not in visited_vertices:
                     visited_vertices.add(vertices)
                     yield normalize_triangle(triangle)
 
