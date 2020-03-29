@@ -66,6 +66,15 @@ def delaunay_triangles(points: Sequence[Point]) -> List[Triangle]:
     """
     Returns Delaunay subdivision of the points into triangles.
 
+    Based on divide-and-conquer algorithm by L. Guibas & J. Stolfi.
+
+    Time complexity:
+        ``O(len(points) * log len(points))``
+    Memory complexity:
+        ``O(len(points))``
+    Reference:
+        http://www.sccg.sk/~samuelcik/dgs/quad_edge.pdf
+
     :param points: points to triangulate
     :returns: Delaunay subdivision of the points into triangles.
 
