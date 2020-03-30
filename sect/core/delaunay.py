@@ -111,6 +111,15 @@ class Triangulation:
                                                if len(hole) == 3)
 
     def triangles(self) -> List[Triangle]:
+        """
+        Returns triangles of the triangulation.
+
+        >>> points = [(0, 0), (0, 1), (1, 0), (1, 1)]
+        >>> triangulation = Triangulation.from_points(points)
+        >>> (triangulation.triangles()
+        ...  == [((0, 1), (1, 0), (1, 1)), ((0, 0), (1, 0), (0, 1))])
+        True
+        """
         return list(self._triangles())
 
     def _triangles(self) -> Iterable[Triangle]:
