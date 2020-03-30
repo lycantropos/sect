@@ -135,6 +135,14 @@ class QuadEdge:
     def orientation_with(self, point: Point) -> Orientation:
         return orientation(self.end, self._start, point)
 
+    @property
+    def segment(self) -> Segment:
+        return self.start, self.end
+
+    @property
+    def endpoints(self) -> Endpoints:
+        return frozenset((self.start, self.end))
+
 
 def edge_to_neighbours(edge: QuadEdge) -> List[QuadEdge]:
     return (list(_edge_to_incidents(edge))
@@ -153,14 +161,6 @@ def _edge_to_incidents(edge: QuadEdge) -> Iterable[QuadEdge]:
     if (edge.orientation_with(edge.left_from_start.end)
             is Orientation.COUNTERCLOCKWISE):
         yield edge.left_from_start
-
-
-def edge_to_segment(edge: QuadEdge) -> Segment:
-    return edge.start, edge.end
-
-
-def edge_to_endpoints(edge: QuadEdge) -> Endpoints:
-    return frozenset((edge.start, edge.end))
 
 
 def edges_with_opposites(edges: Iterable[QuadEdge]) -> Iterable[QuadEdge]:

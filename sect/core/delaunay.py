@@ -20,10 +20,8 @@ from .contracts import (is_point_inside_circumcircle,
                         points_form_convex_quadrilateral)
 from .events_queue import EventsQueue
 from .subdivisional import (QuadEdge,
-                            edge_to_endpoints,
                             edge_to_neighbours,
                             edge_to_non_adjacent_vertices,
-                            edge_to_segment,
                             edges_with_opposites)
 from .sweep import sweep
 from .utils import (coin_change,
@@ -57,7 +55,7 @@ class Triangulation:
         return result[0]
 
     def constrain(self, constraints: Iterable[Segment]) -> None:
-        endpoints = {edge_to_endpoints(edge) for edge in self.edges()}
+        endpoints = {edge.endpoints for edge in self.edges()}
         inner_edges = self._to_unique_inner_edges()
         for constraint in constraints:
             constraint_endpoints = frozenset(constraint)
@@ -65,20 +63,19 @@ class Triangulation:
                 continue
             crossings = _detect_crossings(inner_edges, constraint)
             inner_edges.difference_update(crossings)
-            endpoints.difference_update(edge_to_endpoints(edge)
-                                        for edge in crossings)
+            endpoints.difference_update(edge.endpoints for edge in crossings)
             new_edges = _resolve_crossings(crossings, constraint)
             _set_criterion(edge
                            for edge in new_edges
-                           if edge_to_endpoints(edge) != constraint_endpoints)
-            endpoints.update(edge_to_endpoints(edge) for edge in new_edges)
+                           if edge.endpoints != constraint_endpoints)
+            endpoints.update(edge.endpoints for edge in new_edges)
             inner_edges.update(new_edges)
 
     def bound(self, border_segments: Sequence[Segment]) -> None:
         border_endpoints = {frozenset(segment) for segment in border_segments}
         non_boundary = {edge
                         for edge in self.boundary_edges()
-                        if edge_to_endpoints(edge) not in border_endpoints}
+                        if edge.endpoints not in border_endpoints}
         while non_boundary:
             edge = non_boundary.pop()
             non_boundary.remove(edge.opposite)
@@ -87,7 +84,7 @@ class Triangulation:
             non_boundary.update(edges_with_opposites(
                     candidate
                     for candidate in candidates
-                    if edge_to_endpoints(candidate) not in border_endpoints))
+                    if candidate.endpoints not in border_endpoints))
 
     def cut(self, holes: Sequence[Contour]) -> None:
         if not holes:
@@ -107,7 +104,7 @@ class Triangulation:
             elif event.in_intersection:
                 candidates.append(event.edge)
         for edge in candidates:
-            if edge_to_endpoints(edge) not in hole_segments_endpoints:
+            if edge.endpoints not in hole_segments_endpoints:
                 self.delete(edge)
         self._triangular_holes_vertices.update(frozenset(hole)
                                                for hole in holes
@@ -204,7 +201,7 @@ def _resolve_crossings(crossings: List[QuadEdge],
                                              first_non_edge_vertex,
                                              second_non_edge_vertex)):
             edge.swap()
-            if (segments_relationship(edge_to_segment(edge), constraint)
+            if (segments_relationship(edge.segment, constraint)
                     is SegmentsRelationship.CROSS):
                 crossings.append(edge)
             else:
@@ -218,8 +215,8 @@ def _detect_crossings(inner_edges: Iterable[QuadEdge],
                       constraint: Segment) -> List[QuadEdge]:
     return [edge
             for edge in inner_edges
-            if segments_relationship(edge_to_segment(edge), constraint)
-            is SegmentsRelationship.CROSS]
+            if (segments_relationship(edge.segment, constraint)
+                is SegmentsRelationship.CROSS)]
 
 
 def _merge(base_edge: QuadEdge) -> None:
