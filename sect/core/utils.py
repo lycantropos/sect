@@ -1,6 +1,7 @@
 import sys
 from collections import OrderedDict
-from itertools import cycle
+from itertools import (chain,
+                       cycle)
 from typing import (Iterable,
                     List,
                     Sequence,
@@ -16,6 +17,8 @@ from sect.hints import (Contour,
                         Segment)
 
 Domain = TypeVar('Domain')
+
+flatten = chain.from_iterable
 
 
 def to_convex_hull(points: Sequence[Point]) -> List[Point]:
