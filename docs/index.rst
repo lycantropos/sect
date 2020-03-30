@@ -8,5 +8,7 @@ Welcome to sect's documentation!
 
 .. automodule:: sect.triangulation
     :members:
+.. autoclass:: QuadEdge
+    :members:
 .. autoclass:: Triangulation
     :members:
