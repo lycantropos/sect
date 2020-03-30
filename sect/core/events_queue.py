@@ -7,7 +7,7 @@ from sect.hints import (Point,
                         Segment)
 from .event import (EdgeKind,
                     Event)
-from .subdivisional import QuadEdge
+from .quad_edge import QuadEdge
 
 
 class EventsQueueKey:

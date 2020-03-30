@@ -19,10 +19,10 @@ from sect.hints import (Contour,
 from .contracts import (is_point_inside_circumcircle,
                         points_form_convex_quadrilateral)
 from .events_queue import EventsQueue
-from .subdivisional import (QuadEdge,
-                            edge_to_neighbours,
-                            edge_to_non_adjacent_vertices,
-                            edges_with_opposites)
+from .quad_edge import (QuadEdge,
+                        edge_to_neighbours,
+                        edge_to_non_adjacent_vertices,
+                        edges_with_opposites)
 from .sweep import sweep
 from .utils import (coin_change,
                     contour_to_segments,

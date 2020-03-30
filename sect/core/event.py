@@ -9,7 +9,7 @@ from robust.linear import segments_intersection
 from sect.hints import (Coordinate,
                         Point,
                         Segment)
-from .subdivisional import QuadEdge
+from .quad_edge import QuadEdge
 
 
 @unique
