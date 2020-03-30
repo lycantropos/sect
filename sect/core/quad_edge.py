@@ -152,8 +152,8 @@ class QuadEdge:
         Returns endpoints of the edge.
 
         >>> edge = QuadEdge.factory((0, 0), (1, 1))
-        >>> edge.endpoints
-        frozenset({(0, 0), (1, 1)})
+        >>> edge.endpoints == frozenset(((0, 0), (1, 1)))
+        True
         """
         return frozenset((self.start, self.end))
 
