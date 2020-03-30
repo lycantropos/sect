@@ -4,6 +4,7 @@ from typing import (Iterable,
                     Sequence)
 
 from .core.delaunay import Triangulation
+from .core.quad_edge import QuadEdge
 from .core.utils import (contour_to_segments as _contour_to_segments,
                          flatten as _flatten)
 from .hints import (Contour,
@@ -11,6 +12,7 @@ from .hints import (Contour,
                     Segment,
                     Triangle)
 
+QuadEdge = QuadEdge
 Triangulation = Triangulation
 
 
