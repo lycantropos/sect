@@ -194,7 +194,7 @@ class Triangulation:
 
     def edges(self) -> Iterable[QuadEdge]:
         """
-        Returns edges.
+        Returns edges of the triangulation.
 
         >>> points = [(0, 0), (0, 1), (1, 0), (1, 1)]
         >>> triangulation = Triangulation.from_points(points)
