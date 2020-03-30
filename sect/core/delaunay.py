@@ -228,6 +228,16 @@ class Triangulation:
             edge = edge.right_from_end
 
     def unique_edges(self) -> Iterable[QuadEdge]:
+        """
+        Returns edges of the triangulation with unique endpoints.
+
+        >>> points = [(0, 0), (0, 1), (1, 0), (1, 1)]
+        >>> triangulation = Triangulation.from_points(points)
+        >>> ([edge.segment for edge in triangulation.unique_edges()]
+        ...  == [((1, 1), (1, 0)), ((1, 0), (0, 1)), ((0, 1), (1, 1)),
+        ...      ((0, 1), (0, 0)), ((0, 0), (1, 0))])
+        True
+        """
         visited_edges = set()
         is_visited, visit_multiple = (visited_edges.__contains__,
                                       visited_edges.update)
