@@ -8,3 +8,5 @@ Welcome to sect's documentation!
 
 .. automodule:: sect.triangulation
     :members:
+.. autoclass:: Triangulation
+    :members:
