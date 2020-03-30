@@ -137,6 +137,13 @@ class QuadEdge:
 
     @property
     def segment(self) -> Segment:
+        """
+        Returns segment from the edge.
+
+        >>> edge = QuadEdge.factory((0, 0), (1, 1))
+        >>> edge.segment
+        ((0, 0), (1, 1))
+        """
         return self.start, self.end
 
     @property
