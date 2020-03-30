@@ -156,6 +156,18 @@ class Triangulation:
         edge.delete()
 
     def boundary_edges(self) -> Iterable[QuadEdge]:
+        """
+        Returns boundary edges of the triangulation in counterclockwise order.
+
+        >>> points = [(0, 0), (0, 1), (1, 0), (1, 1)]
+        >>> triangulation = Triangulation.from_points(points)
+        >>> ([edge.segment for edge in triangulation.boundary_edges()]
+        ...  == [((0, 0), (1, 0)), ((1, 0), (0, 0)),
+        ...      ((1, 0), (1, 1)), ((1, 1), (1, 0)),
+        ...      ((1, 1), (0, 1)), ((0, 1), (1, 1)),
+        ...      ((0, 1), (0, 0)), ((0, 0), (0, 1))])
+        True
+        """
         return edges_with_opposites(self.unique_boundary_edges())
 
     def edges(self) -> Iterable[QuadEdge]:
