@@ -141,6 +141,13 @@ class QuadEdge:
 
     @property
     def endpoints(self) -> Endpoints:
+        """
+        Returns endpoints of the edge.
+
+        >>> edge = QuadEdge.factory((0, 0), (1, 1))
+        >>> edge.endpoints
+        frozenset({(0, 0), (1, 1)})
+        """
         return frozenset((self.start, self.end))
 
 
