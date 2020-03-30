@@ -161,3 +161,9 @@ def edge_to_segment(edge: QuadEdge) -> Segment:
 
 def edge_to_endpoints(edge: QuadEdge) -> Endpoints:
     return frozenset((edge.start, edge.end))
+
+
+def edges_with_opposites(edges: Iterable[QuadEdge]) -> Iterable[QuadEdge]:
+    for edge in edges:
+        yield edge
+        yield edge.opposite

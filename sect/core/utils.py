@@ -1,7 +1,6 @@
 import sys
 from collections import OrderedDict
-from itertools import (chain,
-                       cycle)
+from itertools import cycle
 from typing import (Iterable,
                     List,
                     Sequence,
@@ -14,8 +13,7 @@ from robust.angular import (Orientation,
 
 from sect.hints import (Contour,
                         Point,
-                        Segment,
-                        Triangle)
+                        Segment)
 
 Domain = TypeVar('Domain')
 
@@ -38,9 +36,6 @@ def _to_sub_hull(points: Iterable[Point]) -> List[Point]:
                 break
         result.append(point)
     return result
-
-
-flatten = chain.from_iterable
 
 
 def normalize_contour(contour: Contour) -> Contour:

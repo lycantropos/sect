@@ -23,11 +23,11 @@ from .subdivisional import (QuadEdge,
                             edge_to_endpoints,
                             edge_to_neighbours,
                             edge_to_non_adjacent_vertices,
-                            edge_to_segment)
+                            edge_to_segment,
+                            edges_with_opposites)
 from .sweep import sweep
 from .utils import (coin_change,
                     contour_to_segments,
-                    flatten,
                     normalize_contour,
                     pairwise,
                     to_unique_objects)
@@ -57,7 +57,7 @@ class Triangulation:
         return result[0]
 
     def constrain(self, constraints: Iterable[Segment]) -> None:
-        endpoints = {edge_to_endpoints(edge) for edge in self._to_edges()}
+        endpoints = {edge_to_endpoints(edge) for edge in self.edges()}
         inner_edges = self._to_unique_inner_edges()
         for constraint in constraints:
             constraint_endpoints = frozenset(constraint)
@@ -77,15 +77,15 @@ class Triangulation:
     def bound(self, border_segments: Sequence[Segment]) -> None:
         border_endpoints = {frozenset(segment) for segment in border_segments}
         non_boundary = {edge
-                        for edge in self._to_boundary_edges()
+                        for edge in self.boundary_edges()
                         if edge_to_endpoints(edge) not in border_endpoints}
         while non_boundary:
             edge = non_boundary.pop()
             non_boundary.remove(edge.opposite)
             candidates = edge_to_neighbours(edge)
             self.delete(edge)
-            non_boundary.update(flatten(
-                    (candidate, candidate.opposite)
+            non_boundary.update(edges_with_opposites(
+                    candidate
                     for candidate in candidates
                     if edge_to_endpoints(candidate) not in border_endpoints))
 
@@ -118,7 +118,7 @@ class Triangulation:
 
     def _triangles(self) -> Iterable[Triangle]:
         visited_vertices = set(self._triangular_holes_vertices)
-        for edge in self._to_edges():
+        for edge in self.edges():
             if (edge.orientation_with(edge.left_from_start.end)
                     is Orientation.COUNTERCLOCKWISE):
                 if (edge.left_from_start.end
@@ -158,20 +158,13 @@ class Triangulation:
             self.left_edge = self.left_edge.left_from_start
         edge.delete()
 
-    def _to_boundary_edges(self) -> List[QuadEdge]:
-        for edge in self._to_unique_boundary_edges():
-            yield edge
-            yield edge.opposite
+    def boundary_edges(self) -> Iterable[QuadEdge]:
+        return edges_with_opposites(self.unique_boundary_edges())
 
-    def _to_edges(self) -> Iterable[QuadEdge]:
-        for edge in self._to_unique_edges():
-            yield edge
-            yield edge.opposite
+    def edges(self) -> Iterable[QuadEdge]:
+        return edges_with_opposites(self.unique_edges())
 
-    def _to_inner_edges(self) -> Set[QuadEdge]:
-        return set(self._to_edges()).difference(self._to_boundary_edges())
-
-    def _to_unique_boundary_edges(self) -> Iterable[QuadEdge]:
+    def unique_boundary_edges(self) -> Iterable[QuadEdge]:
         start = self.left_edge
         edge = start
         while True:
@@ -180,7 +173,7 @@ class Triangulation:
                 break
             edge = edge.right_from_end
 
-    def _to_unique_edges(self) -> Iterable[QuadEdge]:
+    def unique_edges(self) -> Iterable[QuadEdge]:
         visited_edges = set()
         is_visited, visit_multiple = (visited_edges.__contains__,
                                       visited_edges.update)
@@ -195,8 +188,7 @@ class Triangulation:
                           edge.right_from_start, edge.right_from_end))
 
     def _to_unique_inner_edges(self) -> Set[QuadEdge]:
-        return (set(self._to_unique_edges())
-                .difference(self._to_boundary_edges()))
+        return set(self.unique_edges()).difference(self.boundary_edges())
 
 
 def _resolve_crossings(crossings: List[QuadEdge],

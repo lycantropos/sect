@@ -1,8 +1,9 @@
+from itertools import chain
+
 from hypothesis import given
 from hypothesis_geometry.hints import Polygon
 
-from sect.core.utils import (contour_to_segments,
-                             flatten)
+from sect.core.utils import contour_to_segments
 from sect.hints import Contour
 from sect.triangulation import (constrained_delaunay_triangles,
                                 delaunay_triangles)
@@ -38,7 +39,7 @@ def test_points(polygon: Polygon) -> None:
 
     result = constrained_delaunay_triangles(border, holes)
 
-    assert set(flatten(result)) == set(sum(holes, border))
+    assert set(chain.from_iterable(result)) == set(sum(holes, border))
 
 
 @given(strategies.polygons)
@@ -47,7 +48,7 @@ def test_edges(polygon: Polygon) -> None:
 
     result = constrained_delaunay_triangles(border, holes)
 
-    assert (set(flatten(map(contour_to_segments, result)))
+    assert (set(chain.from_iterable(map(contour_to_segments, result)))
             >= set(sum(map(contour_to_segments, holes),
                        contour_to_segments(border))))
 
