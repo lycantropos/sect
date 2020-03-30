@@ -149,6 +149,19 @@ class Triangulation:
         return base_edge
 
     def delete(self, edge: QuadEdge) -> None:
+        """
+        Deletes the edge from the triangulation.
+
+        >>> points = [(0, 0), (0, 1), (1, 0), (1, 1)]
+        >>> triangulation = Triangulation.from_points(points)
+        >>> edges = [triangulation.left_edge, triangulation.right_edge]
+        >>> all(edge in triangulation.edges() for edge in edges)
+        True
+        >>> for edge in edges:
+        ...     triangulation.delete(edge)
+        >>> any(edge in triangulation.edges() for edge in edges)
+        False
+        """
         if edge is self.right_edge or edge.opposite is self.right_edge:
             self.right_edge = self.right_edge.right_from_end.opposite
         if edge is self.left_edge or edge.opposite is self.left_edge:
