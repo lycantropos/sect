@@ -56,6 +56,7 @@ class QuadEdge:
     @property
     def opposite(self) -> 'QuadEdge':
         """
+        Edge rotated 180 degrees counterclockwise around the middle,
         aka "Sym" in L. Guibas and J. Stolfi notation.
         """
         return self._rotated._rotated
