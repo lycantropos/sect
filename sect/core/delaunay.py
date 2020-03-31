@@ -175,7 +175,7 @@ class Triangulation:
             self.right_edge = self.right_edge.right_from_end.opposite
         if edge is self.left_edge or edge.opposite is self.left_edge:
             self.left_edge = self.left_edge.left_from_start
-        edge.delete()
+        edge.disconnect()
 
     def boundary_edges(self) -> Iterable[QuadEdge]:
         """
@@ -312,7 +312,7 @@ def _to_left_candidate(base_edge: QuadEdge) -> Optional[QuadEdge]:
            and (base_edge.orientation_with(result.left_from_start.end)
                 is Orientation.CLOCKWISE)):
         next_candidate = result.left_from_start
-        result.delete()
+        result.disconnect()
         result = next_candidate
     return result
 
@@ -327,7 +327,7 @@ def _to_right_candidate(base_edge: QuadEdge) -> Optional[QuadEdge]:
            and (base_edge.orientation_with(result.right_from_start.end)
                 is Orientation.CLOCKWISE)):
         next_candidate = result.right_from_start
-        result.delete()
+        result.disconnect()
         result = next_candidate
     return result
 

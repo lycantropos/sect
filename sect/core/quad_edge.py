@@ -164,7 +164,7 @@ class QuadEdge:
         result.opposite.splice(other)
         return result
 
-    def delete(self) -> None:
+    def disconnect(self) -> None:
         self.splice(self.right_from_start)
         self.opposite.splice(self.opposite.right_from_start)
 
