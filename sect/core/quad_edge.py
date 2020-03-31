@@ -34,7 +34,7 @@ class QuadEdge:
     @property
     def start(self) -> Point:
         """
-        aka "Org" in L. Guibas and J. Stolfi notation.
+        Start of the edge, aka "Org" in L. Guibas and J. Stolfi notation.
         """
         return self._start
 
