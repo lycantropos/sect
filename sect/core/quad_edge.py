@@ -78,6 +78,14 @@ class QuadEdge:
         return self._rotated._left_from_start._rotated
 
     @property
+    def left_from_end(self) -> 'QuadEdge':
+        """
+        Next edge in counterclockwise order around the end,
+        aka "Lnext" in L. Guibas and J. Stolfi notation.
+        """
+        return self._rotated.opposite._left_from_start._rotated
+
+    @property
     def right_from_end(self) -> 'QuadEdge':
         """
         Next edge in clockwise order around the end,
@@ -86,12 +94,26 @@ class QuadEdge:
         return self.opposite._left_from_start
 
     @property
-    def left_from_end(self) -> 'QuadEdge':
+    def segment(self) -> Segment:
         """
-        Next edge in counterclockwise order around the end,
-        aka "Lnext" in L. Guibas and J. Stolfi notation.
+        Returns segment from the edge.
+
+        >>> edge = QuadEdge.factory((0, 0), (1, 1))
+        >>> edge.segment == ((0, 0), (1, 1))
+        True
         """
-        return self._rotated.opposite._left_from_start._rotated
+        return self.start, self.end
+
+    @property
+    def endpoints(self) -> Endpoints:
+        """
+        Returns endpoints of the edge.
+
+        >>> edge = QuadEdge.factory((0, 0), (1, 1))
+        >>> edge.endpoints == frozenset(((0, 0), (1, 1)))
+        True
+        """
+        return frozenset((self.start, self.end))
 
     @classmethod
     def factory(cls, start: Point, end: Point) -> 'QuadEdge':
@@ -140,28 +162,6 @@ class QuadEdge:
 
     def orientation_with(self, point: Point) -> Orientation:
         return orientation(self.end, self._start, point)
-
-    @property
-    def segment(self) -> Segment:
-        """
-        Returns segment from the edge.
-
-        >>> edge = QuadEdge.factory((0, 0), (1, 1))
-        >>> edge.segment == ((0, 0), (1, 1))
-        True
-        """
-        return self.start, self.end
-
-    @property
-    def endpoints(self) -> Endpoints:
-        """
-        Returns endpoints of the edge.
-
-        >>> edge = QuadEdge.factory((0, 0), (1, 1))
-        >>> edge.endpoints == frozenset(((0, 0), (1, 1)))
-        True
-        """
-        return frozenset((self.start, self.end))
 
 
 def edge_to_neighbours(edge: QuadEdge) -> List[QuadEdge]:
