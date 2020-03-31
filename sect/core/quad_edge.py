@@ -46,6 +46,10 @@ class QuadEdge:
     def end(self) -> Point:
         """
         End of the edge, aka **Dest** in L. Guibas and J. Stolfi notation.
+
+        >>> edge = QuadEdge.factory((0, 0), (1, 1))
+        >>> edge.end == (1, 1)
+        True
         """
         return self.opposite._start
 
