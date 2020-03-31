@@ -64,6 +64,7 @@ class QuadEdge:
     @property
     def left_from_start(self) -> 'QuadEdge':
         """
+        Next edge in counterclockwise order around the start,
         aka "Onext" in L. Guibas and J. Stolfi notation.
         """
         return self._left_from_start
