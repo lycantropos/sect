@@ -165,6 +165,10 @@ class QuadEdge:
         return result
 
     def disconnect(self) -> None:
+        """
+        Disconnects the edge from the rest,
+        aka **DeleteEdge** in L. Guibas and J. Stolfi notation.
+        """
         self.splice(self.right_from_start)
         self.opposite.splice(self.opposite.right_from_start)
 
