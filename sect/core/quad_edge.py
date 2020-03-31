@@ -34,14 +34,14 @@ class QuadEdge:
     @property
     def start(self) -> Point:
         """
-        Start of the edge, aka "Org" in L. Guibas and J. Stolfi notation.
+        Start of the edge, aka **Org** in L. Guibas and J. Stolfi notation.
         """
         return self._start
 
     @property
     def end(self) -> Point:
         """
-        End of the edge, aka "Dest" in L. Guibas and J. Stolfi notation.
+        End of the edge, aka **Dest** in L. Guibas and J. Stolfi notation.
         """
         return self.opposite._start
 
@@ -49,7 +49,7 @@ class QuadEdge:
     def rotated(self) -> 'QuadEdge':
         """
         Edge rotated 90 degrees counterclockwise around the middle,
-        aka "Rot" in L. Guibas and J. Stolfi notation.
+        aka **Rot** in L. Guibas and J. Stolfi notation.
         """
         return self._rotated
 
@@ -57,7 +57,7 @@ class QuadEdge:
     def opposite(self) -> 'QuadEdge':
         """
         Edge rotated 180 degrees counterclockwise around the middle,
-        aka "Sym" in L. Guibas and J. Stolfi notation.
+        aka **Sym** in L. Guibas and J. Stolfi notation.
         """
         return self._rotated._rotated
 
@@ -65,7 +65,7 @@ class QuadEdge:
     def left_from_start(self) -> 'QuadEdge':
         """
         Next edge in counterclockwise order around the start,
-        aka "Onext" in L. Guibas and J. Stolfi notation.
+        aka **Onext** in L. Guibas and J. Stolfi notation.
         """
         return self._left_from_start
 
@@ -73,7 +73,7 @@ class QuadEdge:
     def right_from_start(self) -> 'QuadEdge':
         """
         Next edge in clockwise order around the start,
-        aka "Oprev" in L. Guibas and J. Stolfi notation.
+        aka **Oprev** in L. Guibas and J. Stolfi notation.
         """
         return self._rotated._left_from_start._rotated
 
@@ -81,7 +81,7 @@ class QuadEdge:
     def left_from_end(self) -> 'QuadEdge':
         """
         Next edge in counterclockwise order around the end,
-        aka "Lnext" in L. Guibas and J. Stolfi notation.
+        aka **Lnext** in L. Guibas and J. Stolfi notation.
         """
         return self._rotated.opposite._left_from_start._rotated
 
@@ -89,7 +89,7 @@ class QuadEdge:
     def right_from_end(self) -> 'QuadEdge':
         """
         Next edge in clockwise order around the end,
-        aka "Rprev" in L. Guibas and J. Stolfi notation.
+        aka **Rprev** in L. Guibas and J. Stolfi notation.
         """
         return self.opposite._left_from_start
 
