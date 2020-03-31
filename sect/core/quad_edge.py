@@ -48,6 +48,7 @@ class QuadEdge:
     @property
     def rotated(self) -> 'QuadEdge':
         """
+        Edge rotated 90 degrees counterclockwise around the middle,
         aka "Rot" in L. Guibas and J. Stolfi notation.
         """
         return self._rotated
