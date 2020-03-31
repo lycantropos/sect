@@ -72,6 +72,7 @@ class QuadEdge:
     @property
     def right_from_start(self) -> 'QuadEdge':
         """
+        Next edge in clockwise order around the start,
         aka "Oprev" in L. Guibas and J. Stolfi notation.
         """
         return self._rotated._left_from_start._rotated
