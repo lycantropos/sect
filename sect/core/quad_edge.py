@@ -35,6 +35,10 @@ class QuadEdge:
     def start(self) -> Point:
         """
         Start of the edge, aka **Org** in L. Guibas and J. Stolfi notation.
+
+        >>> edge = QuadEdge.factory((0, 0), (1, 1))
+        >>> edge.start == (0, 0)
+        True
         """
         return self._start
 
