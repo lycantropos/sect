@@ -88,6 +88,7 @@ class QuadEdge:
     @property
     def left_from_end(self) -> 'QuadEdge':
         """
+        Next edge in counterclockwise order around the end,
         aka "Lnext" in L. Guibas and J. Stolfi notation.
         """
         return self._rotated.opposite._left_from_start._rotated
