@@ -41,7 +41,7 @@ class QuadEdge:
     @property
     def end(self) -> Point:
         """
-        aka "Dest" in L. Guibas and J. Stolfi notation.
+        End of the edge, aka "Dest" in L. Guibas and J. Stolfi notation.
         """
         return self.opposite._start
 
