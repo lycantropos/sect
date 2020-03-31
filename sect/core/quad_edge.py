@@ -159,6 +159,10 @@ class QuadEdge:
         opposite._start = opposite_side.end
 
     def connect(self, other: 'QuadEdge') -> 'QuadEdge':
+        """
+        Adds a new edge connecting the end of the edge
+        with the start of the other edge.
+        """
         result = QuadEdge.factory(self.end, other._start)
         result.splice(self.left_from_end)
         result.opposite.splice(other)
