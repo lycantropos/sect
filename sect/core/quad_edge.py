@@ -80,6 +80,7 @@ class QuadEdge:
     @property
     def right_from_end(self) -> 'QuadEdge':
         """
+        Next edge in clockwise order around the end,
         aka "Rprev" in L. Guibas and J. Stolfi notation.
         """
         return self.opposite._left_from_start
