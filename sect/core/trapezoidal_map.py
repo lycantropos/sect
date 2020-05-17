@@ -31,8 +31,7 @@ def build_graph(contour: Contour, shuffler: Shuffler) -> Node:
 
 def contour_to_start_node(contour: Contour) -> Leaf:
     min_x, min_y, max_x, max_y = points_to_bounding_box(contour)
-    small = 0.1  # Any value > 0.
-    delta_x, delta_y = (max_x - min_x) * small, (max_y - min_y) * small
+    delta_x, delta_y = max_x - min_x, max_y - min_y
     min_x, min_y, max_x, max_y = (min_x - delta_x, min_y - delta_y,
                                   max_x + delta_x, max_y + delta_y)
     return Leaf(Trapezoid((min_x, min_y), (max_x, min_y),
