@@ -3,7 +3,8 @@ from abc import (ABC,
 from typing import (List,
                     Optional)
 
-from sect.hints import Segment
+from sect.hints import Point
+from .edge import Edge
 from .trapezoid import Trapezoid
 
 
@@ -14,7 +15,13 @@ class Node(ABC):
         self._parents = []  # type: List['Node']
 
     @abstractmethod
-    def search_segment(self, segment: Segment) -> Optional[Trapezoid]:
+    def __contains__(self, point: Point) -> bool:
+        """
+        Checks if point is on the contour boundary or inside its region.
+        """
+
+    @abstractmethod
+    def search_edge(self, edge: Edge) -> Optional[Trapezoid]:
         """
         Recursive search for the trapezoid
         which contains the left endpoint of the given segment.

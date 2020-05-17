@@ -1,46 +1,52 @@
 from typing import Optional
 
 from reprit.base import generate_repr
-from robust.angular import (Orientation,
-                            orientation)
+from robust.angular import Orientation
 
-from sect.hints import (Point,
-                        Segment)
+from sect.hints import Point
+from .edge import Edge
 from .node import Node
 from .trapezoid import Trapezoid
 
 
 class YNode(Node):
-    __slots__ = 'segment', 'above', 'below'
+    __slots__ = 'edge', 'above', 'below'
 
-    def __init__(self, segment: Segment, below: Node, above: Node) -> None:
+    def __init__(self, edge: Edge, below: Node, above: Node) -> None:
         super().__init__()
-        self.segment = segment
+        self.edge = edge
         self.below = below
         self.above = above
         self.below._add_parent(self)
         self.above._add_parent(self)
 
+    def __contains__(self, point: Point) -> bool:
+        point_orientation = self.edge.orientation_with(point)
+        if point_orientation is Orientation.COUNTERCLOCKWISE:
+            return point in self.above
+        elif point_orientation is Orientation.CLOCKWISE:
+            return point in self.below
+        else:
+            return True
+
     __repr__ = generate_repr(__init__)
 
-    def search_segment(self, segment: Segment) -> Optional[Trapezoid]:
-        left, right = segment
-        self_left, self_right = self.segment
-        if left == self_left:
-            # Coinciding left segment points.
-            right_orientation = orientation(self_right, self_left, right)
+    def search_edge(self, edge: Edge) -> Optional[Trapezoid]:
+        if edge.left == self.edge.left:
+            # Coinciding left edge points.
+            right_orientation = self.edge.orientation_with(edge.right)
             if right_orientation is Orientation.COUNTERCLOCKWISE:
-                return self.above.search_segment(segment)
+                return self.above.search_edge(edge)
             elif right_orientation is Orientation.CLOCKWISE:
-                return self.below.search_segment(segment)
+                return self.below.search_edge(edge)
             else:
                 return None
         else:
-            left_orientation = orientation(self_right, self_left, left)
+            left_orientation = self.edge.orientation_with(edge.left)
             if left_orientation is Orientation.COUNTERCLOCKWISE:
-                return self.above.search_segment(segment)
+                return self.above.search_edge(edge)
             elif left_orientation is Orientation.CLOCKWISE:
-                return self.below.search_segment(segment)
+                return self.below.search_edge(edge)
             else:
                 return None
 

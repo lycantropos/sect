@@ -3,30 +3,32 @@ from typing import (Iterable,
                     List,
                     Tuple)
 
-from robust.angular import (Orientation,
-                            orientation)
+from robust.angular import Orientation
 
 from sect.hints import (Contour,
                         Coordinate,
                         Point,
-                        Segment,
                         Shuffler)
+from .edge import Edge
 from .leaf import Leaf
 from .node import Node
 from .trapezoid import Trapezoid
+from .utils import to_contour_orientation
 from .x_node import XNode
 from .y_node import YNode
 
 
 def build_graph(contour: Contour, shuffler: Shuffler) -> Node:
     edges = []
+    is_contour_positively_oriented = (to_contour_orientation(contour)
+                                      is Orientation.COUNTERCLOCKWISE)
     for index in range(len(contour)):
         start, end = contour[index - 1], contour[index]
-        edges.append((start, end)
+        edges.append(Edge(start, end, is_contour_positively_oriented)
                      if start < end
-                     else (end, start))
+                     else Edge(end, start, not is_contour_positively_oriented))
     shuffler(edges)
-    return reduce(add_segment_to_graph, edges, contour_to_start_node(contour))
+    return reduce(add_edge_to_graph, edges, contour_to_start_node(contour))
 
 
 def contour_to_start_node(contour: Contour) -> Leaf:
@@ -35,8 +37,8 @@ def contour_to_start_node(contour: Contour) -> Leaf:
     min_x, min_y, max_x, max_y = (min_x - delta_x, min_y - delta_y,
                                   max_x + delta_x, max_y + delta_y)
     return Leaf(Trapezoid((min_x, min_y), (max_x, min_y),
-                          ((min_x, min_y), (max_x, min_y)),
-                          ((min_x, max_y), (max_x, max_y))))
+                          Edge((min_x, min_y), (max_x, min_y), False),
+                          Edge((min_x, max_y), (max_x, max_y), True)))
 
 
 def points_to_bounding_box(points: Iterable[Point]
@@ -52,9 +54,9 @@ def points_to_bounding_box(points: Iterable[Point]
     return min_x, min_y, max_x, max_y
 
 
-def add_segment_to_graph(root: Node, edge: Segment) -> Node:
+def add_edge_to_graph(root: Node, edge: Edge) -> Node:
     trapezoids = find_intersecting_trapezoids(root, edge)
-    p, q = edge_left, edge_right = edge
+    p, q = edge_left, edge_right = edge.left, edge.right
     left_old = None  # old trapezoid to the left.
     left_below = None  # below trapezoid to the left.
     left_above = None  # above trapezoid to the left.
@@ -200,13 +202,12 @@ def add_segment_to_graph(root: Node, edge: Segment) -> Node:
     return root
 
 
-def find_intersecting_trapezoids(graph: Node,
-                                 segment: Segment) -> List[Trapezoid]:
-    trapezoid = graph.search_segment(segment)
+def find_intersecting_trapezoids(graph: Node, edge: Edge) -> List[Trapezoid]:
+    trapezoid = graph.search_edge(edge)
     result = [trapezoid]
-    left, right = segment
+    right = edge.right
     while trapezoid.right < right:
-        trapezoid_right_orientation = orientation(right, left, trapezoid.right)
+        trapezoid_right_orientation = edge.orientation_with(trapezoid.right)
         assert trapezoid_right_orientation, ('Unable to deal '
                                              'with point on segment.')
         if trapezoid_right_orientation is Orientation.COUNTERCLOCKWISE:

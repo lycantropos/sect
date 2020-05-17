@@ -1,7 +1,7 @@
 from reprit.base import generate_repr
 
-from sect.hints import (Point,
-                        Segment)
+from sect.hints import Point
+from .edge import Edge
 from .node import Node
 from .trapezoid import Trapezoid
 
@@ -19,12 +19,19 @@ class XNode(Node):
 
     __repr__ = generate_repr(__init__)
 
-    def search_segment(self, segment: Segment) -> Trapezoid:
-        left, _ = segment
-        if self.point <= left:
-            return self.right.search_segment(segment)
+    def __contains__(self, point: Point) -> bool:
+        if point == self.point:
+            return True
+        elif self.point < point:
+            return point in self.right
         else:
-            return self.left.search_segment(segment)
+            return point in self.left
+
+    def search_edge(self, edge: Edge) -> Trapezoid:
+        if self.point <= edge.left:
+            return self.right.search_edge(edge)
+        else:
+            return self.left.search_edge(edge)
 
     def _replace_child(self, current: Node, replacement: Node) -> None:
         if self.left is current:

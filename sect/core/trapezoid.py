@@ -2,8 +2,8 @@ from typing import Optional
 
 from reprit.base import generate_repr
 
-from sect.hints import (Point,
-                        Segment)
+from sect.hints import Point
+from .edge import Edge
 
 
 class Trapezoid:
@@ -14,8 +14,8 @@ class Trapezoid:
     def __init__(self,
                  left: Point,
                  right: Point,
-                 below: Segment,
-                 above: Segment) -> None:
+                 below: Edge,
+                 above: Edge) -> None:
         assert left < right, 'Incorrect endpoints order'
         self.left = left
         self.right = right
@@ -29,11 +29,9 @@ class Trapezoid:
 
     __repr__ = generate_repr(__init__)
 
-    def __eq__(self, other: 'Trapezoid') -> bool:
-        return ((self.left == other.left and self.right == other.right
-                 and self.above == other.above and self.below == other.below)
-                if isinstance(other, Trapezoid)
-                else NotImplemented)
+    def __contains__(self, point: Point) -> bool:
+        return (self.below.interior_to_the_left
+                and not self.above.interior_to_the_left)
 
     @property
     def lower_left(self) -> Optional['Trapezoid']:

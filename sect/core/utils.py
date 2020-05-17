@@ -42,8 +42,7 @@ def _to_sub_hull(points: Iterable[Point]) -> List[Point]:
 
 
 def normalize_contour(contour: Contour) -> Contour:
-    min_index = min(range(len(contour)),
-                    key=contour.__getitem__)
+    min_index = arg_min(contour)
     contour = contour[min_index:] + contour[:min_index]
     if orientation(contour[-1], contour[0],
                    contour[1]) is Orientation.COUNTERCLOCKWISE:
@@ -54,6 +53,17 @@ def normalize_contour(contour: Contour) -> Contour:
 def contour_to_segments(contour: Contour) -> List[Segment]:
     return [(contour[index - 1], contour[index])
             for index in range(len(contour))]
+
+
+def to_contour_orientation(contour: Contour) -> Orientation:
+    index = arg_min(contour)
+    return orientation(contour[index], contour[index - 1],
+                       contour[(index + 1) % len(contour)])
+
+
+def arg_min(sequence: Sequence[Domain]) -> int:
+    return min(range(len(sequence)),
+               key=sequence.__getitem__)
 
 
 to_unique_objects = (OrderedDict
