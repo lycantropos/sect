@@ -179,17 +179,17 @@ def add_edge_to_graph(root: Node, edge: Edge) -> Node:
             below.lower_right = old.lower_right
             above.upper_right = old.upper_right
         candidate = YNode(edge,
-                          below.trapezoid_node
+                          below.node
                           if below is left_below
                           else Leaf(below),
-                          above.trapezoid_node
+                          above.node
                           if above is left_above
                           else Leaf(above))
         if have_right:
             candidate = XNode(edge_right, candidate, Leaf(right))
         if have_left:
             candidate = XNode(edge_left, Leaf(left), candidate)
-        old_node = old.trapezoid_node
+        old_node = old.node
         if old_node is root:
             root = candidate
         else:

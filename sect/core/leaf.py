@@ -29,7 +29,7 @@ class Leaf(Node):
     def __init__(self, trapezoid: Trapezoid) -> None:
         super().__init__()
         self.trapezoid = trapezoid
-        trapezoid.trapezoid_node = self
+        trapezoid.node = self
 
     __repr__ = generate_repr(__init__)
 

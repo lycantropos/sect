@@ -7,9 +7,8 @@ from .edge import Edge
 
 
 class Trapezoid:
-    __slots__ = ('left', 'right', 'below', 'above',
-                 '_lower_left', '_lower_right', '_upper_left', '_upper_right',
-                 'trapezoid_node')
+    __slots__ = ('left', 'right', 'below', 'above', 'node',
+                 '_lower_left', '_lower_right', '_upper_left', '_upper_right')
 
     def __init__(self,
                  left: Point,
@@ -21,11 +20,11 @@ class Trapezoid:
         self.right = right
         self.above = above
         self.below = below
+        self.node = None  # type: Optional['Node']
         self._lower_left = None  # type: Optional['Trapezoid']
         self._lower_right = None  # type: Optional['Trapezoid']
         self._upper_left = None  # type: Optional['Trapezoid']
         self._upper_right = None  # type: Optional['Trapezoid']
-        self.trapezoid_node = None  # type: Optional['Node']
 
     __repr__ = generate_repr(__init__)
 
