@@ -19,8 +19,5 @@ class Leaf(Node):
     def search_segment(self, segment: Segment) -> Trapezoid:
         return self.trapezoid
 
-    def search_point(self, point: Point) -> 'Node':
-        return self
-
     def _replace_child(self, current: 'Node', replacement: 'Node') -> None:
         raise TypeError('Leaf has no children.')

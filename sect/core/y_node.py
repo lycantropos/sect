@@ -23,16 +23,6 @@ class YNode(Node):
 
     __repr__ = generate_repr(__init__)
 
-    def search_point(self, point: Point) -> 'Node':
-        self_left, self_right = self.segment
-        point_orientation = orientation(self_right, self_left, point)
-        if point_orientation is Orientation.COUNTERCLOCKWISE:
-            return self.above.search_point(point)
-        elif point_orientation is Orientation.CLOCKWISE:
-            return self.below.search_point(point)
-        else:
-            return self
-
     def search_segment(self, segment: Segment) -> Optional[Trapezoid]:
         left, right = segment
         self_left, self_right = self.segment

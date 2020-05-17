@@ -19,14 +19,6 @@ class XNode(Node):
 
     __repr__ = generate_repr(__init__)
 
-    def search_point(self, point: Point) -> 'Node':
-        if point == self.point:
-            return self
-        elif self.point < point:
-            return self.right.search_point(point)
-        else:
-            return self.left.search_point(point)
-
     def search_segment(self, segment: Segment) -> Trapezoid:
         left, _ = segment
         if self.point <= left:
