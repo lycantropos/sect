@@ -178,10 +178,10 @@ def add_segment_to_graph(root: Node, edge: Segment) -> Node:
             above.upper_right = old.upper_right
         candidate = YNode(edge,
                           below.trapezoid_node
-                          if below == left_below
+                          if below is left_below
                           else Leaf(below),
                           above.trapezoid_node
-                          if above == left_above
+                          if above is left_above
                           else Leaf(above))
         if have_right:
             candidate = XNode(q, candidate, Leaf(right))
