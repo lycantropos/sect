@@ -83,10 +83,11 @@ Usage
 >>> constrained_delaunay_triangles([(0, 0), (3, 0), (1, 1), (0, 3)])
 [((0, 0), (3, 0), (1, 1)), ((0, 0), (1, 1), (0, 3))]
 >>> constrained_delaunay_triangles([(0, 0), (4, 0), (0, 4)],
-...                                [[(0, 0), (2, 1), (1, 2)]])
+...                                [[(0, 0), (1, 2), (2, 1)]])
 [((0, 0), (4, 0), (2, 1)), ((0, 4), (2, 1), (4, 0)), ((0, 0), (1, 2), (0, 4)), ((0, 4), (1, 2), (2, 1))]
->>> from sect.decomposition import trapezoidal
->>> graph = trapezoidal([(0, 0), (2, 0), (2, 2), (0, 2)])
+>>> from sect.decomposition import trapezoidal_polygon
+>>> graph = trapezoidal_polygon([(0, 0), (6, 0), (6, 6), (0, 6)],
+...                             [[(2, 2), (2, 4), (4, 4), (4, 2)]])
 >>> (0, 0) in graph
 True
 >>> (1, 1) in graph
