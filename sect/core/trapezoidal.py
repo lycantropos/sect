@@ -1,21 +1,22 @@
 from functools import reduce
-from typing import (Iterable,
-                    List,
-                    Sequence,
-                    Tuple)
+from typing import (List,
+                    Sequence)
 
 from robust.angular import Orientation
 
 from sect.hints import (Contour,
-                        Coordinate,
+                        Multisegment,
                         Point,
                         Shuffler)
 from .edge import Edge
+from .hints import BoundingBox
 from .leaf import Leaf
 from .location import Location
 from .node import Node
 from .trapezoid import Trapezoid
-from .utils import to_contour_orientation
+from .utils import (flatten,
+                    points_to_bounding_box,
+                    to_contour_orientation)
 from .x_node import XNode
 from .y_node import YNode
 
@@ -31,6 +32,18 @@ class Map:
 
     def locate(self, point: Point) -> Location:
         return self.root.locate(point)
+
+    @classmethod
+    def from_multisegment(cls, multisegment: Multisegment,
+                          shuffler: Shuffler) -> 'Map':
+        edges = [Edge(start, end, False)
+                 if start < end
+                 else Edge(end, start, False)
+                 for start, end in multisegment]
+        shuffler(edges)
+        bounding_box = points_to_bounding_box(flatten(multisegment))
+        return cls(reduce(add_edge_to_graph, edges,
+                          bounding_box_to_start_node(bounding_box)))
 
     @classmethod
     def from_polygon(cls, border: Contour, holes: Sequence[Contour],
@@ -54,31 +67,9 @@ class Map:
                              else Edge(end, start,
                                        not is_hole_negatively_oriented))
         shuffler(edges)
+        bounding_box = points_to_bounding_box(border)
         return cls(reduce(add_edge_to_graph, edges,
-                          contour_to_start_node(border)))
-
-
-def contour_to_start_node(contour: Contour) -> Leaf:
-    min_x, min_y, max_x, max_y = points_to_bounding_box(contour)
-    delta_x, delta_y = max_x - min_x, max_y - min_y
-    min_x, min_y, max_x, max_y = (min_x - delta_x, min_y - delta_y,
-                                  max_x + delta_x, max_y + delta_y)
-    return Leaf(Trapezoid((min_x, min_y), (max_x, min_y),
-                          Edge((min_x, min_y), (max_x, min_y), False),
-                          Edge((min_x, max_y), (max_x, max_y), True)))
-
-
-def points_to_bounding_box(points: Iterable[Point]
-                           ) -> Tuple[Coordinate, Coordinate,
-                                      Coordinate, Coordinate]:
-    points = iter(points)
-    first_point = next(points)
-    min_x, min_y = max_x, max_y = first_point
-    for point in points:
-        x, y = point
-        min_x, max_x = min(min_x, x), max(max_x, x)
-        min_y, max_y = min(min_y, y), max(max_y, y)
-    return min_x, min_y, max_x, max_y
+                          bounding_box_to_start_node(bounding_box)))
 
 
 def add_edge_to_graph(root: Node, edge: Edge) -> Node:
@@ -242,3 +233,13 @@ def find_intersecting_trapezoids(graph: Node, edge: Edge) -> List[Trapezoid]:
                                        'but none found.')
         result.append(trapezoid)
     return result
+
+
+def bounding_box_to_start_node(box: BoundingBox) -> Leaf:
+    min_x, min_y, max_x, max_y = box
+    delta_x, delta_y = max_x - min_x, max_y - min_y
+    min_x, min_y, max_x, max_y = (min_x - delta_x, min_y - delta_y,
+                                  max_x + delta_x, max_y + delta_y)
+    return Leaf(Trapezoid((min_x, min_y), (max_x, min_y),
+                          Edge((min_x, min_y), (max_x, min_y), False),
+                          Edge((min_x, max_y), (max_x, max_y), True)))
