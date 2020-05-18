@@ -1,6 +1,7 @@
 from functools import reduce
 from typing import (Iterable,
                     List,
+                    Sequence,
                     Tuple)
 
 from robust.angular import Orientation
@@ -11,6 +12,7 @@ from sect.hints import (Contour,
                         Shuffler)
 from .edge import Edge
 from .leaf import Leaf
+from .location import Location
 from .node import Node
 from .trapezoid import Trapezoid
 from .utils import to_contour_orientation
@@ -18,17 +20,42 @@ from .x_node import XNode
 from .y_node import YNode
 
 
-def build_graph(contour: Contour, shuffler: Shuffler) -> Node:
-    edges = []
-    is_contour_positively_oriented = (to_contour_orientation(contour)
-                                      is Orientation.COUNTERCLOCKWISE)
-    for index in range(len(contour)):
-        start, end = contour[index - 1], contour[index]
-        edges.append(Edge(start, end, is_contour_positively_oriented)
-                     if start < end
-                     else Edge(end, start, not is_contour_positively_oriented))
-    shuffler(edges)
-    return reduce(add_edge_to_graph, edges, contour_to_start_node(contour))
+class Map:
+    __slots__ = 'root',
+
+    def __init__(self, root: Node) -> None:
+        self.root = root
+
+    def __contains__(self, point: Point) -> bool:
+        return bool(self.root.locate(point))
+
+    def locate(self, point: Point) -> Location:
+        return self.root.locate(point)
+
+    @classmethod
+    def from_polygon(cls, border: Contour, holes: Sequence[Contour],
+                     shuffler: Shuffler) -> 'Map':
+        edges = []
+        is_border_positively_oriented = (to_contour_orientation(border)
+                                         is Orientation.COUNTERCLOCKWISE)
+        for index in range(len(border)):
+            start, end = border[index - 1], border[index]
+            edges.append(Edge(start, end, is_border_positively_oriented)
+                         if start < end
+                         else Edge(end, start,
+                                   not is_border_positively_oriented))
+        for hole in holes:
+            is_hole_negatively_oriented = (to_contour_orientation(hole)
+                                           is Orientation.CLOCKWISE)
+            for index in range(len(hole)):
+                start, end = hole[index - 1], hole[index]
+                edges.append(Edge(start, end, is_hole_negatively_oriented)
+                             if start < end
+                             else Edge(end, start,
+                                       not is_hole_negatively_oriented))
+        shuffler(edges)
+        return cls(reduce(add_edge_to_graph, edges,
+                          contour_to_start_node(border)))
 
 
 def contour_to_start_node(contour: Contour) -> Leaf:

@@ -1,16 +1,16 @@
 import random
+from typing import Sequence
 
 from .core.location import Location
-from .core.node import Node
-from .core.trapezoidal_map import build_graph as _build_graph
+from .core.trapezoidal import Map
 from .hints import (Contour,
                     Shuffler)
 
-Node = Node
+Map = Map
 Location = Location
 
 
-def trapezoidal(contour: Contour,
+def trapezoidal(border: Contour, holes: Sequence[Contour] = (),
                 *,
-                shuffler: Shuffler = random.shuffle) -> Node:
-    return _build_graph(contour, shuffler)
+                shuffler: Shuffler = random.shuffle) -> Map:
+    return Map.from_polygon(border, holes, shuffler)
