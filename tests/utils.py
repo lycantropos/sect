@@ -5,6 +5,8 @@ from typing import (Iterable,
                     Tuple)
 
 from hypothesis.strategies import SearchStrategy
+from orient.planar import (Relation,
+                           point_in_segment)
 from robust.angular import (Orientation,
                             orientation)
 
@@ -12,11 +14,20 @@ from sect.core.hints import Endpoints
 from sect.core.utils import (contour_to_segments,
                              normalize_contour)
 from sect.hints import (Contour,
+                        Multisegment,
                         Point,
                         Segment)
 
 Strategy = SearchStrategy
 Polygon = Tuple[Contour, Sequence[Contour]]
+
+
+def point_in_multisegment(point: Point,
+                          multisegment: Multisegment) -> Relation:
+    return (Relation.COMPONENT
+            if any(point_in_segment(point, segment) is Relation.COMPONENT
+                   for segment in multisegment)
+            else Relation.DISJOINT)
 
 
 def points_do_not_lie_on_the_same_line(points: Sequence[Point]) -> bool:
