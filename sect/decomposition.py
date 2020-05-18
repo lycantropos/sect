@@ -2,20 +2,21 @@ import random
 from typing import Sequence
 
 from .core.location import Location
-from .core.trapezoidal import Map
+from .core.trapezoidal import Graph
 from .hints import (Contour,
                     Multisegment,
                     Shuffler)
 
-Map = Map
+Graph = Graph
 Location = Location
 
 
 def trapezoidal_polygon(border: Contour, holes: Sequence[Contour] = (),
                         *,
-                        shuffler: Shuffler = random.shuffle) -> Map:
+                        shuffler: Shuffler = random.shuffle) -> Graph:
     """
-    Returns trapezoidal map of the polygon.
+    Returns trapezoidal decomposition graph of the polygon
+    given by border and holes.
 
     Based on incremental randomized algorithm by R. Seidel.
 
@@ -35,27 +36,27 @@ def trapezoidal_polygon(border: Contour, holes: Sequence[Contour] = (),
     :param shuffler:
         function which mutates sequence by shuffling its elements,
         required for randomization.
-    :returns: trapezoidal map of polygon.
+    :returns: trapezoidal decomposition graph of border and holes.
 
-    >>> map_ = trapezoidal_polygon([(0, 0), (6, 0), (6, 6), (0, 6)],
-    ...                            [[(2, 2), (2, 4), (4, 4), (4, 2)]])
-    >>> (1, 1) in map_
+    >>> graph = trapezoidal_polygon([(0, 0), (6, 0), (6, 6), (0, 6)],
+    ...                             [[(2, 2), (2, 4), (4, 4), (4, 2)]])
+    >>> (1, 1) in graph
     True
-    >>> (2, 2) in map_
+    >>> (2, 2) in graph
     True
-    >>> (3, 3) in map_
+    >>> (3, 3) in graph
     False
-    >>> map_.locate((1, 1)) is Location.INTERIOR
+    >>> graph.locate((1, 1)) is Location.INTERIOR
     True
-    >>> map_.locate((2, 2)) is Location.BOUNDARY
+    >>> graph.locate((2, 2)) is Location.BOUNDARY
     True
-    >>> map_.locate((3, 3)) is Location.EXTERIOR
+    >>> graph.locate((3, 3)) is Location.EXTERIOR
     True
     """
-    return Map.from_polygon(border, holes, shuffler)
+    return Graph.from_polygon(border, holes, shuffler)
 
 
 def trapezoidal_multisegment(multisegment: Multisegment,
                              *,
-                             shuffler: Shuffler = random.shuffle) -> Map:
-    return Map.from_multisegment(multisegment, shuffler)
+                             shuffler: Shuffler = random.shuffle) -> Graph:
+    return Graph.from_multisegment(multisegment, shuffler)

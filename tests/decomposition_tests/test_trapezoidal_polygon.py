@@ -6,7 +6,7 @@ from orient.planar import (Relation,
                            point_in_polygon)
 
 from sect.core.location import Location
-from sect.decomposition import (Map,
+from sect.decomposition import (Graph,
                                 trapezoidal_polygon)
 from sect.hints import Point
 from . import strategies
@@ -16,7 +16,7 @@ from . import strategies
 def test_basic(polygon: Polygon) -> None:
     border, holes = polygon
 
-    assert isinstance(trapezoidal_polygon(border, holes), Map)
+    assert isinstance(trapezoidal_polygon(border, holes), Graph)
 
 
 @given(strategies.polygons_with_points)
