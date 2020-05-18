@@ -17,6 +17,10 @@ class Leaf(Node):
 
     __repr__ = generate_repr(__init__)
 
+    @property
+    def height(self) -> int:
+        return 0
+
     def locate(self, point: Point) -> Location:
         return (Location.INTERIOR
                 if self.trapezoid.component

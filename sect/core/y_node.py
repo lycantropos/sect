@@ -21,6 +21,10 @@ class YNode(Node):
         self.below._add_parent(self)
         self.above._add_parent(self)
 
+    @property
+    def height(self) -> int:
+        return max(self.below.height, self.above.height) + 1
+
     def locate(self, point: Point) -> Location:
         point_orientation = self.edge.orientation_with(point)
         if point_orientation is Orientation.COUNTERCLOCKWISE:

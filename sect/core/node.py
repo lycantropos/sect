@@ -21,6 +21,13 @@ class Node(ABC):
         """
         return self.locate(point) is not Location.EXTERIOR
 
+    @property
+    @abstractmethod
+    def height(self) -> int:
+        """
+        Returns height of the node.
+        """
+
     @abstractmethod
     def locate(self, point: Point) -> Location:
         """

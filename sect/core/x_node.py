@@ -20,6 +20,10 @@ class XNode(Node):
 
     __repr__ = generate_repr(__init__)
 
+    @property
+    def height(self) -> int:
+        return max(self.left.height, self.right.height) + 1
+
     def locate(self, point: Point) -> Location:
         if point == self.point:
             return Location.BOUNDARY
