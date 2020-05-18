@@ -1,7 +1,6 @@
 from typing import Tuple
 
 from hypothesis import given
-from hypothesis_geometry.hints import Polygon
 from orient.planar import (Relation,
                            point_in_polygon)
 
@@ -9,6 +8,7 @@ from sect.decomposition import (Graph,
                                 Location,
                                 polygon_trapezoidal)
 from sect.hints import Point
+from tests.utils import Polygon
 from . import strategies
 
 
