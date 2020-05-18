@@ -19,8 +19,7 @@ class Leaf(Node):
 
     def locate(self, point: Point) -> Location:
         return (Location.INTERIOR
-                if (self.trapezoid.below.interior_to_the_left
-                    and not self.trapezoid.above.interior_to_the_left)
+                if self.trapezoid.component
                 else Location.EXTERIOR)
 
     def search_edge(self, edge: Edge) -> Trapezoid:

@@ -29,6 +29,14 @@ class Trapezoid:
     __repr__ = generate_repr(__init__)
 
     @property
+    def component(self) -> bool:
+        """
+        Checks if the trapezoid is a component of decomposed geometry.
+        """
+        return (self.below.interior_to_the_left
+                and not self.above.interior_to_the_left)
+
+    @property
     def lower_left(self) -> Optional['Trapezoid']:
         return self._lower_left
 
