@@ -9,13 +9,13 @@ from sect.hints import (Contour,
 from tests.strategies import coordinates_strategies
 from tests.utils import Strategy
 
-contours = coordinates_strategies.flatmap(planar.contours)
+polygons = coordinates_strategies.flatmap(planar.polygons)
 
 
-def to_contours_with_points(coordinates: Strategy[Coordinate]
+def to_polygons_with_points(coordinates: Strategy[Coordinate]
                             ) -> Strategy[Tuple[Contour, Point]]:
-    return strategies.tuples(planar.contours(coordinates),
+    return strategies.tuples(planar.polygons(coordinates),
                              planar.points(coordinates))
 
 
-contours_with_points = coordinates_strategies.flatmap(to_contours_with_points)
+polygons_with_points = coordinates_strategies.flatmap(to_polygons_with_points)

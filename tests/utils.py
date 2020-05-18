@@ -1,7 +1,8 @@
 from collections import defaultdict
 from typing import (Iterable,
                     Sequence,
-                    Set)
+                    Set,
+                    Tuple)
 
 from hypothesis.strategies import SearchStrategy
 from robust.angular import (Orientation,
@@ -15,6 +16,7 @@ from sect.hints import (Contour,
                         Segment)
 
 Strategy = SearchStrategy
+Polygon = Tuple[Contour, Sequence[Contour]]
 
 
 def points_do_not_lie_on_the_same_line(points: Sequence[Point]) -> bool:

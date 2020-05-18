@@ -1,40 +1,43 @@
 from typing import Tuple
 
 from hypothesis import given
+from hypothesis_geometry.hints import Polygon
 from orient.planar import (Relation,
-                           point_in_region)
+                           point_in_polygon)
 
 from sect.core.location import Location
-from sect.decomposition import (Node,
+from sect.decomposition import (Map,
                                 trapezoidal)
 from sect.hints import (Contour,
                         Point)
 from . import strategies
 
 
-@given(strategies.contours)
+@given(strategies.polygons)
 def test_basic(contour: Contour) -> None:
-    assert isinstance(trapezoidal(contour), Node)
+    assert isinstance(trapezoidal(contour), Map)
 
 
-@given(strategies.contours_with_points)
-def test_contains(contour_with_point: Tuple[Contour, Point]) -> None:
-    contour, point = contour_with_point
+@given(strategies.polygons_with_points)
+def test_contains(polygon_with_point: Tuple[Polygon, Point]) -> None:
+    polygon, point = polygon_with_point
+    border, holes = polygon
 
-    result = trapezoidal(contour)
+    result = trapezoidal(border, holes)
 
     assert ((point in result)
-            is (point_in_region(point, contour) is not Relation.DISJOINT))
+            is (point_in_polygon(point, polygon) is not Relation.DISJOINT))
 
 
-@given(strategies.contours_with_points)
-def test_locate(contour_with_point: Tuple[Contour, Point]) -> None:
-    contour, point = contour_with_point
+@given(strategies.polygons_with_points)
+def test_locate(polygon_with_point: Tuple[Polygon, Point]) -> None:
+    polygon, point = polygon_with_point
+    border, holes = polygon
 
-    result = trapezoidal(contour)
+    result = trapezoidal(border, holes)
 
     location = result.locate(point)
-    relation = point_in_region(point, contour)
+    relation = point_in_polygon(point, polygon)
     assert (location is Location.EXTERIOR) is (relation is Relation.DISJOINT)
     assert (location is Location.BOUNDARY) is (relation is Relation.COMPONENT)
     assert (location is Location.INTERIOR) is (relation is Relation.WITHIN)
