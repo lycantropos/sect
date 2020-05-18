@@ -25,6 +25,14 @@ class Graph:
     __slots__ = 'root',
 
     def __init__(self, root: Node) -> None:
+        """
+        Initializes graph.
+
+        Time complexity:
+            ``O(1)``
+        Memory complexity:
+            ``O(1)``
+        """
         self.root = root
 
     __repr__ = generate_repr(__init__)
