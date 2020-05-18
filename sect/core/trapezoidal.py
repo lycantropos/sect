@@ -87,9 +87,7 @@ class Graph:
     def add_edge(self, edge: Edge) -> None:
         trapezoids = self.find_intersecting_trapezoids(edge)
         edge_left, edge_right = edge.left, edge.right
-        left_old = None  # old trapezoid to the left.
-        left_below = None  # below trapezoid to the left.
-        left_above = None  # above trapezoid to the left.
+        left_old = left_below = left_above = None
         for index, old in enumerate(trapezoids):
             start_trap = index == 0
             end_trap = index == len(trapezoids) - 1
@@ -121,14 +119,14 @@ class Graph:
                     below.lower_right = old.lower_right
                     above.upper_right = old.upper_right
             elif start_trap:
-                # Old trapezoid is the first of 2+ trapezoids
-                # that the segment intersects.
+                # old trapezoid is the first of 2+ trapezoids
+                # that the segment intersects
                 if have_left:
                     left = Trapezoid(old.left, edge_left, old.below, old.above)
                 below = Trapezoid(edge_left, old.right, old.below, edge)
                 above = Trapezoid(edge_left, old.right, edge, old.above)
 
-                # Set pairs of trapezoid neighbours.
+                # set pairs of trapezoid neighbours
                 if have_left:
                     left.lower_left = old.lower_left
                     left.upper_left = old.upper_left
@@ -140,8 +138,8 @@ class Graph:
                 below.lower_right = old.lower_right
                 above.upper_right = old.upper_right
             elif end_trap:
-                # Old trapezoid is the last of 2+ trapezoids that the segment
-                # intersects.
+                # old trapezoid is the last of 2+ trapezoids
+                # that the segment intersects
                 if left_below.below is old.below:
                     below = left_below
                     below.right = edge_right
@@ -158,7 +156,7 @@ class Graph:
                     right = Trapezoid(edge_right, old.right, old.below,
                                       old.above)
 
-                # Set pairs of trapezoid neighbours.
+                # set pairs of trapezoid neighbours
                 if have_right:
                     right.lower_right = old.lower_right
                     right.upper_right = old.upper_right
@@ -168,7 +166,7 @@ class Graph:
                     below.lower_right = old.lower_right
                     above.upper_right = old.upper_right
 
-                # Connect to new trapezoids replacing old.
+                # connect to new trapezoids replacing old
                 if below is not left_below:
                     below.upper_left = left_below
                     below.lower_left = (left_below
@@ -181,10 +179,10 @@ class Graph:
                                         if old.upper_left is left_old
                                         else old.upper_left)
             else:
-                # Middle trapezoid.
-                # Old trapezoid is neither the first
+                # middle trapezoid,
+                # old trapezoid is neither the first
                 # nor last of the 3+ trapezoids
-                # that the segment intersects.
+                # that the segment intersects
                 if left_below.below is old.below:
                     below = left_below
                     below.right = old.right
@@ -197,14 +195,16 @@ class Graph:
                 else:
                     above = Trapezoid(old.left, old.right, edge, old.above)
 
-                # Connect to new trapezoids replacing prevOld.
-                if below is not left_below:  # below is new.
+                # connect to new trapezoids replacing left_old
+                if below is not left_below:
+                    # below is new
                     below.upper_left = left_below
                     below.lower_left = (left_below
                                         if old.lower_left is left_old
                                         else old.lower_left)
 
-                if above is not left_above:  # above is new.
+                if above is not left_above:
+                    # above is new
                     above.lower_left = left_above
                     above.upper_left = (left_above
                                         if old.upper_left is left_old
@@ -227,7 +227,7 @@ class Graph:
                 self.root = candidate
             else:
                 old_node.replace_with(candidate)
-            # Prepare for next loop.
+            # prepare for next loop
             left_old, left_above, left_below = old, above, below
 
     def find_intersecting_trapezoids(self, edge: Edge) -> List[Trapezoid]:
