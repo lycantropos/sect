@@ -16,6 +16,7 @@ decomposition module
     :members:
 .. autoclass:: Graph
     :members:
+    :special-members:
 .. autoclass:: Location
     :members:
 
