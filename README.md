@@ -85,6 +85,25 @@ Usage
 >>> constrained_delaunay_triangles([(0, 0), (4, 0), (0, 4)],
 ...                                [[(0, 0), (2, 1), (1, 2)]])
 [((0, 0), (4, 0), (2, 1)), ((0, 4), (2, 1), (4, 0)), ((0, 0), (1, 2), (0, 4)), ((0, 4), (1, 2), (2, 1))]
+>>> from sect.decomposition import trapezoidal
+>>> graph = trapezoidal([(0, 0), (2, 0), (2, 2), (0, 2)])
+>>> (0, 0) in graph
+True
+>>> (1, 1) in graph
+True
+>>> (2, 2) in graph
+True
+>>> (3, 3) in graph
+False
+>>> from sect.decomposition import Location
+>>> graph.locate((0, 0)) is Location.BOUNDARY
+True
+>>> graph.locate((1, 1)) is Location.INTERIOR
+True
+>>> graph.locate((2, 2)) is Location.BOUNDARY
+True
+>>> graph.locate((3, 3)) is Location.EXTERIOR
+True
 
 ```
 
