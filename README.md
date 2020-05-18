@@ -86,24 +86,24 @@ Usage
 ...                                [[(0, 0), (1, 2), (2, 1)]])
 [((0, 0), (4, 0), (2, 1)), ((0, 4), (2, 1), (4, 0)), ((0, 0), (1, 2), (0, 4)), ((0, 4), (1, 2), (2, 1))]
 >>> from sect.decomposition import trapezoidal_polygon
->>> graph = trapezoidal_polygon([(0, 0), (6, 0), (6, 6), (0, 6)],
-...                             [[(2, 2), (2, 4), (4, 4), (4, 2)]])
->>> (0, 0) in graph
+>>> map_ = trapezoidal_polygon([(0, 0), (6, 0), (6, 6), (0, 6)],
+...                            [[(2, 2), (2, 4), (4, 4), (4, 2)]])
+>>> (0, 0) in map_
 True
->>> (1, 1) in graph
+>>> (1, 1) in map_
 True
->>> (2, 2) in graph
+>>> (2, 2) in map_
 True
->>> (3, 3) in graph
+>>> (3, 3) in map_
 False
 >>> from sect.decomposition import Location
->>> graph.locate((0, 0)) is Location.BOUNDARY
+>>> map_.locate((0, 0)) is Location.BOUNDARY
 True
->>> graph.locate((1, 1)) is Location.INTERIOR
+>>> map_.locate((1, 1)) is Location.INTERIOR
 True
->>> graph.locate((2, 2)) is Location.BOUNDARY
+>>> map_.locate((2, 2)) is Location.BOUNDARY
 True
->>> graph.locate((3, 3)) is Location.EXTERIOR
+>>> map_.locate((3, 3)) is Location.EXTERIOR
 True
 
 ```
