@@ -40,16 +40,6 @@ class Graph:
         return self.root.locate(point)
 
     @classmethod
-    def from_bounding_box(cls, bounding_box: BoundingBox) -> 'Graph':
-        min_x, min_y, max_x, max_y = bounding_box
-        delta_x, delta_y = max_x - min_x, max_y - min_y
-        min_x, min_y, max_x, max_y = (min_x - delta_x, min_y - delta_y,
-                                      max_x + delta_x, max_y + delta_y)
-        return cls(Leaf(Trapezoid((min_x, min_y), (max_x, min_y),
-                                  Edge((min_x, min_y), (max_x, min_y), False),
-                                  Edge((min_x, max_y), (max_x, max_y), True))))
-
-    @classmethod
     def from_multisegment(cls, multisegment: Multisegment,
                           shuffler: Shuffler) -> 'Graph':
         edges = [Edge(start, end, False)
@@ -58,7 +48,7 @@ class Graph:
                  for start, end in multisegment]
         shuffler(edges)
         bounding_box = points_to_bounding_box(flatten(multisegment))
-        result = cls.from_bounding_box(bounding_box)
+        result = cls(bounding_box_to_node(bounding_box))
         for edge in edges:
             result.add_edge(edge)
         return result
@@ -86,7 +76,7 @@ class Graph:
                                        not is_hole_negatively_oriented))
         shuffler(edges)
         bounding_box = points_to_bounding_box(border)
-        result = cls.from_bounding_box(bounding_box)
+        result = cls(bounding_box_to_node(bounding_box))
         for edge in edges:
             result.add_edge(edge)
         return result
@@ -254,3 +244,13 @@ class Graph:
                                            'but none found.')
             result.append(trapezoid)
         return result
+
+
+def bounding_box_to_node(bounding_box: BoundingBox) -> Leaf:
+    min_x, min_y, max_x, max_y = bounding_box
+    delta_x, delta_y = max_x - min_x, max_y - min_y
+    min_x, min_y, max_x, max_y = (min_x - delta_x, min_y - delta_y,
+                                  max_x + delta_x, max_y + delta_y)
+    return Leaf(Trapezoid((min_x, min_y), (max_x, min_y),
+                          Edge((min_x, min_y), (max_x, min_y), False),
+                          Edge((min_x, max_y), (max_x, max_y), True)))
