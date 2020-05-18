@@ -11,6 +11,12 @@ Graph = Graph
 Location = Location
 
 
+def multisegment_trapezoidal(multisegment: Multisegment,
+                             *,
+                             shuffler: Shuffler = random.shuffle) -> Graph:
+    return Graph.from_multisegment(multisegment, shuffler)
+
+
 def polygon_trapezoidal(border: Contour, holes: Sequence[Contour] = (),
                         *,
                         shuffler: Shuffler = random.shuffle) -> Graph:
@@ -54,9 +60,3 @@ def polygon_trapezoidal(border: Contour, holes: Sequence[Contour] = (),
     True
     """
     return Graph.from_polygon(border, holes, shuffler)
-
-
-def multisegment_trapezoidal(multisegment: Multisegment,
-                             *,
-                             shuffler: Shuffler = random.shuffle) -> Graph:
-    return Graph.from_multisegment(multisegment, shuffler)
