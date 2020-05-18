@@ -22,7 +22,7 @@ def multisegment_trapezoidal(multisegment: Multisegment,
     Time complexity:
         ``O(segments_count * log segments_count)`` expected,
         ``O(segments_count ** 2)`` worst,
-        where ``segments = len(multisegment)``.
+        where ``segments_count = len(multisegment)``.
     Memory complexity:
         ``O(segments_count)``,
         where ``segments_count = len(multisegment)``.
