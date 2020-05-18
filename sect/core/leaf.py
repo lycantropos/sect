@@ -5,6 +5,7 @@ from robust.angular import (Orientation,
 from sect.hints import (Contour,
                         Point)
 from .edge import Edge
+from .location import Location
 from .node import Node
 from .trapezoid import Trapezoid
 from .utils import contour_to_segments
@@ -33,8 +34,11 @@ class Leaf(Node):
 
     __repr__ = generate_repr(__init__)
 
-    def __contains__(self, point: Point) -> bool:
-        return point in self.trapezoid
+    def locate(self, point: Point) -> Location:
+        return (Location.INTERIOR
+                if (self.trapezoid.below.interior_to_the_left
+                    and not self.trapezoid.above.interior_to_the_left)
+                else Location.EXTERIOR)
 
     def search_edge(self, edge: Edge) -> Trapezoid:
         return self.trapezoid

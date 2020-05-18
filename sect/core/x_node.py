@@ -2,6 +2,7 @@ from reprit.base import generate_repr
 
 from sect.hints import Point
 from .edge import Edge
+from .location import Location
 from .node import Node
 from .trapezoid import Trapezoid
 
@@ -19,13 +20,13 @@ class XNode(Node):
 
     __repr__ = generate_repr(__init__)
 
-    def __contains__(self, point: Point) -> bool:
+    def locate(self, point: Point) -> Location:
         if point == self.point:
-            return True
+            return Location.BOUNDARY
         elif self.point < point:
-            return point in self.right
+            return self.right.locate(point)
         else:
-            return point in self.left
+            return self.left.locate(point)
 
     def search_edge(self, edge: Edge) -> Trapezoid:
         if self.point <= edge.left:

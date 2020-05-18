@@ -5,6 +5,7 @@ from typing import (List,
 
 from sect.hints import Point
 from .edge import Edge
+from .location import Location
 from .trapezoid import Trapezoid
 
 
@@ -14,10 +15,16 @@ class Node(ABC):
     def __init__(self) -> None:
         self._parents = []  # type: List['Node']
 
-    @abstractmethod
     def __contains__(self, point: Point) -> bool:
         """
-        Checks if point is on the contour boundary or inside its region.
+        Checks if point is on the contour boundary or in its interior.
+        """
+        return self.locate(point) is not Location.EXTERIOR
+
+    @abstractmethod
+    def locate(self, point: Point) -> Location:
+        """
+        Finds location of given point relative to the contour.
         """
 
     @abstractmethod

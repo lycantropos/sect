@@ -5,6 +5,7 @@ from robust.angular import Orientation
 
 from sect.hints import Point
 from .edge import Edge
+from .location import Location
 from .node import Node
 from .trapezoid import Trapezoid
 
@@ -20,14 +21,14 @@ class YNode(Node):
         self.below._add_parent(self)
         self.above._add_parent(self)
 
-    def __contains__(self, point: Point) -> bool:
+    def locate(self, point: Point) -> Location:
         point_orientation = self.edge.orientation_with(point)
         if point_orientation is Orientation.COUNTERCLOCKWISE:
-            return point in self.above
+            return self.above.locate(point)
         elif point_orientation is Orientation.CLOCKWISE:
-            return point in self.below
+            return self.below.locate(point)
         else:
-            return True
+            return Location.BOUNDARY
 
     __repr__ = generate_repr(__init__)
 

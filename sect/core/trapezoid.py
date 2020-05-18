@@ -28,10 +28,6 @@ class Trapezoid:
 
     __repr__ = generate_repr(__init__)
 
-    def __contains__(self, point: Point) -> bool:
-        return (self.below.interior_to_the_left
-                and not self.above.interior_to_the_left)
-
     @property
     def lower_left(self) -> Optional['Trapezoid']:
         return self._lower_left
