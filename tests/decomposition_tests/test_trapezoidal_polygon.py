@@ -8,14 +8,15 @@ from orient.planar import (Relation,
 from sect.core.location import Location
 from sect.decomposition import (Map,
                                 trapezoidal_polygon)
-from sect.hints import (Contour,
-                        Point)
+from sect.hints import Point
 from . import strategies
 
 
 @given(strategies.polygons)
-def test_basic(contour: Contour) -> None:
-    assert isinstance(trapezoidal_polygon(contour), Map)
+def test_basic(polygon: Polygon) -> None:
+    border, holes = polygon
+
+    assert isinstance(trapezoidal_polygon(border, holes), Map)
 
 
 @given(strategies.polygons_with_points)
