@@ -7,7 +7,7 @@ from orient.planar import (Relation,
 
 from sect.core.location import Location
 from sect.decomposition import (Map,
-                                trapezoidal)
+                                trapezoidal_polygon)
 from sect.hints import (Contour,
                         Point)
 from . import strategies
@@ -15,7 +15,7 @@ from . import strategies
 
 @given(strategies.polygons)
 def test_basic(contour: Contour) -> None:
-    assert isinstance(trapezoidal(contour), Map)
+    assert isinstance(trapezoidal_polygon(contour), Map)
 
 
 @given(strategies.polygons_with_points)
@@ -23,7 +23,7 @@ def test_contains(polygon_with_point: Tuple[Polygon, Point]) -> None:
     polygon, point = polygon_with_point
     border, holes = polygon
 
-    result = trapezoidal(border, holes)
+    result = trapezoidal_polygon(border, holes)
 
     assert ((point in result)
             is (point_in_polygon(point, polygon) is not Relation.DISJOINT))
@@ -34,7 +34,7 @@ def test_locate(polygon_with_point: Tuple[Polygon, Point]) -> None:
     polygon, point = polygon_with_point
     border, holes = polygon
 
-    result = trapezoidal(border, holes)
+    result = trapezoidal_polygon(border, holes)
 
     location = result.locate(point)
     relation = point_in_polygon(point, polygon)

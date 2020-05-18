@@ -10,7 +10,7 @@ Map = Map
 Location = Location
 
 
-def trapezoidal(border: Contour, holes: Sequence[Contour] = (),
-                *,
-                shuffler: Shuffler = random.shuffle) -> Map:
+def trapezoidal_polygon(border: Contour, holes: Sequence[Contour] = (),
+                        *,
+                        shuffler: Shuffler = random.shuffle) -> Map:
     return Map.from_polygon(border, holes, shuffler)
