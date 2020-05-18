@@ -15,12 +15,6 @@ class Node(ABC):
     def __init__(self) -> None:
         self._parents = []  # type: List['Node']
 
-    def __contains__(self, point: Point) -> bool:
-        """
-        Checks if point is on the contour boundary or in its interior.
-        """
-        return self.locate(point) is not Location.EXTERIOR
-
     @property
     @abstractmethod
     def height(self) -> int:
