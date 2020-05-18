@@ -1,6 +1,7 @@
 from typing import (List,
                     Sequence)
 
+from reprit.base import generate_repr
 from robust.angular import Orientation
 
 from sect.hints import (Contour,
@@ -25,6 +26,8 @@ class Graph:
 
     def __init__(self, root: Node) -> None:
         self.root = root
+
+    __repr__ = generate_repr(__init__)
 
     def __contains__(self, point: Point) -> bool:
         """
