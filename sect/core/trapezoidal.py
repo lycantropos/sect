@@ -37,6 +37,14 @@ class Graph:
         return self.root.height
 
     def locate(self, point: Point) -> Location:
+        """
+        Finds location of point relative to decomposed geometry.
+
+        Time complexity:
+            ``O(self.height)``
+        Memory complexity:
+            ``O(1)``
+        """
         return self.root.locate(point)
 
     @classmethod
