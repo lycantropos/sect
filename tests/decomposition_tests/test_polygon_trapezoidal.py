@@ -20,6 +20,16 @@ def test_basic(polygon: Polygon) -> None:
 
 
 @given(strategies.polygons_with_points)
+def test_height(polygon_with_point: Tuple[Polygon, Point]) -> None:
+    polygon, point = polygon_with_point
+    border, holes = polygon
+
+    result = polygon_trapezoidal(border, holes)
+
+    assert 0 < result.height < 2 * (len(border) + sum(map(len, holes)))
+
+
+@given(strategies.polygons_with_points)
 def test_contains(polygon_with_point: Tuple[Polygon, Point]) -> None:
     polygon, point = polygon_with_point
     border, holes = polygon
