@@ -29,6 +29,13 @@ class Graph:
     def __contains__(self, point: Point) -> bool:
         return bool(self.root.locate(point))
 
+    @property
+    def height(self) -> int:
+        """
+        Returns height of the root node.
+        """
+        return self.root.height
+
     def locate(self, point: Point) -> Location:
         return self.root.locate(point)
 
