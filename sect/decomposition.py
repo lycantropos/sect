@@ -15,8 +15,7 @@ def trapezoidal_polygon(border: Contour, holes: Sequence[Contour] = (),
                         *,
                         shuffler: Shuffler = random.shuffle) -> Graph:
     """
-    Returns trapezoidal decomposition graph of the polygon
-    given by border and holes.
+    Returns trapezoidal graph of the polygon given by border and holes.
 
     Based on incremental randomized algorithm by R. Seidel.
 
@@ -36,7 +35,7 @@ def trapezoidal_polygon(border: Contour, holes: Sequence[Contour] = (),
     :param shuffler:
         function which mutates sequence by shuffling its elements,
         required for randomization.
-    :returns: trapezoidal decomposition graph of border and holes.
+    :returns: trapezoidal graph of border and holes.
 
     >>> graph = trapezoidal_polygon([(0, 0), (6, 0), (6, 6), (0, 6)],
     ...                             [[(2, 2), (2, 4), (4, 4), (4, 2)]])
