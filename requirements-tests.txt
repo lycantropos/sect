@@ -1,3 +1,4 @@
+orient>=0.7.0
 pytest>=5.4.2
 pytest-cov>=2.8.1
 hypothesis>=5.14.0
