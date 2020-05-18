@@ -5,8 +5,8 @@ from hypothesis_geometry.hints import Polygon
 from orient.planar import (Relation,
                            point_in_polygon)
 
-from sect.core.location import Location
 from sect.decomposition import (Graph,
+                                Location,
                                 trapezoidal_polygon)
 from sect.hints import Point
 from . import strategies
