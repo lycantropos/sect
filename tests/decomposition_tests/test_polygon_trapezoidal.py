@@ -7,7 +7,7 @@ from orient.planar import (Relation,
 
 from sect.decomposition import (Graph,
                                 Location,
-                                trapezoidal_polygon)
+                                polygon_trapezoidal)
 from sect.hints import Point
 from . import strategies
 
@@ -16,7 +16,7 @@ from . import strategies
 def test_basic(polygon: Polygon) -> None:
     border, holes = polygon
 
-    assert isinstance(trapezoidal_polygon(border, holes), Graph)
+    assert isinstance(polygon_trapezoidal(border, holes), Graph)
 
 
 @given(strategies.polygons_with_points)
@@ -24,7 +24,7 @@ def test_contains(polygon_with_point: Tuple[Polygon, Point]) -> None:
     polygon, point = polygon_with_point
     border, holes = polygon
 
-    result = trapezoidal_polygon(border, holes)
+    result = polygon_trapezoidal(border, holes)
 
     assert ((point in result)
             is (point_in_polygon(point, polygon) is not Relation.DISJOINT))
@@ -35,7 +35,7 @@ def test_locate(polygon_with_point: Tuple[Polygon, Point]) -> None:
     polygon, point = polygon_with_point
     border, holes = polygon
 
-    result = trapezoidal_polygon(border, holes)
+    result = polygon_trapezoidal(border, holes)
 
     location = result.locate(point)
     relation = point_in_polygon(point, polygon)
