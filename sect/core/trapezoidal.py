@@ -27,6 +27,14 @@ class Graph:
         self.root = root
 
     def __contains__(self, point: Point) -> bool:
+        """
+        Checks if point is contained in decomposed geometry.
+
+        Time complexity:
+            ``O(self.height)``
+        Memory complexity:
+            ``O(1)``
+        """
         return bool(self.root.locate(point))
 
     @property
