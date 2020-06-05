@@ -1,7 +1,6 @@
 from abc import (ABC,
                  abstractmethod)
-from typing import (List,
-                    Optional)
+from typing import List
 
 from sect.hints import Point
 from .edge import Edge
@@ -29,7 +28,7 @@ class Node(ABC):
         """
 
     @abstractmethod
-    def search_edge(self, edge: Edge) -> Optional[Trapezoid]:
+    def search_edge(self, edge: Edge) -> Trapezoid:
         """
         Recursive search for the trapezoid
         which contains the left endpoint of the given segment.
