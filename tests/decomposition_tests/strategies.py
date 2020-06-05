@@ -1,9 +1,9 @@
+from functools import partial
 from typing import Tuple
 
 from hypothesis import strategies
 from hypothesis_geometry import planar
 
-from sect.core.utils import contour_to_segments
 from sect.hints import (Contour,
                         Coordinate,
                         Multisegment,
@@ -11,12 +11,8 @@ from sect.hints import (Contour,
 from tests.strategies import coordinates_strategies
 from tests.utils import Strategy
 
-
-def to_multisegments(coordinates: Strategy[Coordinate]
-                     ) -> Strategy[Multisegment]:
-    return planar.contours(coordinates).map(contour_to_segments)
-
-
+to_multisegments = partial(planar.multisegments,
+                           min_size=1)
 multisegments = coordinates_strategies.flatmap(to_multisegments)
 
 
