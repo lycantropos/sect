@@ -36,24 +36,10 @@ class YNode(Node):
 
     __repr__ = generate_repr(__init__)
 
-    def search_edge(self, edge: Edge) -> Optional[Trapezoid]:
-        if edge.left == self.edge.left:
-            # Coinciding left edge points.
-            right_orientation = self.edge.orientation_with(edge.right)
-            if right_orientation is Orientation.COUNTERCLOCKWISE:
-                return self.above.search_edge(edge)
-            elif right_orientation is Orientation.CLOCKWISE:
-                return self.below.search_edge(edge)
-            else:
-                return None
-        else:
-            left_orientation = self.edge.orientation_with(edge.left)
-            if left_orientation is Orientation.COUNTERCLOCKWISE:
-                return self.above.search_edge(edge)
-            elif left_orientation is Orientation.CLOCKWISE:
-                return self.below.search_edge(edge)
-            else:
-                return None
+    def search_edge(self, edge: Edge) -> Trapezoid:
+        return (self.above
+                if self.edge < edge
+                else self.below).search_edge(edge)
 
     def _replace_child(self, current: 'Node', replacement: 'Node') -> None:
         if self.below is current:
