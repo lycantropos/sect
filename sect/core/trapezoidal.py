@@ -261,8 +261,6 @@ class Graph:
         while trapezoid.right < right:
             trapezoid_right_orientation = edge.orientation_with(
                     trapezoid.right)
-            assert trapezoid_right_orientation, ('Unable to deal '
-                                                 'with point on segment.')
             if trapezoid_right_orientation is Orientation.COUNTERCLOCKWISE:
                 trapezoid = trapezoid.lower_right
             else:
