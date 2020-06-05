@@ -259,12 +259,10 @@ class Graph:
         result = [trapezoid]
         right = edge.right
         while trapezoid.right < right:
-            trapezoid_right_orientation = edge.orientation_with(
-                    trapezoid.right)
-            if trapezoid_right_orientation is Orientation.COUNTERCLOCKWISE:
-                trapezoid = trapezoid.lower_right
-            else:
-                trapezoid = trapezoid.upper_right
+            trapezoid = (trapezoid.lower_right
+                         if (edge.orientation_with(trapezoid.right)
+                             is Orientation.COUNTERCLOCKWISE)
+                         else (trapezoid.upper_right or trapezoid.lower_right))
             assert trapezoid is not None, ('Expected neighbour trapezoid, '
                                            'but none found.')
             result.append(trapezoid)
