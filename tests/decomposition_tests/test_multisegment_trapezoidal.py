@@ -3,7 +3,6 @@ from typing import Tuple
 from hypothesis import given
 from orient.planar import Relation
 
-from sect import draw
 from sect.decomposition import (Graph,
                                 Location,
                                 multisegment_trapezoidal)
