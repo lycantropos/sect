@@ -3,6 +3,7 @@ from typing import Tuple
 from hypothesis import given
 from orient.planar import Relation
 
+from sect import draw
 from sect.decomposition import (Graph,
                                 Location,
                                 multisegment_trapezoidal)
@@ -21,7 +22,7 @@ def test_basic(multisegment: Multisegment) -> None:
 def test_height(multisegment: Multisegment) -> None:
     result = multisegment_trapezoidal(multisegment)
 
-    assert 0 < result.height < 2 * len(multisegment)
+    assert 0 < result.height <= 2 * (len(multisegment) + 2)
 
 
 @given(strategies.multisegments_with_points)
