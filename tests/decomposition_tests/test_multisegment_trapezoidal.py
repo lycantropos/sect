@@ -17,10 +17,8 @@ def test_basic(multisegment: Multisegment) -> None:
     assert isinstance(multisegment_trapezoidal(multisegment), Graph)
 
 
-@given(strategies.multisegments_with_points)
-def test_height(multisegment_with_point: Tuple[Multisegment, Point]) -> None:
-    multisegment, point = multisegment_with_point
-
+@given(strategies.multisegments)
+def test_height(multisegment: Multisegment) -> None:
     result = multisegment_trapezoidal(multisegment)
 
     assert 0 < result.height < 2 * len(multisegment)
