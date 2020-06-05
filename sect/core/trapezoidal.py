@@ -276,6 +276,8 @@ class Graph:
 def bounding_box_to_node(bounding_box: BoundingBox) -> Leaf:
     min_x, min_y, max_x, max_y = bounding_box
     delta_x, delta_y = max_x - min_x, max_y - min_y
+    # handle horizontal/vertical cases
+    delta_x, delta_y = delta_x or 1, delta_y or 1
     min_x, min_y, max_x, max_y = (min_x - delta_x, min_y - delta_y,
                                   max_x + delta_x, max_y + delta_y)
     return Leaf(Trapezoid((min_x, min_y), (max_x, min_y),
