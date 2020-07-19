@@ -100,3 +100,7 @@ def to_min_max(iterable: Iterable[Domain]) -> Tuple[Domain, Domain]:
         elif maximum < element:
             maximum = element
     return minimum, maximum
+
+
+def ceil_log2(number: int) -> int:
+    return number.bit_length() - (not (number & (number - 1)))

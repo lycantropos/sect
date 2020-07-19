@@ -1,7 +1,8 @@
 from collections import deque
 from itertools import (accumulate,
                        chain,
-                       groupby)
+                       groupby,
+                       repeat)
 from typing import (Iterable,
                     List,
                     Optional,
@@ -28,7 +29,8 @@ from .quad_edge import (QuadEdge,
                         edge_to_non_adjacent_vertices,
                         edges_with_opposites)
 from .sweep import sweep
-from .utils import (contour_to_segments,
+from .utils import (ceil_log2,
+                    contour_to_segments,
                     flatten,
                     normalize_contour,
                     pairwise,
@@ -64,7 +66,7 @@ class Triangulation:
         result = [_initialize_triangulation(points[start:stop])
                   for start, stop in pairwise(accumulate(chain((0,),
                                                                lengths)))]
-        while len(result) > 1:
+        for _ in repeat(None, ceil_log2(len(result))):
             parts_to_merge_count = len(result) // 2 * 2
             result = ([result[offset]._merge_with(result[offset + 1])
                        for offset in range(0, parts_to_merge_count, 2)]
