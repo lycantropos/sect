@@ -11,7 +11,7 @@ from .quad_edge import QuadEdge
 
 
 class EventsQueueKey:
-    __slots__ = ('event',)
+    __slots__ = 'event',
 
     def __init__(self, event: Event) -> None:
         self.event = event
@@ -98,6 +98,3 @@ class EventsQueue:
         event.complement.complement, event.complement = left_event, right_event
         self._queue.push(left_event)
         self._queue.push(right_event)
-
-    def clear(self) -> None:
-        self._queue.clear()
