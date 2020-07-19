@@ -1,11 +1,13 @@
 from collections import deque
-from itertools import accumulate
+from itertools import (accumulate,
+                       chain)
 from typing import (Iterable,
                     List,
                     Optional,
                     Sequence,
                     Set)
 
+from decision.partition import coin_change
 from reprit.base import generate_repr
 from robust.angular import (Orientation,
                             orientation)
@@ -24,8 +26,7 @@ from .quad_edge import (QuadEdge,
                         edge_to_non_adjacent_vertices,
                         edges_with_opposites)
 from .sweep import sweep
-from .utils import (coin_change,
-                    contour_to_segments,
+from .utils import (contour_to_segments,
                     normalize_contour,
                     pairwise,
                     to_unique_objects)
@@ -46,7 +47,8 @@ class Triangulation:
         points = sorted(to_unique_objects(points))
         lengths = coin_change(len(points), _initializers)
         result = [_initialize_triangulation(points[start:stop])
-                  for start, stop in pairwise(accumulate([0] + lengths))]
+                  for start, stop in pairwise(accumulate(chain((0,),
+                                                               lengths)))]
         while len(result) > 1:
             parts_to_merge_count = len(result) // 2 * 2
             result = ([result[offset]._merge_with(result[offset + 1])
