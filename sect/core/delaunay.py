@@ -92,17 +92,21 @@ class Triangulation:
         border_endpoints = {frozenset(segment) for segment in border_segments}
         boundary_fragments = (
             tuple(fragments)
-            for _, fragments in groupby(self.boundary_edges(),
+            for _, fragments in groupby(self.unique_boundary_edges(),
                                         key=CollinearFragmentsKey))
 
         def unite_fragments(fragments: Iterable[QuadEdge]) -> Segment:
             return to_min_max(flatten(fragment.segment
                                       for fragment in fragments))
 
-        non_boundary = set(flatten(fragments
-                                   for fragments in boundary_fragments
-                                   if (frozenset(unite_fragments(fragments))
-                                       not in border_endpoints)))
+        non_boundary = set(flatten(
+                edges_with_opposites(fragment
+                                     for fragment in fragments
+                                     if (fragment.endpoints
+                                         not in border_endpoints))
+                for fragments in boundary_fragments
+                if (frozenset(unite_fragments(fragments))
+                    not in border_endpoints)))
         while non_boundary:
             edge = non_boundary.pop()
             non_boundary.remove(edge.opposite)
