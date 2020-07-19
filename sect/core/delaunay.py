@@ -156,11 +156,9 @@ class Triangulation:
     def _triangles(self) -> Iterable[Triangle]:
         visited_vertices = set(self._triangular_holes_vertices)
         for edge in self.edges():
-            if (edge.orientation_with(edge.left_from_start.end)
-                    is Orientation.COUNTERCLOCKWISE):
-                if (edge.left_from_start.end
-                        != edge.opposite.right_from_start.end):
-                    continue
+            if (edge.left_from_start.end == edge.opposite.right_from_start.end
+                    and (edge.orientation_with(edge.left_from_start.end)
+                         is Orientation.COUNTERCLOCKWISE)):
                 triangle = edge.start, edge.end, edge.left_from_start.end
                 vertices = frozenset(triangle)
                 if vertices not in visited_vertices:
