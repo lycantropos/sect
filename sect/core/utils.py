@@ -89,3 +89,14 @@ def points_to_bounding_box(points: Iterable[Point]) -> BoundingBox:
         min_x, max_x = min(min_x, x), max(max_x, x)
         min_y, max_y = min(min_y, y), max(max_y, y)
     return min_x, min_y, max_x, max_y
+
+
+def to_min_max(iterable: Iterable[Domain]) -> Tuple[Domain, Domain]:
+    iterator = iter(iterable)
+    minimum = maximum = next(iterator)
+    for element in iterator:
+        if element < minimum:
+            minimum = element
+        elif maximum < element:
+            maximum = element
+    return minimum, maximum

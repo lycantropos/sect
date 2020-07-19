@@ -1,6 +1,7 @@
 from collections import deque
 from itertools import (accumulate,
-                       chain)
+                       chain,
+                       groupby)
 from typing import (Iterable,
                     List,
                     Optional,
@@ -9,6 +10,7 @@ from typing import (Iterable,
 
 from decision.partition import coin_change
 from reprit.base import generate_repr
+from robust import parallelogram
 from robust.angular import (Orientation,
                             orientation)
 from robust.linear import (SegmentsRelationship,
@@ -27,9 +29,22 @@ from .quad_edge import (QuadEdge,
                         edges_with_opposites)
 from .sweep import sweep
 from .utils import (contour_to_segments,
+                    flatten,
                     normalize_contour,
                     pairwise,
+                    to_min_max,
                     to_unique_objects)
+
+
+class CollinearFragmentsKey:
+    __slots__ = 'edge',
+
+    def __init__(self, edge: QuadEdge) -> None:
+        self.edge = edge
+
+    def __eq__(self, other: 'CollinearFragmentsKey') -> bool:
+        return not parallelogram.signed_area(self.edge.start, self.edge.end,
+                                             other.edge.start, other.edge.end)
 
 
 class Triangulation:
@@ -75,9 +90,19 @@ class Triangulation:
 
     def bound(self, border_segments: Sequence[Segment]) -> None:
         border_endpoints = {frozenset(segment) for segment in border_segments}
-        non_boundary = {edge
-                        for edge in self.boundary_edges()
-                        if edge.endpoints not in border_endpoints}
+        boundary_fragments = (
+            tuple(fragments)
+            for _, fragments in groupby(self.boundary_edges(),
+                                        key=CollinearFragmentsKey))
+
+        def unite_fragments(fragments: Iterable[QuadEdge]) -> Segment:
+            return to_min_max(flatten(fragment.segment
+                                      for fragment in fragments))
+
+        non_boundary = set(flatten(fragments
+                                   for fragments in boundary_fragments
+                                   if (frozenset(unite_fragments(fragments))
+                                       not in border_endpoints)))
         while non_boundary:
             edge = non_boundary.pop()
             non_boundary.remove(edge.opposite)
