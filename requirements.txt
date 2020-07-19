@@ -1,4 +1,4 @@
 dendroid>=0.4.2
 prioq>=0.1.1
 reprit>=0.2.2
-robust>=0.2.1
+robust>=0.2.4
