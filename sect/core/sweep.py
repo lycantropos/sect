@@ -46,7 +46,7 @@ def sweep(events_queue: EventsQueue) -> Iterable[Event]:
 def compute_transition(below_event: Optional[Event], event: Event) -> None:
     if below_event is None:
         event.in_out, event.other_in_out = False, True
-    elif event.from_test_contour is below_event.from_test_contour:
+    elif event.from_left is below_event.from_left:
         event.in_out, event.other_in_out = (not below_event.in_out,
                                             below_event.other_in_out)
     else:
@@ -65,7 +65,7 @@ def detect_intersection(below_event: Event,
     relationship = segments_relationship(below_segment, segment)
     if relationship is SegmentsRelationship.OVERLAP:
         # segments overlap
-        if below_event.from_test_contour is event.from_test_contour:
+        if below_event.from_left is event.from_left:
             raise ValueError('Edges of the same polygon '
                              'should not overlap.')
         starts_equal = below_event.start == event.start
