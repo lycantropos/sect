@@ -48,8 +48,8 @@ class EventsQueueKey:
             elif event.from_left is not other_event.from_left:
                 return other_event.from_left
             else:
-                end_x, end_y = event.end
-                other_end_x, other_end_y = other_event.end
+                _, end_y = event.end
+                _, other_end_y = other_event.end
                 return end_y < other_end_y
 
 
