@@ -7,7 +7,7 @@ services:
       args:
         - PYTHON_IMAGE=${PYPY_IMAGE_NAME}
         - PYTHON_IMAGE_VERSION=${PYPY_IMAGE_VERSION}
-    image: lycantropos/sect-pypy:0.3.1
+    image: lycantropos/sect-pypy:0.3.2-alpha
     volumes:
       - ./sect/:/opt/sect/sect/
       - ./tests/:/opt/sect/tests/
