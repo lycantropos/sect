@@ -65,30 +65,25 @@ def detect_intersection(below_event: Event,
     relationship = segments_relationship(below_segment, segment)
     if relationship is SegmentsRelationship.OVERLAP:
         # segments overlap
-        if event.from_test_contour is below_event.from_test_contour:
+        if below_event.from_test_contour is event.from_test_contour:
             raise ValueError('Edges of the same polygon '
                              'should not overlap.')
-        sorted_events = []
-        starts_equal = event.start == below_event.start
+        starts_equal = below_event.start == event.start
         if starts_equal:
-            sorted_events.append(None)
-        elif EventsQueueKey(below_event) > EventsQueueKey(event):
-            sorted_events.append(event)
-            sorted_events.append(below_event)
+            start_min = start_max = None
+        elif EventsQueueKey(event) < EventsQueueKey(below_event):
+            start_min, start_max = event, below_event
         else:
-            sorted_events.append(below_event)
-            sorted_events.append(event)
+            start_min, start_max = below_event, event
 
         ends_equal = event.end == below_event.end
         if ends_equal:
-            sorted_events.append(None)
-        elif (EventsQueueKey(below_event.complement)
-              > EventsQueueKey(event.complement)):
-            sorted_events.append(event.complement)
-            sorted_events.append(below_event.complement)
+            end_min = end_max = None
+        elif (EventsQueueKey(event.complement)
+              < EventsQueueKey(below_event.complement)):
+            end_min, end_max = event.complement, below_event.complement
         else:
-            sorted_events.append(below_event.complement)
-            sorted_events.append(event.complement)
+            end_min, end_max = below_event.complement, event.complement
 
         if starts_equal:
             # both line segments are equal or share the left endpoint
@@ -97,23 +92,20 @@ def detect_intersection(below_event: Event,
                                if event.in_out is below_event.in_out
                                else EdgeKind.DIFFERENT_TRANSITION)
             if not ends_equal:
-                events_queue.divide_segment(sorted_events[2].complement,
-                                            sorted_events[1].start)
+                events_queue.divide_segment(end_max.complement, end_min.start)
             return True
         elif ends_equal:
             # the line segments share the right endpoint
-            events_queue.divide_segment(sorted_events[0],
-                                        sorted_events[1].start)
+            events_queue.divide_segment(start_min, start_max.start)
         else:
             events_queue.divide_segment(
-                    sorted_events[0]
+                    start_min
                     # one line segment includes the other one
-                    if sorted_events[0] is sorted_events[3].complement
+                    if start_min is end_max.complement
                     # no line segment includes the other one
-                    else sorted_events[1],
-                    sorted_events[2].start)
-            events_queue.divide_segment(sorted_events[0],
-                                        sorted_events[1].start)
+                    else start_max,
+                    end_min.start)
+            events_queue.divide_segment(start_min, start_max.start)
     elif (relationship is not SegmentsRelationship.NONE
           and below_event.start != event.start
           and below_event.end != event.end):
