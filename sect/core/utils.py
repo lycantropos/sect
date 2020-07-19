@@ -1,14 +1,12 @@
 import sys
 from collections import OrderedDict
-from itertools import (chain,
-                       cycle)
+from itertools import chain
 from typing import (Iterable,
                     List,
                     Sequence,
                     Tuple,
                     TypeVar)
 
-from dendroid import red_black
 from robust.angular import (Orientation,
                             orientation)
 
@@ -70,20 +68,6 @@ def arg_min(sequence: Sequence[Domain]) -> int:
 to_unique_objects = (OrderedDict
                      if sys.version_info < (3, 6)
                      else dict).fromkeys
-
-
-def coin_change(amount: int, denominations: Iterable[int]) -> List[int]:
-    denominations = red_black.tree(*denominations)
-    result = []
-    poppers = cycle((red_black.Tree.popmax, red_black.Tree.popmin))
-    while amount and denominations:
-        denomination = next(poppers)(denominations)
-        denomination_count, amount = divmod(amount, denomination)
-        if amount and amount < denominations.min():
-            denomination_count -= 1
-            amount += denomination
-        result += [denomination] * denomination_count
-    return result
 
 
 def pairwise(iterable: Iterable[Domain]) -> Iterable[Tuple[Domain, Domain]]:
