@@ -43,10 +43,10 @@ def _to_sub_hull(points: Iterable[Point]) -> List[Point]:
 def normalize_contour(contour: Contour) -> Contour:
     min_index = arg_min(contour)
     contour = contour[min_index:] + contour[:min_index]
-    if orientation(contour[-1], contour[0],
-                   contour[1]) is Orientation.COUNTERCLOCKWISE:
-        contour = contour[:1] + contour[1:][::-1]
-    return contour
+    return (contour[:1] + contour[1:][::-1]
+            if (orientation(contour[-1], contour[0], contour[1])
+                is Orientation.COUNTERCLOCKWISE)
+            else contour)
 
 
 def contour_to_segments(contour: Contour) -> List[Segment]:
