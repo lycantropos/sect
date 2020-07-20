@@ -39,7 +39,7 @@ class YNode(Node):
                 if self.edge < edge
                 else self.below).search_edge(edge)
 
-    def _replace_child(self, current: 'Node', replacement: 'Node') -> None:
+    def _replace_child(self, current: Node, replacement: Node) -> None:
         if self.below is current:
             self.below = replacement
         else:

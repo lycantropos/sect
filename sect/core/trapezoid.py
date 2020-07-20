@@ -15,12 +15,13 @@ class Trapezoid:
                  right: Point,
                  below: Edge,
                  above: Edge) -> None:
+        from .node import Node
         assert left < right, 'Incorrect endpoints order'
         self.left = left
         self.right = right
         self.above = above
         self.below = below
-        self.node = None  # type: Optional['Node']
+        self.node = None  # type: Optional[Node]
         self._lower_left = None  # type: Optional['Trapezoid']
         self._lower_right = None  # type: Optional['Trapezoid']
         self._upper_left = None  # type: Optional['Trapezoid']
