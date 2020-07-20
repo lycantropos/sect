@@ -78,10 +78,7 @@ to_unique_objects = (OrderedDict
 
 def pairwise(iterable: Iterable[Domain]) -> Iterable[Tuple[Domain, Domain]]:
     iterator = iter(iterable)
-    try:
-        element = next(iterator)
-    except StopIteration:
-        return
+    element = next(iterator, None)
     for next_element in iterator:
         yield element, next_element
         element = next_element
