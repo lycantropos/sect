@@ -184,7 +184,6 @@ class EventsQueue:
                         and self.detect_intersection(below_event, event)):
                     self.compute_position(sweep_line.below(below_event),
                                           below_event)
-                yield event
             else:
                 event = event.complement
                 if event in sweep_line:
@@ -193,3 +192,4 @@ class EventsQueue:
                     sweep_line.remove(event)
                     if above_event is not None and below_event is not None:
                         self.detect_intersection(below_event, above_event)
+                yield event
