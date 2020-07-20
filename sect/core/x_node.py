@@ -25,12 +25,12 @@ class XNode(Node):
         return max(self.left.height, self.right.height) + 1
 
     def locate(self, point: Point) -> Location:
-        if point == self.point:
-            return Location.BOUNDARY
+        if point < self.point:
+            return self.left.locate(point)
         elif self.point < point:
             return self.right.locate(point)
         else:
-            return self.left.locate(point)
+            return Location.BOUNDARY
 
     def search_edge(self, edge: Edge) -> Trapezoid:
         if self.point <= edge.left:
