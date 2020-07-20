@@ -1,5 +1,3 @@
-from typing import Optional
-
 from reprit.base import generate_repr
 from robust.angular import Orientation
 
@@ -21,6 +19,8 @@ class YNode(Node):
         self.below._add_parent(self)
         self.above._add_parent(self)
 
+    __repr__ = generate_repr(__init__)
+
     @property
     def height(self) -> int:
         return max(self.below.height, self.above.height) + 1
@@ -33,8 +33,6 @@ class YNode(Node):
             return self.below.locate(point)
         else:
             return Location.BOUNDARY
-
-    __repr__ = generate_repr(__init__)
 
     def search_edge(self, edge: Edge) -> Trapezoid:
         return (self.above
