@@ -29,7 +29,6 @@ from .quad_edge import (QuadEdge,
                         edge_to_neighbours,
                         edge_to_non_adjacent_vertices,
                         edges_with_opposites)
-from .sweep import sweep
 from .utils import (ceil_log2,
                     contour_to_segments,
                     flatten,
@@ -135,7 +134,7 @@ class Triangulation:
                                        from_left=False,
                                        is_counterclockwise_contour=True)
         hole_segments_endpoints, candidates = set(), []
-        for event in sweep(events_queue):
+        for event in events_queue.sweep():
             if event.from_left:
                 hole_segments_endpoints.add(frozenset(event.segment))
             elif event.in_intersection:
