@@ -78,8 +78,8 @@ class EventsQueue:
         if relationship is SegmentsRelationship.OVERLAP:
             # segments overlap
             if below_event.from_left is event.from_left:
-                raise ValueError(
-                        'Edges of the same polygon should not overlap.')
+                raise ValueError('Edges of the same polygon '
+                                 'should not overlap.')
             starts_equal = below_event.start == event.start
             ends_equal = below_event.end == event.end
             start_min, start_max = ((None, None)
@@ -94,26 +94,24 @@ class EventsQueue:
                                 (event.complement, below_event.complement
                                 if (EventsQueueKey(event.complement)
                                     < EventsQueueKey(below_event.complement))
-                                else (
-                                    below_event.complement, event.complement)))
+                                else (below_event.complement,
+                                      event.complement)))
             if starts_equal:
                 # both line segments are equal or share the left endpoint
                 event.is_overlap = below_event.is_overlap = True
                 if not ends_equal:
-                    self.divide_segment(end_max.complement,
-                                        end_min.start)
+                    self.divide_segment(end_max.complement, end_min.start)
                 return True
             elif ends_equal:
                 # the line segments share the right endpoint
                 self.divide_segment(start_min, start_max.start)
             else:
-                self.divide_segment(
-                        start_min
-                        # one line segment includes the other one
-                        if start_min is end_max.complement
-                        # no line segment includes the other one
-                        else start_max,
-                        end_min.start)
+                self.divide_segment(start_min
+                                    # one line segment includes the other one
+                                    if start_min is end_max.complement
+                                    # no line segment includes the other one
+                                    else start_max,
+                                    end_min.start)
                 self.divide_segment(start_min, start_max.start)
         elif (relationship is not SegmentsRelationship.NONE
               and below_event.start != event.start
