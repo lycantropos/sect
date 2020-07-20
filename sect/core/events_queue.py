@@ -140,8 +140,8 @@ class EventsQueue:
         start, end = edge.start, edge.end
         interior_on_left = is_counterclockwise_contour
         if start > end:
-            interior_on_left = not interior_on_left
             start, end = end, start
+            interior_on_left = not interior_on_left
         start_event = Event(True, start, None, from_left, interior_on_left,
                             edge)
         end_event = Event(False, end, start_event, from_left, interior_on_left,
@@ -157,8 +157,8 @@ class EventsQueue:
         start, end = segment
         interior_to_left = is_counterclockwise_contour
         if start > end:
-            interior_to_left = not interior_to_left
             start, end = end, start
+            interior_to_left = not interior_to_left
         start_event = Event(True, start, None, from_left, interior_to_left)
         end_event = Event(False, end, start_event, from_left, interior_to_left)
         start_event.complement = end_event
