@@ -36,9 +36,8 @@ class Event:
         """
         Returns end of the event's segment.
 
-        >>> event = Event(True, (0, 0), None, False, EdgeKind.NORMAL)
-        >>> event.complement = Event(False, (1, 0), event, False,
-        ...                          EdgeKind.NORMAL)
+        >>> event = Event(True, (0, 0), None, False, False)
+        >>> event.complement = Event(False, (1, 0), event, False, False)
         >>> event.end == (1, 0)
         True
         """
@@ -49,11 +48,10 @@ class Event:
         """
         Checks whether the event's segment belongs to intersection.
 
-        >>> event = Event(True, (0, 0), None, False, EdgeKind.NORMAL)
-        >>> event.complement = Event(False, (1, 0), event, False,
-        ...                          EdgeKind.NORMAL)
+        >>> event = Event(True, (0, 0), None, False, False)
+        >>> event.complement = Event(False, (1, 0), event, False, False)
         >>> event.in_intersection
-        True
+        False
         """
         return self.other_interior_to_left or self.is_overlap
 
@@ -62,9 +60,8 @@ class Event:
         """
         Returns segment of the event.
 
-        >>> event = Event(True, (0, 0), None, False, EdgeKind.NORMAL)
-        >>> event.complement = Event(False, (1, 0), event, False,
-        ...                          EdgeKind.NORMAL)
+        >>> event = Event(True, (0, 0), None, False, False)
+        >>> event.complement = Event(False, (1, 0), event, False, False)
         >>> event.segment == ((0, 0), (1, 0))
         True
         """
