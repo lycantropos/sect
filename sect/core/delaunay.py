@@ -3,7 +3,8 @@ from itertools import (accumulate,
                        chain,
                        groupby,
                        repeat)
-from typing import (Iterable,
+from typing import (FrozenSet,
+                    Iterable,
                     List,
                     Optional,
                     Sequence,
@@ -56,7 +57,7 @@ class Triangulation:
     def __init__(self, left_edge: QuadEdge, right_edge: QuadEdge) -> None:
         self.left_edge = left_edge
         self.right_edge = right_edge
-        self._triangular_holes_vertices = set()
+        self._triangular_holes_vertices = set()  # type: Set[FrozenSet[Point]]
 
     __repr__ = generate_repr(__init__)
 
