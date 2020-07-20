@@ -58,25 +58,22 @@ def detect_intersection(below_event: Event,
     if relationship is SegmentsRelationship.OVERLAP:
         # segments overlap
         if below_event.from_left is event.from_left:
-            raise ValueError('Edges of the same polygon '
-                             'should not overlap.')
+            raise ValueError('Edges of the same polygon should not overlap.')
         starts_equal = below_event.start == event.start
-        if starts_equal:
-            start_min = start_max = None
-        elif EventsQueueKey(event) < EventsQueueKey(below_event):
-            start_min, start_max = event, below_event
-        else:
-            start_min, start_max = below_event, event
-
-        ends_equal = event.end == below_event.end
-        if ends_equal:
-            end_min = end_max = None
-        elif (EventsQueueKey(event.complement)
-              < EventsQueueKey(below_event.complement)):
-            end_min, end_max = event.complement, below_event.complement
-        else:
-            end_min, end_max = below_event.complement, event.complement
-
+        ends_equal = below_event.end == event.end
+        start_min, start_max = ((None, None)
+                                if starts_equal
+                                else ((event, below_event)
+                                      if (EventsQueueKey(event)
+                                          < EventsQueueKey(below_event))
+                                      else (below_event, event)))
+        end_min, end_max = ((None, None)
+                            if ends_equal
+                            else
+                            (event.complement, below_event.complement
+                            if (EventsQueueKey(event.complement)
+                                < EventsQueueKey(below_event.complement))
+                            else (below_event.complement, event.complement)))
         if starts_equal:
             # both line segments are equal or share the left endpoint
             below_event.is_overlap = True
