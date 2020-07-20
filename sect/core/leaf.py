@@ -29,5 +29,5 @@ class Leaf(Node):
     def search_edge(self, edge: Edge) -> Trapezoid:
         return self.trapezoid
 
-    def _replace_child(self, current: 'Node', replacement: 'Node') -> None:
+    def _replace_child(self, current: Node, replacement: Node) -> None:
         raise TypeError('Leaf has no children.')
