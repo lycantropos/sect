@@ -35,10 +35,6 @@ class Edge:
             return left_orientation is Orientation.CLOCKWISE
         elif left_orientation is Orientation.COLLINEAR:
             return right_orientation is Orientation.CLOCKWISE
-        elif self.is_vertical:
-            return left_orientation is Orientation.CLOCKWISE
-        elif other.is_vertical:
-            return other_left_orientation is Orientation.COUNTERCLOCKWISE
         elif other_right_orientation is Orientation.COLLINEAR:
             return other_left_orientation is Orientation.COUNTERCLOCKWISE
         else:
