@@ -17,7 +17,6 @@ def sweep(events_queue: EventsQueue) -> Iterable[Event]:
     while events_queue:
         event = events_queue.pop()
         start_x, _ = event.start
-        sweep_line.move_to(start_x)
         if event.is_left_endpoint:
             sweep_line.add(event)
             above_event, below_event = (sweep_line.above(event),
