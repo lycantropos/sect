@@ -169,7 +169,6 @@ class EventsQueue:
         sweep_line = SweepLine()
         while self._queue:
             event = self._queue.pop()
-            start_x, _ = event.start
             if event.is_left_endpoint:
                 sweep_line.add(event)
                 above_event, below_event = (sweep_line.above(event),
