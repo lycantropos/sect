@@ -22,10 +22,10 @@ class Trapezoid:
         self.above = above
         self.below = below
         self.node = None  # type: Optional[Node]
-        self._lower_left = None  # type: Optional['Trapezoid']
-        self._lower_right = None  # type: Optional['Trapezoid']
-        self._upper_left = None  # type: Optional['Trapezoid']
-        self._upper_right = None  # type: Optional['Trapezoid']
+        self._lower_left = None  # type: Optional[Trapezoid]
+        self._lower_right = None  # type: Optional[Trapezoid]
+        self._upper_left = None  # type: Optional[Trapezoid]
+        self._upper_right = None  # type: Optional[Trapezoid]
 
     __repr__ = generate_repr(__init__)
 
