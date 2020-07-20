@@ -54,33 +54,15 @@ class SweepLineKey:
         event, other_event = self.event, other.event
         if event is other_event:
             return False
-        start, other_start = event.start, other_event.start
-        end, other_end = event.end, other_event.end
-        start_x, start_y = start
-        other_start_x, other_start_y = other_start
-        end_x, end_y = end
-        other_end_x, other_end_y = other_end
+        start, end = event.start, event.end
+        other_start, other_end = other_event.start, other_event.end
         other_start_orientation = orientation(end, start, other_start)
         other_end_orientation = orientation(end, start, other_end)
         if other_start_orientation is other_end_orientation:
-            if other_start_orientation is not Orientation.COLLINEAR:
-                # other segment fully lies on one side
-                return other_start_orientation is Orientation.COUNTERCLOCKWISE
-            # segments are collinear
-            elif event.from_left is not other_event.from_left:
-                return other_event.from_left
-            elif start_x == other_start_x:
-                if start_y != other_start_y:
-                    # segments are vertical
-                    return start_y < other_start_y
-                else:
-                    # segments have same start
-                    return end_y < other_end_y
-            elif start_y != other_start_y:
-                return start_y < other_start_y
-            else:
-                # segments are horizontal
-                return start_x < other_start_x
+            return (other_event.from_left
+                    if other_start_orientation is Orientation.COLLINEAR
+                    else (other_start_orientation
+                          is Orientation.COUNTERCLOCKWISE))
         start_orientation = orientation(other_end, other_start, start)
         end_orientation = orientation(other_end, other_start, end)
         if start_orientation is end_orientation:
