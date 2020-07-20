@@ -1,5 +1,3 @@
-from enum import (IntEnum,
-                  unique)
 from reprlib import recursive_repr
 from typing import Optional
 
@@ -10,35 +8,26 @@ from sect.hints import (Point,
 from .quad_edge import QuadEdge
 
 
-@unique
-class EdgeKind(IntEnum):
-    NORMAL = 0
-    NON_CONTRIBUTING = 1
-    SAME_TRANSITION = 2
-    DIFFERENT_TRANSITION = 3
-
-
 class Event:
     __slots__ = ('is_left_endpoint', 'start', 'complement', 'from_left',
-                 'edge_kind', 'edge', 'in_out', 'other_in_out')
+                 'is_overlap', 'interior_to_left', 'other_interior_to_left',
+                 'edge')
 
     def __init__(self,
                  is_left_endpoint: bool,
                  start: Point,
                  complement: Optional['Event'],
                  from_left_contour: bool,
-                 edge_kind: EdgeKind,
-                 edge: Optional[QuadEdge] = None,
-                 in_out: Optional[bool] = None,
-                 other_in_out: Optional[bool] = None) -> None:
+                 interior_to_left: bool,
+                 edge: Optional[QuadEdge] = None) -> None:
         self.is_left_endpoint = is_left_endpoint
         self.start = start
         self.complement = complement
         self.from_left = from_left_contour
-        self.edge_kind = edge_kind
+        self.is_overlap = False
+        self.interior_to_left = interior_to_left
+        self.other_interior_to_left = False
         self.edge = edge
-        self.in_out = in_out
-        self.other_in_out = other_in_out
 
     __repr__ = recursive_repr()(generate_repr(__init__))
 
@@ -66,9 +55,7 @@ class Event:
         >>> event.in_intersection
         True
         """
-        edge_kind = self.edge_kind
-        return (edge_kind is EdgeKind.NORMAL and not self.other_in_out
-                or edge_kind is EdgeKind.SAME_TRANSITION)
+        return self.other_interior_to_left or self.is_overlap
 
     @property
     def segment(self) -> Segment:

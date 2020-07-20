@@ -34,6 +34,7 @@ from .utils import (ceil_log2,
                     flatten,
                     normalize_contour,
                     pairwise,
+                    to_clockwise_contour,
                     to_min_max,
                     to_unique_objects)
 
@@ -123,12 +124,15 @@ class Triangulation:
             return
         events_queue = EventsQueue()
         for hole in holes:
-            for segment in contour_to_segments(hole):
-                events_queue.register_segment(segment,
-                                              from_left=True)
+            for segment in contour_to_segments(to_clockwise_contour(hole)):
+                events_queue.register_segment(
+                        segment,
+                        from_left=True,
+                        is_counterclockwise_contour=False)
         for edge in self._to_unique_inner_edges():
             events_queue.register_edge(edge,
-                                       from_left=False)
+                                       from_left=False,
+                                       is_counterclockwise_contour=True)
         hole_segments_endpoints, candidates = set(), []
         for event in sweep(events_queue):
             if event.from_left:

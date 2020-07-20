@@ -49,6 +49,12 @@ def normalize_contour(contour: Contour) -> Contour:
             else contour)
 
 
+def to_clockwise_contour(contour: Contour) -> Contour:
+    return (contour
+            if to_contour_orientation(contour) is Orientation.CLOCKWISE
+            else contour[:1] + contour[1:][::-1])
+
+
 def contour_to_segments(contour: Contour) -> List[Segment]:
     return [(contour[index - 1], contour[index])
             for index in range(len(contour))]

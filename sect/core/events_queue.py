@@ -5,8 +5,7 @@ from robust.angular import (Orientation,
 
 from sect.hints import (Point,
                         Segment)
-from .event import (EdgeKind,
-                    Event)
+from .event import Event
 from .quad_edge import QuadEdge
 
 
@@ -67,32 +66,41 @@ class EventsQueue:
 
     def register_segment(self, segment: Segment,
                          *,
-                         from_left: bool) -> None:
-        start, end = sorted(segment)
-        start_event = Event(True, start, None, from_left, EdgeKind.NORMAL)
-        end_event = Event(False, end, start_event, from_left, EdgeKind.NORMAL)
+                         from_left: bool,
+                         is_counterclockwise_contour: bool) -> None:
+        start, end = segment
+        interior_to_left = is_counterclockwise_contour
+        if start > end:
+            interior_to_left = not interior_to_left
+            start, end = end, start
+        start_event = Event(True, start, None, from_left, interior_to_left)
+        end_event = Event(False, end, start_event, from_left, interior_to_left)
         start_event.complement = end_event
         self._queue.push(start_event)
         self._queue.push(end_event)
 
     def register_edge(self, edge: QuadEdge,
                       *,
-                      from_left: bool) -> None:
-        start, end = sorted((edge.start, edge.end))
-        start_event = Event(True, start, None, from_left, EdgeKind.NORMAL,
+                      from_left: bool,
+                      is_counterclockwise_contour: bool) -> None:
+        start, end = edge.start, edge.end
+        interior_on_left = is_counterclockwise_contour
+        if start > end:
+            interior_on_left = not interior_on_left
+            start, end = end, start
+        start_event = Event(True, start, None, from_left, interior_on_left,
                             edge)
-        end_event = Event(False, end, start_event, from_left, EdgeKind.NORMAL,
+        end_event = Event(False, end, start_event, from_left, interior_on_left,
                           edge)
         start_event.complement = end_event
         self._queue.push(start_event)
         self._queue.push(end_event)
 
     def divide_segment(self, event: Event, point: Point) -> None:
-        left_event = Event(True, point, event.complement,
-                           event.from_left, EdgeKind.NORMAL,
-                           event.edge)
+        left_event = Event(True, point, event.complement, event.from_left,
+                           event.interior_to_left, event.edge)
         right_event = Event(False, point, event, event.from_left,
-                            EdgeKind.NORMAL, event.edge)
+                            event.interior_to_left, event.edge)
         event.complement.complement, event.complement = left_event, right_event
         self._queue.push(left_event)
         self._queue.push(right_event)
