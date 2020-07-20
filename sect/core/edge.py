@@ -43,11 +43,5 @@ class Edge:
                     # crossing edges are incomparable
                     else NotImplemented)
 
-    @property
-    def is_vertical(self) -> bool:
-        left_x, _ = self.left
-        right_x, _ = self.right
-        return left_x == right_x
-
     def orientation_with(self, point: Point) -> Orientation:
         return orientation(self.right, self.left, point)
