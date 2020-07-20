@@ -83,7 +83,7 @@ class Graph:
     @classmethod
     def from_polygon(cls, border: Contour, holes: Sequence[Contour],
                      shuffler: Shuffler) -> 'Graph':
-        edges = []
+        edges = []  # type: List[Edge]
         is_border_positively_oriented = (to_contour_orientation(border)
                                          is Orientation.COUNTERCLOCKWISE)
         for index in range(len(border)):
