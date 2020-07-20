@@ -40,16 +40,11 @@ class EventsQueueKey:
             other_end_orientation = orientation(event.end, event.start,
                                                 other_event.end)
             # the lowest segment is processed first
-            if other_end_orientation is not Orientation.COLLINEAR:
-                return other_end_orientation is (Orientation.COUNTERCLOCKWISE
-                                                 if event.is_left_endpoint
-                                                 else Orientation.CLOCKWISE)
-            elif event.from_left is not other_event.from_left:
-                return other_event.from_left
-            else:
-                _, end_y = event.end
-                _, other_end_y = other_event.end
-                return end_y < other_end_y
+            return (other_event.from_left
+                    if other_end_orientation is Orientation.COLLINEAR
+                    else other_end_orientation is (Orientation.COUNTERCLOCKWISE
+                                                   if event.is_left_endpoint
+                                                   else Orientation.CLOCKWISE))
 
 
 class EventsQueue:
