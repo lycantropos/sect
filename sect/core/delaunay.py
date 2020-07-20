@@ -123,25 +123,19 @@ class Triangulation:
         if not holes:
             return
         events_queue = EventsQueue()
+        for edge in self._to_unique_inner_edges():
+            events_queue.register_edge(edge,
+                                       from_left=True,
+                                       is_counterclockwise_contour=True)
         for hole in holes:
             for segment in contour_to_segments(to_clockwise_contour(hole)):
                 events_queue.register_segment(
                         segment,
-                        from_left=True,
+                        from_left=False,
                         is_counterclockwise_contour=False)
-        for edge in self._to_unique_inner_edges():
-            events_queue.register_edge(edge,
-                                       from_left=False,
-                                       is_counterclockwise_contour=True)
-        hole_segments_endpoints, candidates = set(), []
         for event in events_queue.sweep():
-            if event.from_left:
-                hole_segments_endpoints.add(frozenset(event.segment))
-            elif event.in_intersection:
-                candidates.append(event.edge)
-        for edge in candidates:
-            if edge.endpoints not in hole_segments_endpoints:
-                self.delete(edge)
+            if event.from_left and event.inside:
+                self.delete(event.edge)
         self._triangular_holes_vertices.update(frozenset(hole)
                                                for hole in holes
                                                if len(hole) == 3)

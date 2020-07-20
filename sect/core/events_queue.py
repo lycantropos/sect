@@ -98,7 +98,7 @@ class EventsQueue:
                                     below_event.complement, event.complement)))
             if starts_equal:
                 # both line segments are equal or share the left endpoint
-                below_event.is_overlap = True
+                event.is_overlap = below_event.is_overlap = True
                 if not ends_equal:
                     self.divide_segment(end_max.complement,
                                         end_min.start)
