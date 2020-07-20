@@ -5,8 +5,7 @@ from robust.linear import (SegmentsRelationship,
                            segments_intersection,
                            segments_relationship)
 
-from .event import (EdgeKind,
-                    Event)
+from .event import Event
 from .events_queue import (EventsQueue,
                            EventsQueueKey)
 from .sweep_line import SweepLine
@@ -21,16 +20,13 @@ def sweep(events_queue: EventsQueue) -> Iterable[Event]:
             sweep_line.add(event)
             above_event, below_event = (sweep_line.above(event),
                                         sweep_line.below(event))
-            compute_transition(below_event, event)
+            compute_position(below_event, event)
             if (above_event is not None
                     and detect_intersection(event, above_event, events_queue)):
-                compute_transition(below_event, event)
-                compute_transition(event, above_event)
+                compute_position(event, above_event)
             if (below_event is not None
                     and detect_intersection(below_event, event, events_queue)):
-                below_below_event = sweep_line.below(below_event)
-                compute_transition(below_below_event, below_event)
-                compute_transition(below_event, event)
+                compute_position(sweep_line.below(below_event), below_event)
             yield event
         else:
             event = event.complement
@@ -42,15 +38,12 @@ def sweep(events_queue: EventsQueue) -> Iterable[Event]:
                     detect_intersection(below_event, above_event, events_queue)
 
 
-def compute_transition(below_event: Optional[Event], event: Event) -> None:
-    if below_event is None:
-        event.in_out, event.other_in_out = False, True
-    elif event.from_left is below_event.from_left:
-        event.in_out, event.other_in_out = (not below_event.in_out,
-                                            below_event.other_in_out)
-    else:
-        event.in_out, event.other_in_out = (not below_event.other_in_out,
-                                            below_event.in_out)
+def compute_position(below_event: Optional[Event], event: Event) -> None:
+    if below_event is not None:
+        event.other_interior_to_left = (below_event.other_interior_to_left
+                                        if (event.from_left
+                                            is below_event.from_left)
+                                        else below_event.interior_to_left)
 
 
 def detect_intersection(below_event: Event,
@@ -86,10 +79,7 @@ def detect_intersection(below_event: Event,
 
         if starts_equal:
             # both line segments are equal or share the left endpoint
-            below_event.edge_kind = EdgeKind.NON_CONTRIBUTING
-            event.edge_kind = (EdgeKind.SAME_TRANSITION
-                               if event.in_out is below_event.in_out
-                               else EdgeKind.DIFFERENT_TRANSITION)
+            below_event.is_overlap = True
             if not ends_equal:
                 events_queue.divide_segment(end_max.complement, end_min.start)
             return True
