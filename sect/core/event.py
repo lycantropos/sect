@@ -44,16 +44,17 @@ class Event:
         return self.complement.start
 
     @property
-    def in_intersection(self) -> bool:
+    def inside(self) -> bool:
         """
-        Checks whether the event's segment belongs to intersection.
+        Checks if the segment enclosed by
+        or lies within the region of the intersection.
 
         >>> event = Event(True, (0, 0), None, False, False)
         >>> event.complement = Event(False, (1, 0), event, False, False)
-        >>> event.in_intersection
+        >>> event.inside
         False
         """
-        return self.other_interior_to_left or self.is_overlap
+        return self.other_interior_to_left and not self.is_overlap
 
     @property
     def segment(self) -> Segment:
