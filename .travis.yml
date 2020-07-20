@@ -27,7 +27,7 @@ after_success:
 deploy:
   provider: pypi
   on:
-    branch: master
+    tags: true
     python: 3.5
   user: __token__
   password:
