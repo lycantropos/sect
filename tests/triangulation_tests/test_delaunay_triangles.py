@@ -9,7 +9,8 @@ from sect.core.utils import (contour_to_segments,
 from sect.hints import (Point,
                         Triangle)
 from sect.triangulation import delaunay_triangles
-from tests.utils import to_boundary_endpoints
+from tests.utils import (to_boundary_endpoints,
+                         to_convex_border)
 from . import strategies
 
 
@@ -47,7 +48,7 @@ def test_boundary(points: Sequence[Point]) -> None:
 
     assert (to_boundary_endpoints(result)
             == set(map(frozenset,
-                       contour_to_segments(to_convex_hull(points)))))
+                       contour_to_segments(to_convex_border(points)))))
 
 
 @given(strategies.triangles)
