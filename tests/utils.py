@@ -1,9 +1,13 @@
 from collections import defaultdict
+from operator import getitem
 from typing import (Iterable,
+                    List,
                     Sequence,
                     Set,
-                    Tuple)
+                    Tuple,
+                    TypeVar)
 
+from hypothesis import strategies
 from hypothesis.strategies import SearchStrategy
 from orient.planar import (Relation,
                            point_in_segment)
@@ -83,3 +87,12 @@ def is_convex_contour(contour: Contour) -> bool:
     return all(orientation(contour[index - 2], contour[index - 1],
                            contour[index]) is Orientation.CLOCKWISE
                for index in range(len(contour)))
+
+
+Element = TypeVar('Element')
+
+
+def sub_lists(sequence: Sequence[Element]) -> SearchStrategy[List[Element]]:
+    return strategies.builds(getitem,
+                             strategies.permutations(sequence),
+                             strategies.slices(max(len(sequence), 1)))
