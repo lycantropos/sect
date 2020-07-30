@@ -1,4 +1,5 @@
 import sys
+from bisect import bisect
 from collections import OrderedDict
 from itertools import chain
 from typing import (Iterable,
@@ -107,3 +108,55 @@ def to_min_max(iterable: Iterable[Domain]) -> Tuple[Domain, Domain]:
 
 def ceil_log2(number: int) -> int:
     return number.bit_length() - (not (number & (number - 1)))
+
+
+def complete_vertices(border: Contour, holes: Sequence[Contour],
+                      candidates: Sequence[Point]
+                      ) -> Tuple[Contour, Sequence[Contour], Sequence[Point]]:
+    candidates = sorted(to_unique_objects(candidates))
+    border, candidates = _complete_contour_vertices(border, candidates)
+    completed_holes = []
+    for hole in holes:
+        hole, candidates = _complete_contour_vertices(hole, candidates)
+        completed_holes.append(hole)
+    return border, completed_holes, candidates
+
+
+def _complete_contour_vertices(contour: Contour,
+                               candidates: Sequence[Point]
+                               ) -> Tuple[Contour, Sequence[Point]]:
+    extra_vertices = {}
+    start = contour[-1]
+    for index, end in enumerate(contour):
+        start_index = bisect(candidates, start)
+        end_index = bisect(candidates, end)
+        if start_index > end_index:
+            start_index, end_index = end_index, start_index
+        extra_vertices_indices = []
+        for candidate_index in range(start_index, end_index):
+            extra_point = candidates[candidate_index]
+            if _is_inner_segment_point(start, end, extra_point):
+                extra_vertices_indices.append(candidate_index)
+        if extra_vertices_indices:
+            extra_vertices[index] = [candidates[index]
+                                     for index in extra_vertices_indices]
+            extra_vertices_indices = frozenset(extra_vertices_indices)
+            candidates = [point
+                          for index, point in enumerate(candidates)
+                          if index not in extra_vertices_indices]
+            if not candidates:
+                break
+        start = end
+    if extra_vertices:
+        contour = list(flatten((extra_vertices[index]
+                                if contour[index - 1] < vertex
+                                else extra_vertices[index][::-1]) + [vertex]
+                               if index in extra_vertices
+                               else [vertex]
+                               for index, vertex in enumerate(contour)))
+    return contour, candidates
+
+
+def _is_inner_segment_point(start: Point, end: Point, point: Point) -> bool:
+    return ((start < point < end if start < end else end < point < start)
+            and orientation(start, end, point) is Orientation.COLLINEAR)

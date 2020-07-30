@@ -5,7 +5,8 @@ from typing import (Iterable,
 
 from .core.delaunay import Triangulation
 from .core.quad_edge import QuadEdge
-from .core.utils import (contour_to_segments as _contour_to_segments,
+from .core.utils import (complete_vertices as _complete_vertices,
+                         contour_to_segments as _contour_to_segments,
                          flatten as _flatten)
 from .hints import (Contour,
                     Point,
@@ -81,6 +82,9 @@ def constrained_delaunay(border: Contour,
         triangulation of the border, holes & extra points
         considering constraints.
     """
+    if extra_points:
+        border, holes, extra_points = _complete_vertices(border, holes,
+                                                         extra_points)
     result = delaunay(chain(border, _flatten(holes), extra_points))
     border_segments = _contour_to_segments(border)
     result.constrain(chain(border_segments,
