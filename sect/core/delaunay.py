@@ -78,19 +78,16 @@ class Triangulation:
 
     def bound(self, border_segments: Sequence[Segment]) -> None:
         border_endpoints = {frozenset(segment) for segment in border_segments}
-        non_boundary = set(edges_with_opposites(
-                edge
-                for edge in self.unique_boundary_edges()
-                if edge.endpoints not in border_endpoints))
+        non_boundary = {edge
+                        for edge in self.unique_boundary_edges()
+                        if edge.endpoints not in border_endpoints}
         while non_boundary:
             edge = non_boundary.pop()
-            non_boundary.remove(edge.opposite)
             candidates = edge_to_neighbours(edge)
             self.delete(edge)
-            non_boundary.update(edges_with_opposites(
-                    candidate
-                    for candidate in candidates
-                    if candidate.endpoints not in border_endpoints))
+            non_boundary.update(candidate
+                                for candidate in candidates
+                                if candidate.endpoints not in border_endpoints)
 
     def cut(self, holes: Sequence[Contour]) -> None:
         if not holes:
