@@ -27,12 +27,11 @@ class YNode(Node):
 
     def locate(self, point: Point) -> Location:
         point_orientation = self.edge.orientation_with(point)
-        if point_orientation is Orientation.COUNTERCLOCKWISE:
-            return self.above.locate(point)
-        elif point_orientation is Orientation.CLOCKWISE:
-            return self.below.locate(point)
-        else:
-            return Location.BOUNDARY
+        return (self.above.locate(point)
+                if point_orientation is Orientation.COUNTERCLOCKWISE
+                else (self.below.locate(point)
+                      if point_orientation is Orientation.CLOCKWISE
+                      else Location.BOUNDARY))
 
     def search_edge(self, edge: Edge) -> Trapezoid:
         return (self.above
