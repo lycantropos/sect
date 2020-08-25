@@ -42,5 +42,3 @@ class XNode(Node):
             self.left = replacement
         else:
             self.right = replacement
-        current._remove_parent(self)
-        replacement._add_parent(self)

@@ -43,5 +43,3 @@ class YNode(Node):
             self.below = replacement
         else:
             self.above = replacement
-        current._remove_parent(self)
-        replacement._add_parent(self)
