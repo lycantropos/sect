@@ -138,13 +138,13 @@ class EventsQueue:
                       from_left: bool,
                       is_counterclockwise_contour: bool) -> None:
         start, end = edge.start, edge.end
-        interior_on_left = is_counterclockwise_contour
+        interior_to_left = is_counterclockwise_contour
         if start > end:
             start, end = end, start
-            interior_on_left = not interior_on_left
-        start_event = Event(True, start, None, from_left, interior_on_left,
+            interior_to_left = not interior_to_left
+        start_event = Event(True, start, None, from_left, interior_to_left,
                             edge)
-        end_event = Event(False, end, start_event, from_left, interior_on_left,
+        end_event = Event(False, end, start_event, from_left, interior_to_left,
                           edge)
         start_event.complement = end_event
         self._queue.push(start_event)
