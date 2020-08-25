@@ -38,16 +38,13 @@ class Node(ABC):
         """
         Replaces the node with given one in all parents.
         """
-        while self._parents:
-            self._parents[0]._replace_child(self, other)
+        for parent in self._parents:
+            parent._replace_child(self, other)
+            other._add_parent(parent)
+        self._parents.clear()
 
     def _add_parent(self, parent: 'Node') -> None:
-        assert parent is not None, 'Null parent'
-        assert parent is not self, 'Cannot be parent of self'
         self._parents.append(parent)
-
-    def _remove_parent(self, parent: 'Node') -> None:
-        self._parents.remove(parent)
 
     @abstractmethod
     def _replace_child(self, current: 'Node', replacement: 'Node') -> None:
