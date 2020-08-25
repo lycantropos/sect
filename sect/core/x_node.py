@@ -32,10 +32,9 @@ class XNode(Node):
                       else Location.BOUNDARY))
 
     def search_edge(self, edge: Edge) -> Trapezoid:
-        if self.point <= edge.left:
-            return self.right.search_edge(edge)
-        else:
-            return self.left.search_edge(edge)
+        return (self.right
+                if self.point <= edge.left
+                else self.left).search_edge(edge)
 
     def _replace_child(self, current: Node, replacement: Node) -> None:
         if self.left is current:
