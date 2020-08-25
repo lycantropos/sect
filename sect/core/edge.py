@@ -6,16 +6,16 @@ from sect.hints import Point
 
 
 class Edge:
-    __slots__ = 'left', 'right', 'interior_to_the_left'
+    __slots__ = 'left', 'right', 'interior_to_left'
 
     def __init__(self,
                  left: Point,
                  right: Point,
-                 interior_to_the_left: bool) -> None:
+                 interior_to_left: bool) -> None:
         assert left < right, 'Incorrect endpoints order'
         self.left = left
         self.right = right
-        self.interior_to_the_left = interior_to_the_left
+        self.interior_to_left = interior_to_left
 
     __repr__ = generate_repr(__init__)
 
