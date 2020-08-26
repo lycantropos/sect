@@ -95,17 +95,6 @@ def points_to_bounding_box(points: Iterable[Point]) -> BoundingBox:
     return min_x, min_y, max_x, max_y
 
 
-def to_min_max(iterable: Iterable[Domain]) -> Tuple[Domain, Domain]:
-    iterator = iter(iterable)
-    minimum = maximum = next(iterator)
-    for element in iterator:
-        if element < minimum:
-            minimum = element
-        elif maximum < element:
-            maximum = element
-    return minimum, maximum
-
-
 def ceil_log2(number: int) -> int:
     return number.bit_length() - (not (number & (number - 1)))
 
