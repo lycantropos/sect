@@ -12,7 +12,7 @@ class SweepLine:
     __slots__ = '_tree',
 
     def __init__(self) -> None:
-        self._tree = red_black.tree(key=SweepLineKey)
+        self._tree = red_black.set_(key=SweepLineKey)
 
     __repr__ = generate_repr(__init__)
 
