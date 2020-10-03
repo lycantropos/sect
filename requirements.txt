@@ -1,4 +1,4 @@
-decision>=0.1.0
+decision>=0.2.0
 dendroid>=1.0.0
 prioq>=0.1.1
 reprit>=0.2.2
