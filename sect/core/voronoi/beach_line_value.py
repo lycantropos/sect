@@ -14,3 +14,8 @@ class BeachLineValue:
         self.circle_event = circle_event
 
     __repr__ = generate_repr(__init__)
+
+    def deactivate_circle_event(self) -> None:
+        if self.circle_event is not None:
+            self.circle_event.deactivate()
+            self.circle_event = None
