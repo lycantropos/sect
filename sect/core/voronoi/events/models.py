@@ -150,9 +150,8 @@ class CircleEvent:
                 or compare_floats(self.y, float(end_y),
                                   ULPS) is ComparisonResult.MORE)
 
-    def deactivate(self) -> 'CircleEvent':
+    def deactivate(self) -> None:
         self.is_active = False
-        return self
 
 
 Event = TypeVar('Event', CircleEvent, SiteEvent)
