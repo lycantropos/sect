@@ -215,6 +215,3 @@ class Diagram:
 
     def _process_single_site(self, site: SiteEvent) -> None:
         self.cells.append(Cell(site.initial_index, site.source_category))
-
-    def _reserve(self, sites_count: int) -> None:
-        pass
