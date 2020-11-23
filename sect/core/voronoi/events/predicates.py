@@ -21,8 +21,7 @@ def point_point_segment_circle_exists(first_site: SiteEvent,
         first_orientation = to_orientation(first_site.start, second_site.start,
                                            third_site.start)
         second_orientation = to_orientation(first_site.start,
-                                            second_site.start,
-                                            third_site.end)
+                                            second_site.start, third_site.end)
         first_site_start_x, _ = first_site.start
         second_site_start_x, _ = second_site.start
         if segment_index == 1 and second_site_start_x <= first_site_start_x:
