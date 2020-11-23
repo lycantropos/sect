@@ -81,10 +81,9 @@ class SiteEvent:
     def is_vertical(self) -> bool:
         return are_same_vertical_points(self.start, self.end)
 
-    def inverse(self) -> 'SiteEvent':
+    def inverse(self) -> None:
         self.start, self.end, self.is_inverse = (self.end, self.start,
                                                  not self.is_inverse)
-        return self
 
 
 class CircleEvent:
