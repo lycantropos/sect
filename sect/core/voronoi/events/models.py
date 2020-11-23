@@ -1,5 +1,4 @@
-from typing import (Any,
-                    TypeVar)
+from typing import TypeVar
 
 from reprit.base import generate_repr
 
