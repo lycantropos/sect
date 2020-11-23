@@ -161,7 +161,6 @@ class Diagram:
         first_edge = Edge(None, None, None, None, None, is_linear, is_primary)
         self.edges.append(first_edge)
         first_edge.cell = self.cells[first_site_event.sorted_index]
-
         # add a new half-edge
         second_edge = Edge(None, None, None, None, None, is_linear, is_primary)
         self.edges.append(second_edge)
