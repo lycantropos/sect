@@ -66,12 +66,6 @@ class SiteEvent:
                     if isinstance(other, CircleEvent)
                     else NotImplemented)
 
-    @classmethod
-    def from_point(cls, point: Point,
-                   *args: Any,
-                   **kwargs: Any) -> 'SiteEvent':
-        return cls(point, point, *args, **kwargs)
-
     @property
     def comparison_point(self) -> Point:
         return min(self.start, self.end)
