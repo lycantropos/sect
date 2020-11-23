@@ -25,18 +25,15 @@ if TYPE_CHECKING:
 
 
 class Builder:
-    __slots__ = ('index', '_beach_line', '_circle_events', '_end_points',
-                 'site_events', '_site_event_index')
+    __slots__ = ('_beach_line', '_circle_events', '_end_points', 'site_events',
+                 '_site_event_index')
 
-    def __init__(self,
-                 index: int = 0,
-                 site_events: Optional[List[SiteEvent]] = None) -> None:
-        self.index = index
+    def __init__(self, site_events: Optional[List[SiteEvent]] = None) -> None:
+        self.site_events = [] if site_events is None else site_events
+        self._site_event_index = None
         self._beach_line = red_black.Tree.from_components([])
         self._circle_events = PriorityQueue(key=itemgetter(0))
         self._end_points = PriorityQueue(key=itemgetter(0))
-        self.site_events = [] if site_events is None else site_events
-        self._site_event_index = None
 
     __repr__ = generate_repr(__init__)
 
@@ -170,33 +167,21 @@ class Builder:
         self._site_event_index = 0
 
     def insert_point(self, point: Point) -> None:
-        self.site_events.append(SiteEvent.from_point(
-                point,
-                initial_index=self.index,
-                source_category=SourceCategory.SINGLE_POINT))
-        self.index += 1
+        self.site_events.append(SiteEvent(point, point, point,
+                                          SourceCategory.SINGLE_POINT))
 
     def insert_segment(self, segment: Segment) -> None:
         site_events = self.site_events
-        index = self.index
         start, end = segment
-        site_events.append(SiteEvent.from_point(
-                start,
-                initial_index=index,
-                source_category=SourceCategory.SEGMENT_START_POINT))
-        site_events.append(SiteEvent.from_point(
-                end,
-                initial_index=index,
-                source_category=SourceCategory.SEGMENT_END_POINT))
-        site_events.append(
-                SiteEvent(start, end,
-                          source_category=SourceCategory.INITIAL_SEGMENT,
-                          initial_index=index)
-                if start < end
-                else SiteEvent(end, start,
-                               source_category=SourceCategory.REVERSE_SEGMENT,
-                               initial_index=index))
-        self.index += 1
+        site_events.append(SiteEvent(start, start, segment,
+                                     SourceCategory.SEGMENT_START_POINT))
+        site_events.append(SiteEvent(end, end, segment,
+                                     SourceCategory.SEGMENT_END_POINT))
+        site_events.append(SiteEvent(start, end, segment,
+                                     SourceCategory.INITIAL_SEGMENT)
+                           if start < end
+                           else SiteEvent(end, start, segment,
+                                          SourceCategory.REVERSE_SEGMENT))
 
     def process_circle_event(self, output: 'Diagram') -> None:
         circle_event, first_node = self._circle_events.pop()

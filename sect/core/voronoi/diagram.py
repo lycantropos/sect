@@ -132,11 +132,11 @@ class Diagram:
         self.edges.append(second_edge)
         # add the initial cell during the first edge insertion
         if not self.cells:
-            self.cells.append(Cell(first_event.initial_index,
+            self.cells.append(Cell(first_event.source,
                                    first_event.source_category))
         # the second site represents a new site during site event processing,
         # add a new cell to the cell records
-        self.cells.append(Cell(second_event.initial_index,
+        self.cells.append(Cell(second_event.source,
                                second_event.source_category))
         first_edge.cell, second_edge.cell = (self.cells[first_event_index],
                                              self.cells[second_event_index])
@@ -177,7 +177,7 @@ class Diagram:
         return first_edge, second_edge
 
     def _process_single_site(self, site: SiteEvent) -> None:
-        self.cells.append(Cell(site.initial_index, site.source_category))
+        self.cells.append(Cell(site.source, site.source_category))
 
 
 def is_linear_edge(first_event: SiteEvent, second_event: SiteEvent) -> bool:

@@ -7,6 +7,7 @@ from reprit.base import generate_repr
 from .enums import (ComparisonResult,
                     GeometryCategory,
                     SourceCategory)
+from .hints import Source
 from .utils import compare_floats
 
 
@@ -117,13 +118,13 @@ class Edge:
 
 
 class Cell:
-    __slots__ = 'source_index', 'source_category', 'incident_edge'
+    __slots__ = 'source', 'source_category', 'incident_edge'
 
     def __init__(self,
-                 source_index: int,
+                 source: Source,
                  source_category: SourceCategory,
                  incident_edge: Optional[Edge] = None) -> None:
-        self.source_index = source_index
+        self.source = source
         self.source_category = source_category
         self.incident_edge = incident_edge
 

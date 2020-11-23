@@ -6,6 +6,7 @@ from reprit.base import generate_repr
 from sect.core.voronoi.enums import (ComparisonResult,
                                      Orientation,
                                      SourceCategory)
+from sect.core.voronoi.hints import Source
 from sect.core.voronoi.utils import (are_same_vertical_points,
                                      compare_floats,
                                      to_orientation)
@@ -15,23 +16,20 @@ ULPS = 64
 
 
 class SiteEvent:
-    __slots__ = ('start', 'end', 'sorted_index', 'initial_index', 'is_inverse',
-                 'source_category')
+    __slots__ = ('start', 'end', 'source', 'source_category', 'sorted_index',
+                 'is_inverse')
 
     def __init__(self,
                  start: Point,
                  end: Point,
+                 source: Source,
+                 source_category: SourceCategory,
                  sorted_index: int = 0,
-                 initial_index: int = 0,
-                 is_inverse: bool = False,
-                 source_category: SourceCategory = SourceCategory.SINGLE_POINT
-                 ) -> None:
-        self.start = start
-        self.end = end
+                 is_inverse: bool = False) -> None:
+        self.start, self.end = start, end
+        self.source, self.source_category = source, source_category
         self.sorted_index = sorted_index
-        self.initial_index = initial_index
         self.is_inverse = is_inverse
-        self.source_category = source_category
 
     __repr__ = generate_repr(__init__)
 
