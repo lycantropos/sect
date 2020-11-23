@@ -20,7 +20,7 @@ class Diagram:
     def __init__(self,
                  cells: Optional[List[Cell]] = None,
                  edges: Optional[List[Edge]] = None,
-                 vertices: Optional[List[Vertex]] = None):
+                 vertices: Optional[List[Vertex]] = None) -> None:
         self.cells = [] if cells is None else cells
         self.edges = [] if edges is None else edges
         self.vertices = [] if vertices is None else vertices
