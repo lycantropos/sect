@@ -1,7 +1,6 @@
 sect
 ====
 
-[![](https://travis-ci.com/lycantropos/sect.svg?branch=master)](https://travis-ci.com/lycantropos/sect "Travis CI")
 [![](https://dev.azure.com/lycantropos/sect/_apis/build/status/lycantropos.sect?branchName=master)](https://dev.azure.com/lycantropos/sect/_build/latest?definitionId=23&branchName=master "Azure Pipelines")
 [![](https://readthedocs.org/projects/sect/badge/?version=latest)](https://sect.readthedocs.io/en/latest "Documentation")
 [![](https://codecov.io/gh/lycantropos/sect/branch/master/graph/badge.svg)](https://codecov.io/gh/lycantropos/sect "Codecov")
