@@ -6,6 +6,7 @@ from typing import (Callable,
 
 Coordinate = Real
 Point = Tuple[Coordinate, Coordinate]
+Multipoint = Sequence[Point]
 Segment = Tuple[Point, Point]
 Multisegment = Sequence[Segment]
 Triangle = Tuple[Point, Point, Point]

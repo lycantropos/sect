@@ -3,7 +3,9 @@ from typing import Sequence
 
 from .core.location import Location
 from .core.trapezoidal import Graph
+from .core.voronoi.diagram import Diagram
 from .hints import (Contour,
+                    Multipoint,
                     Multisegment,
                     Shuffler)
 
@@ -96,3 +98,17 @@ def polygon_trapezoidal(border: Contour, holes: Sequence[Contour] = (),
     True
     """
     return Graph.from_polygon(border, holes, shuffler)
+
+
+def multipoint_voronoi(multipoint: Multipoint) -> Diagram:
+    return _voronoi(multipoint, ())
+
+
+def _voronoi(multipoint: Multipoint, multisegment: Multisegment) -> Diagram:
+    diagram = Diagram()
+    from sect.core.voronoi.point import Point
+    from sect.core.voronoi.segment import Segment
+    diagram.construct([Point(x, y) for x, y in multipoint],
+                      [Segment(Point(start_x, start_y), Point(end_x, end_y))
+                       for (start_x, start_y), (end_x, end_y) in multisegment])
+    return diagram
