@@ -5,8 +5,8 @@ services:
     build:
       context: .
       args:
-        - PYTHON_IMAGE=${CPYTHON_IMAGE_NAME}
-        - PYTHON_IMAGE_VERSION=${CPYTHON_IMAGE_VERSION}
+        - IMAGE_NAME=${CPYTHON_IMAGE_NAME}
+        - IMAGE_VERSION=${CPYTHON_IMAGE_VERSION}
     image: lycantropos/sect-cpython:0.4.1
     volumes:
       - ./sect/:/opt/sect/sect/
