@@ -32,7 +32,8 @@ def multisegment_trapezoidal(multisegment: Multisegment,
         https://doi.org/10.1016%2F0925-7721%2891%2990012-4
         https://www.cs.princeton.edu/courses/archive/fall05/cos528/handouts/A%20Simple%20and%20fast.pdf
 
-    :param multisegment: sequence of non-crossing & non-overlapping segments.
+    :param multisegment:
+        non-empty sequence of non-crossing & non-overlapping segments.
     :param shuffler:
         function which mutates sequence by shuffling its elements,
         required for randomization.
