@@ -169,16 +169,14 @@ class Builder:
             event.sorted_index = index
         self._site_event_index = 0
 
-    def insert_point(self, point: Point) -> int:
-        index = self.index
+    def insert_point(self, point: Point) -> None:
         self.site_events.append(SiteEvent.from_point(
                 point,
-                initial_index=index,
+                initial_index=self.index,
                 source_category=SourceCategory.SINGLE_POINT))
         self.index += 1
-        return index
 
-    def insert_segment(self, segment: Segment) -> int:
+    def insert_segment(self, segment: Segment) -> None:
         site_events = self.site_events
         index = self.index
         start, end = segment
@@ -199,7 +197,6 @@ class Builder:
                                source_category=SourceCategory.REVERSE_SEGMENT,
                                initial_index=index))
         self.index += 1
-        return index
 
     def process_circle_event(self, output: 'Diagram') -> None:
         circle_event, first_node = self._circle_events.pop()
