@@ -12,19 +12,19 @@ from tests.utils import point_in_multisegment
 from . import strategies
 
 
-@given(strategies.multisegments)
+@given(strategies.non_empty_multisegments)
 def test_basic(multisegment: Multisegment) -> None:
     assert isinstance(multisegment_trapezoidal(multisegment), Graph)
 
 
-@given(strategies.multisegments)
+@given(strategies.non_empty_multisegments)
 def test_height(multisegment: Multisegment) -> None:
     result = multisegment_trapezoidal(multisegment)
 
     assert 0 < result.height <= 2 * (len(multisegment) + 2)
 
 
-@given(strategies.multisegments_with_points)
+@given(strategies.non_empty_multisegments_with_points)
 def test_contains(multisegment_with_point: Tuple[Multisegment, Point]) -> None:
     multisegment, point = multisegment_with_point
 
@@ -34,7 +34,7 @@ def test_contains(multisegment_with_point: Tuple[Multisegment, Point]) -> None:
                                  is Relation.COMPONENT)
 
 
-@given(strategies.multisegments_with_points)
+@given(strategies.non_empty_multisegments_with_points)
 def test_locate(multisegment_with_point: Tuple[Multisegment, Point]) -> None:
     multisegment, point = multisegment_with_point
 

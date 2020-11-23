@@ -11,19 +11,21 @@ from sect.hints import (Contour,
 from tests.strategies import coordinates_strategies
 from tests.utils import Strategy
 
-to_multisegments = partial(planar.multisegments,
-                           min_size=1)
-multisegments = coordinates_strategies.flatmap(to_multisegments)
+to_non_empty_multisegments = partial(planar.multisegments,
+                                     min_size=1)
+non_empty_multisegments = (coordinates_strategies
+                           .flatmap(to_non_empty_multisegments))
 
 
-def to_multisegments_with_points(coordinates: Strategy[Coordinate]
-                                 ) -> Strategy[Tuple[Multisegment, Point]]:
-    return strategies.tuples(to_multisegments(coordinates),
+def to_non_empty_multisegments_with_points(coordinates: Strategy[Coordinate]
+                                           ) -> Strategy[Tuple[Multisegment,
+                                                               Point]]:
+    return strategies.tuples(to_non_empty_multisegments(coordinates),
                              planar.points(coordinates))
 
 
-multisegments_with_points = (coordinates_strategies
-                             .flatmap(to_multisegments_with_points))
+non_empty_multisegments_with_points = (
+    coordinates_strategies.flatmap(to_non_empty_multisegments_with_points))
 polygons = coordinates_strategies.flatmap(planar.polygons)
 
 
