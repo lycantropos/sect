@@ -94,8 +94,7 @@ class CircleEvent:
                  center_y: float,
                  lower_x: float,
                  is_active: bool = True) -> None:
-        self.center_x = center_x
-        self.center_y = center_y
+        self.center_x, self.center_y = center_x, center_y
         self.lower_x = lower_x
         self.is_active = is_active
 
