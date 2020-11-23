@@ -27,25 +27,6 @@ class Diagram:
 
     __repr__ = generate_repr(__init__)
 
-    @staticmethod
-    def is_linear_edge(first_event: SiteEvent,
-                       second_event: SiteEvent) -> bool:
-        return (not Diagram.is_primary_edge(first_event, second_event)
-                or first_event.is_segment is second_event.is_segment)
-
-    @staticmethod
-    def is_primary_edge(first_event: SiteEvent,
-                        second_event: SiteEvent) -> bool:
-        first_event_is_segment, second_event_is_segment = (
-            first_event.is_segment, second_event.is_segment)
-        if first_event_is_segment and not second_event_is_segment:
-            return (first_event.start != second_event.start
-                    and first_event.end != second_event.start)
-        elif not first_event_is_segment and second_event_is_segment:
-            return (second_event.start != first_event.start
-                    and second_event.end != first_event.start)
-        return True
-
     def clear(self) -> None:
         self.cells.clear()
         self.edges.clear()
@@ -141,8 +122,8 @@ class Diagram:
                          second_event: SiteEvent) -> Tuple[Edge, Edge]:
         first_event_index = first_event.sorted_index
         second_event_index = second_event.sorted_index
-        is_linear = self.is_linear_edge(first_event, second_event)
-        is_primary = self.is_primary_edge(first_event, second_event)
+        is_linear = is_linear_edge(first_event, second_event)
+        is_primary = is_primary_edge(first_event, second_event)
         # create a new half-edge that belongs to the first site
         first_edge = Edge(None, None, None, None, None, is_linear, is_primary)
         self.edges.append(first_edge)
@@ -174,9 +155,8 @@ class Diagram:
         self.vertices.append(new_vertex)
         # update vertex pointers of the old edges
         first_bisector.start = second_bisector.start = new_vertex
-        is_linear = self.is_linear_edge(first_site_event, second_site_event)
-        is_primary = self.is_primary_edge(first_site_event,
-                                          second_site_event)
+        is_linear = is_linear_edge(first_site_event, second_site_event)
+        is_primary = is_primary_edge(first_site_event, second_site_event)
         # add a new half-edge
         first_edge = Edge(None, None, None, None, None, is_linear, is_primary)
         self.edges.append(first_edge)
@@ -199,3 +179,20 @@ class Diagram:
 
     def _process_single_site(self, site: SiteEvent) -> None:
         self.cells.append(Cell(site.initial_index, site.source_category))
+
+
+def is_linear_edge(first_event: SiteEvent, second_event: SiteEvent) -> bool:
+    return (not is_primary_edge(first_event, second_event)
+            or first_event.is_segment is second_event.is_segment)
+
+
+def is_primary_edge(first_event: SiteEvent, second_event: SiteEvent) -> bool:
+    first_event_is_segment, second_event_is_segment = (
+        first_event.is_segment, second_event.is_segment)
+    if first_event_is_segment and not second_event_is_segment:
+        return (first_event.start != second_event.start
+                and first_event.end != second_event.start)
+    elif not first_event_is_segment and second_event_is_segment:
+        return (second_event.start != first_event.start
+                and second_event.end != first_event.start)
+    return True
