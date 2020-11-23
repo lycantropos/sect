@@ -81,7 +81,7 @@ class Diagram:
             edge = self.edges[edge_index]
             start, end = edge.start, edge.end
             if start is not None and end is not None and start == end:
-                self.remove_edge(edge)
+                edge.disconnect()
             else:
                 if edge_index != last_edge_index:
                     self.edges[last_edge_index] = edge

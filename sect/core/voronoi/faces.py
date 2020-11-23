@@ -100,6 +100,21 @@ class Edge:
     def _rot_prev(self):
         return self.twin.next
 
+    def disconnect(self) -> None:
+        vertex = self.start
+        cursor = self.twin.rot_next
+        while cursor is not self.twin:
+            cursor.start = vertex
+            cursor = cursor.rot_next
+        twin = self.twin
+        edge_rot_prev, edge_rot_next = self.rot_prev, self.rot_next
+        twin_rot_prev, twin_rot_next = twin.rot_prev, twin.rot_next
+        # update prev/next pointers for the incident edges
+        edge_rot_next.twin.next = twin_rot_prev
+        twin_rot_prev.prev = edge_rot_next.twin
+        edge_rot_prev.prev = twin_rot_next.twin
+        twin_rot_next.twin.next = edge_rot_prev
+
 
 class Cell:
     __slots__ = 'source_index', 'source_category', 'incident_edge'
