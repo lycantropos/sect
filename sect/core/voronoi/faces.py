@@ -18,7 +18,7 @@ class Vertex:
         self.x, self.y = x, y
         self.incident_edge = None  # type: Optional[Edge]
 
-    __repr__ = recursive_repr()(generate_repr(__init__))
+    __repr__ = generate_repr(__init__)
 
     def __eq__(self, other: 'Vertex',
                *,
