@@ -4,13 +4,13 @@ from typing import (List,
 
 from reprit.base import generate_repr
 
+from sect.hints import Point
 from .builder import Builder
 from .events import (CircleEvent,
                      SiteEvent)
 from .faces import (Cell,
                     Edge,
                     Vertex)
-from .point import Point
 from .segment import Segment
 
 

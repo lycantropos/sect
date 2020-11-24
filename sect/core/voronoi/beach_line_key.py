@@ -4,10 +4,10 @@ from typing import Tuple
 
 from reprit.base import generate_repr
 
+from sect.hints import Point
 from .enums import (ComparisonResult,
                     Orientation)
 from .events import SiteEvent
-from .point import Point
 from .utils import (compare_floats,
                     deltas_to_orientation,
                     robust_cross_product,

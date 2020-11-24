@@ -9,9 +9,9 @@ from math import (copysign,
 from typing import (List,
                     TypeVar)
 
+from sect.hints import Point
 from .enums import (ComparisonResult,
                     Orientation)
-from .point import Point
 
 Domain = TypeVar('Domain')
 

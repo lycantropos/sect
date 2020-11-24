@@ -1,6 +1,6 @@
 from reprit.base import generate_repr
 
-from .point import Point
+from sect.hints import Point
 
 
 class Segment:
