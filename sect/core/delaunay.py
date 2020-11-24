@@ -39,8 +39,7 @@ class Triangulation:
     __slots__ = 'left_edge', 'right_edge', '_triangular_holes_vertices'
 
     def __init__(self, left_edge: QuadEdge, right_edge: QuadEdge) -> None:
-        self.left_edge = left_edge
-        self.right_edge = right_edge
+        self.left_edge, self.right_edge = left_edge, right_edge
         self._triangular_holes_vertices = set()  # type: Set[FrozenSet[Point]]
 
     __repr__ = generate_repr(__init__)
