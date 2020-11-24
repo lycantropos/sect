@@ -80,81 +80,17 @@ class Diagram:
             bisector_node.value.circle_event = event
 
     def _build(self) -> None:
-        edge_index = last_edge_index = 0
-        while edge_index < len(self.edges):
-            edge = self.edges[edge_index]
-            start, end = edge.start, edge.end
-            if start is not None and end is not None and start == end:
-                edge.disconnect()
-            else:
-                if edge_index != last_edge_index:
-                    self.edges[last_edge_index] = edge
-                    next_edge = self.edges[last_edge_index + 1] = (
-                        self.edges[edge_index + 1])
-                    edge.twin, next_edge.twin = next_edge, edge
-                    if edge.prev is not None:
-                        edge.prev.next, next_edge.next.prev = edge, next_edge
-                    if next_edge.prev is not None:
-                        edge.next.prev, next_edge.prev.next = edge, next_edge
-                last_edge_index += 2
-            edge_index += 2
-        del self.edges[last_edge_index:]
-        # set up incident edge pointers for cells and vertices
+        self._remove_degenerate_edges()
         for edge in self.edges:
-            edge.cell.incident_edge = edge
-            if edge.start is not None:
-                edge.start.incident_edge = edge
-        # remove degenerate vertices
-        last_vertex_index = 0
-        for index, vertex in enumerate(self.vertices):
-            if vertex.incident_edge is not None:
-                if index != last_vertex_index:
-                    self.vertices[last_vertex_index] = vertex
-                    cursor = vertex.incident_edge
-                    while True:
-                        cursor.start = vertex
-                        cursor = cursor.rot_next
-                        if cursor is vertex.incident_edge:
-                            break
-                last_vertex_index += 1
-        del self.vertices[last_vertex_index:]
+            edge.set_as_incident()
+        self._remove_degenerate_vertices()
         # set up next/prev pointers for infinite edges
-        if not self.vertices:
-            if self.edges:
-                # update prev/next pointers for the line edges
-                edge_index = 0
-                edge = self.edges[edge_index]
-                edge.prev = edge.next = edge
-                edge_index += 1
-                edge = self.edges[edge_index]
-                edge_index += 1
-                while edge_index < len(self.edges):
-                    next_edge = self.edges[edge_index]
-                    edge_index += 1
-                    edge.prev = edge.next = next_edge
-                    next_edge.prev = next_edge.next = edge
-                    edge = self.edges[edge_index]
-                    edge_index += 1
-                edge.prev = edge.next = edge
-        else:
+        if self.vertices:
             # update prev/next pointers for the ray edges
-            for cell in self.cells:
-                if cell.is_degenerate:
-                    continue
-                # move to the previous edge while it is possible
-                # in the clockwise direction
-                left_edge = cell.incident_edge
-                while left_edge.prev is not None:
-                    left_edge = left_edge.prev
-                    # terminate if this is not a boundary cell
-                    if left_edge is cell.incident_edge:
-                        break
-                if left_edge.prev is not None:
-                    continue
-                right_edge = cell.incident_edge
-                while right_edge.next is not None:
-                    right_edge = right_edge.next
-                left_edge.prev, right_edge.next = right_edge, left_edge
+            self._update_ray_edges()
+        elif self.edges:
+            # update prev/next pointers for the line edges
+            self._update_line_edges()
 
     def _construct(self) -> None:
         self._init_sites_queue()
@@ -434,6 +370,77 @@ class Diagram:
                                             third_site, right_node)
                 right_node = new_node
             self._site_event_index += 1
+
+    def _remove_degenerate_edges(self) -> None:
+        edge_index = first_degenerate_edge_index = 0
+        while edge_index < len(self.edges):
+            edge = self.edges[edge_index]
+            if edge.is_degenerate:
+                edge.disconnect()
+            else:
+                if edge_index != first_degenerate_edge_index:
+                    self.edges[first_degenerate_edge_index] = edge
+                    next_edge = self.edges[first_degenerate_edge_index + 1] = (
+                        self.edges[edge_index + 1])
+                    edge.twin, next_edge.twin = next_edge, edge
+                    if edge.prev is not None:
+                        edge.prev.next, next_edge.next.prev = edge, next_edge
+                    if next_edge.prev is not None:
+                        edge.next.prev, next_edge.prev.next = edge, next_edge
+                first_degenerate_edge_index += 2
+            edge_index += 2
+        del self.edges[first_degenerate_edge_index:]
+
+    def _remove_degenerate_vertices(self) -> None:
+        first_degenerate_vertex_index = 0
+        for index, vertex in enumerate(self.vertices):
+            if vertex.is_degenerate:
+                continue
+            if index != first_degenerate_vertex_index:
+                self.vertices[first_degenerate_vertex_index] = vertex
+                cursor = vertex.incident_edge
+                while True:
+                    cursor.start = vertex
+                    cursor = cursor.rot_next
+                    if cursor is vertex.incident_edge:
+                        break
+            first_degenerate_vertex_index += 1
+        del self.vertices[first_degenerate_vertex_index:]
+
+    def _update_line_edges(self) -> None:
+        edge_index = 0
+        edge = self.edges[edge_index]
+        edge.prev = edge.next = edge
+        edge_index += 1
+        edge = self.edges[edge_index]
+        edge_index += 1
+        while edge_index < len(self.edges):
+            next_edge = self.edges[edge_index]
+            edge_index += 1
+            edge.prev = edge.next = next_edge
+            next_edge.prev = next_edge.next = edge
+            edge = self.edges[edge_index]
+            edge_index += 1
+        edge.prev = edge.next = edge
+
+    def _update_ray_edges(self) -> None:
+        for cell in self.cells:
+            if cell.is_degenerate:
+                continue
+            # move to the previous edge while it is possible
+            # in the clockwise direction
+            left_edge = cell.incident_edge
+            while left_edge.prev is not None:
+                left_edge = left_edge.prev
+                # terminate if this is not a boundary cell
+                if left_edge is cell.incident_edge:
+                    break
+            if left_edge.prev is not None:
+                continue
+            right_edge = cell.incident_edge
+            while right_edge.next is not None:
+                right_edge = right_edge.next
+            left_edge.prev, right_edge.next = right_edge, left_edge
 
 
 def is_linear_edge(first_event: SiteEvent, second_event: SiteEvent) -> bool:
