@@ -6,8 +6,8 @@ from reprit.base import generate_repr
 from sect.core.voronoi.enums import (ComparisonResult,
                                      Orientation,
                                      SourceCategory)
-from sect.core.voronoi.point import are_vertical_endpoints
-from sect.core.voronoi.utils import (compare_floats,
+from sect.core.voronoi.utils import (are_vertical_endpoints,
+                                     compare_floats,
                                      to_orientation)
 from sect.hints import Point
 

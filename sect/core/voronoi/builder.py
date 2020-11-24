@@ -16,9 +16,9 @@ from .enums import SourceCategory
 from .events import (CircleEvent,
                      SiteEvent)
 from .events.computers import compute_circle_event
-from .point import are_vertical_endpoints
 from .segment import Segment
-from .utils import to_unique_just_seen
+from .utils import (are_vertical_endpoints,
+                    to_unique_just_seen)
 
 if TYPE_CHECKING:
     from .diagram import Diagram

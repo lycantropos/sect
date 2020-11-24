@@ -16,6 +16,12 @@ from .enums import (ComparisonResult,
 Domain = TypeVar('Domain')
 
 
+def are_vertical_endpoints(start: Point, end: Point) -> bool:
+    start_x, _ = start
+    end_x, _ = end
+    return start_x == end_x
+
+
 def compare_floats(left: float, right: float, max_ulps: int
                    ) -> ComparisonResult:
     left_uint, right_uint = _float_to_uint(left), _float_to_uint(right)
