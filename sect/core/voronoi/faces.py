@@ -48,11 +48,9 @@ class Edge:
                  is_primary: bool) -> None:
         self.start = start
         self.twin = twin
-        self.prev = prev
-        self.next = next_
+        self.prev, self.next = prev, next_
         self.cell = cell
-        self.is_linear = is_linear
-        self.is_primary = is_primary
+        self.is_linear, self.is_primary = is_linear, is_primary
 
     __repr__ = recursive_repr()(generate_repr(__init__,
                                               field_seeker=seekers.complex_))
