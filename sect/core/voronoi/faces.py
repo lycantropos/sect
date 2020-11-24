@@ -90,11 +90,11 @@ class Edge:
         return self.twin.start
 
     @property
-    def _rot_next(self):
+    def _rot_next(self) -> Optional['Edge']:
         return self.prev.twin
 
     @property
-    def _rot_prev(self):
+    def _rot_prev(self) -> Optional['Edge']:
         return self.twin.next
 
     def disconnect(self) -> None:
