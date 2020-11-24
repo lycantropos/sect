@@ -15,6 +15,10 @@ class Point:
                 if isinstance(other, Point)
                 else NotImplemented)
 
+    def __iter__(self):
+        yield self.x
+        yield self.y
+
     def __lt__(self, other: 'Point') -> bool:
         return ((self.x, self.y) < (other.x, other.y)
                 if isinstance(other, Point)
