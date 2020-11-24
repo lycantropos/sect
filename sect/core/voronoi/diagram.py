@@ -372,8 +372,8 @@ class Diagram:
             self._site_event_index += 1
 
     def _remove_degenerate_edges(self) -> None:
-        edge_index = first_degenerate_edge_index = 0
-        while edge_index < len(self.edges):
+        first_degenerate_edge_index = 0
+        for edge_index in range(0, len(self.edges), 2):
             edge = self.edges[edge_index]
             if edge.is_degenerate:
                 edge.disconnect()
@@ -388,7 +388,6 @@ class Diagram:
                     if next_edge.prev is not None:
                         edge.next.prev, next_edge.prev.next = edge, next_edge
                 first_degenerate_edge_index += 2
-            edge_index += 2
         del self.edges[first_degenerate_edge_index:]
 
     def _remove_degenerate_vertices(self) -> None:
