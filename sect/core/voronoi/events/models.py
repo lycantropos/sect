@@ -42,25 +42,28 @@ class SiteEvent:
 
     def __lt__(self, other: 'Event') -> bool:
         if isinstance(other, SiteEvent):
-            if self.start.x != other.start.x:
-                return self.start.x < other.start.x
+            start_x, start_y = self.start
+            other_start_x, other_start_y = other.start
+            if start_x != other_start_x:
+                return start_x < other_start_x
             elif not self.is_segment:
                 if not other.is_segment:
-                    return self.start.y < other.start.y
+                    return start_y < other_start_y
                 elif other.is_vertical:
-                    return self.start.y <= other.start.y
+                    return start_y <= other_start_y
                 return True
             elif other.is_vertical:
-                return self.is_vertical and self.start.y < other.start.y
+                return self.is_vertical and start_y < other_start_y
             elif self.is_vertical:
                 return True
-            elif self.start.y != other.start.y:
-                return self.start.y < other.start.y
+            elif start_y != other_start_y:
+                return start_y < other_start_y
             else:
                 return (to_orientation(self.end, self.start, other.end)
                         is Orientation.LEFT)
         else:
-            return (compare_floats(float(self.start.x), float(other.lower_x),
+            start_x, _ = self.start
+            return (compare_floats(float(start_x), float(other.lower_x),
                                    ULPS) is ComparisonResult.LESS
                     if isinstance(other, CircleEvent)
                     else NotImplemented)
