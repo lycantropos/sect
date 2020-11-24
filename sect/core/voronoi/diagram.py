@@ -56,7 +56,6 @@ class Diagram:
         twin = edge.twin
         edge_rot_prev, edge_rot_next = edge.rot_prev, edge.rot_next
         twin_rot_prev, twin_rot_next = twin.rot_prev, twin.rot_next
-
         # update prev/next pointers for the incident edges
         edge_rot_next.twin.next = twin_rot_prev
         twin_rot_prev.prev = edge_rot_next.twin
