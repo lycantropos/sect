@@ -112,6 +112,11 @@ class Edge:
         edge_rot_prev.prev = twin_rot_next.twin
         twin_rot_next.twin.next = edge_rot_prev
 
+    def set_as_incident(self) -> None:
+        self.cell.incident_edge = self
+        if self.start is not None:
+            self.start.incident_edge = self
+
 
 class Cell:
     __slots__ = 'source', 'source_category', 'incident_edge'
