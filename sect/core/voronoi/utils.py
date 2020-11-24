@@ -79,10 +79,13 @@ def safe_sqrt(value: float) -> float:
 def to_orientation(vertex: Point,
                    first_ray_point: Point,
                    second_ray_point: Point) -> Orientation:
-    return deltas_to_orientation(first_ray_point.x - vertex.x,
-                                 first_ray_point.y - vertex.y,
-                                 second_ray_point.x - vertex.x,
-                                 second_ray_point.y - vertex.y)
+    vertex_x, vertex_y = vertex
+    first_ray_point_x, first_ray_point_y = first_ray_point
+    second_ray_point_x, second_ray_point_y = second_ray_point
+    return deltas_to_orientation(first_ray_point_x - vertex_x,
+                                 first_ray_point_y - vertex_y,
+                                 second_ray_point_x - vertex_x,
+                                 second_ray_point_y - vertex_y)
 
 
 def to_sign(value: float) -> int:
