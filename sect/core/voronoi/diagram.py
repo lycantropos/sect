@@ -226,23 +226,20 @@ class Diagram:
         first_bisector.start = second_bisector.start = new_vertex
         is_linear = is_linear_edge(first_site_event, second_site_event)
         is_primary = is_primary_edge(first_site_event, second_site_event)
-        # add a new half-edge
-        first_edge = Edge(None, None, None, None, None, is_linear, is_primary)
+        first_edge = Edge(None, None, None, first_bisector,
+                          self.cells[first_site_event.sorted_index],
+                          is_linear, is_primary)
+        second_edge = Edge(new_vertex, first_edge, second_bisector.twin, None,
+                           self.cells[second_site_event.sorted_index],
+                           is_linear, is_primary)
+        first_edge.twin = second_edge
         self.edges.append(first_edge)
-        first_edge.cell = self.cells[first_site_event.sorted_index]
-        # add a new half-edge
-        second_edge = Edge(None, None, None, None, None, is_linear, is_primary)
         self.edges.append(second_edge)
-        second_edge.cell = self.cells[second_site_event.sorted_index]
-        first_edge.twin, second_edge.twin = second_edge, first_edge
-        second_edge.start = new_vertex
         # update Voronoi prev/next pointers
         first_bisector.prev = first_edge
-        first_edge.next = first_bisector
         first_bisector.twin.next = second_bisector
         second_bisector.prev = first_bisector.twin
         second_bisector.twin.next = second_edge
-        second_edge.prev = second_bisector.twin
         return first_edge, second_edge
 
     def _insert_point(self, point: Point) -> None:
