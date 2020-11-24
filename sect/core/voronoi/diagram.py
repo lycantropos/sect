@@ -187,29 +187,27 @@ class Diagram:
         self._site_event_index = 0
 
     def _insert_new_edge(self,
-                         first_event: SiteEvent,
-                         second_event: SiteEvent) -> Tuple[Edge, Edge]:
-        first_event_index = first_event.sorted_index
-        second_event_index = second_event.sorted_index
-        is_linear = is_linear_edge(first_event, second_event)
-        is_primary = is_primary_edge(first_event, second_event)
-        # create a new half-edge that belongs to the first site
-        first_edge = Edge(None, None, None, None, None, is_linear, is_primary)
-        self.edges.append(first_edge)
-        # create a new half-edge that belongs to the second site
-        second_edge = Edge(None, None, None, None, None, is_linear, is_primary)
-        self.edges.append(second_edge)
-        # add the initial cell during the first edge insertion
+                         first_site: SiteEvent,
+                         second_site: SiteEvent) -> Tuple[Edge, Edge]:
         if not self.cells:
-            self.cells.append(Cell(first_event.source,
-                                   first_event.source_category))
+            self.cells.append(Cell(first_site.source,
+                                   first_site.source_category))
         # the second site represents a new site during site event processing,
         # add a new cell to the cell records
-        self.cells.append(Cell(second_event.source,
-                               second_event.source_category))
-        first_edge.cell, second_edge.cell = (self.cells[first_event_index],
-                                             self.cells[second_event_index])
-        first_edge.twin, second_edge.twin = second_edge, first_edge
+        self.cells.append(Cell(second_site.source,
+                               second_site.source_category))
+        is_linear = is_linear_edge(first_site, second_site)
+        is_primary = is_primary_edge(first_site, second_site)
+        first_edge = Edge(None, None, None, None,
+                          self.cells[first_site.sorted_index], is_linear,
+                          is_primary)
+        second_edge = Edge(None, first_edge, None, None,
+                           self.cells[second_site.sorted_index], is_linear,
+                           is_primary)
+        first_edge.twin = second_edge
+        self.edges.append(first_edge)
+        self.edges.append(second_edge)
+        # add the initial cell during the first edge insertion
         return first_edge, second_edge
 
     def _insert_new_edge_from_intersection(self,
