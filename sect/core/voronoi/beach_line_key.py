@@ -140,15 +140,17 @@ def horizontal_goes_through_right_arc_first(left_site: SiteEvent,
 def point_point_horizontal_goes_through_right_arc_first(left_site: SiteEvent,
                                                         right_site: SiteEvent,
                                                         point: Point) -> bool:
-    left_point, right_point = left_site.start, right_site.start
-    if left_point.x > right_point.x:
-        if point.y <= left_point.y:
+    left_x, left_y = left_site.start
+    right_x, right_y = right_site.start
+    _, y = point
+    if right_x < left_x:
+        if y <= left_y:
             return False
-    elif left_point.x < right_point.x:
-        if point.y >= right_point.y:
+    elif left_x < right_x:
+        if right_y <= y:
             return True
     else:
-        return left_point.y + right_point.y < 2 * point.y
+        return left_y + right_y < 2 * y
     distance_from_left = distance_to_point_arc(left_site, point)
     distance_from_right = distance_to_point_arc(right_site, point)
     # undefined ulp range is equal to 3EPS + 3EPS <= 6ULP
