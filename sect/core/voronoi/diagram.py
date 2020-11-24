@@ -46,22 +46,6 @@ class Diagram:
                     and second_event.end != first_event.start)
         return True
 
-    @staticmethod
-    def remove_edge(edge: Edge) -> None:
-        vertex = edge.start
-        cursor = edge.twin.rot_next
-        while cursor is not edge.twin:
-            cursor.start = vertex
-            cursor = cursor.rot_next
-        twin = edge.twin
-        edge_rot_prev, edge_rot_next = edge.rot_prev, edge.rot_next
-        twin_rot_prev, twin_rot_next = twin.rot_prev, twin.rot_next
-        # update prev/next pointers for the incident edges
-        edge_rot_next.twin.next = twin_rot_prev
-        twin_rot_prev.prev = edge_rot_next.twin
-        edge_rot_prev.prev = twin_rot_next.twin
-        twin_rot_next.twin.next = edge_rot_prev
-
     def clear(self) -> None:
         self.cells.clear()
         self.edges.clear()
