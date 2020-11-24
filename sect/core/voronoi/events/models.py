@@ -6,7 +6,7 @@ from reprit.base import generate_repr
 from sect.core.voronoi.enums import (ComparisonResult,
                                      Orientation,
                                      SourceCategory)
-from sect.core.voronoi.utils import (are_vertical_endpoints,
+from sect.core.voronoi.utils import (are_same_vertical_points,
                                      compare_floats,
                                      to_orientation)
 from sect.hints import Point
@@ -88,7 +88,7 @@ class SiteEvent:
 
     @property
     def is_vertical(self) -> bool:
-        return are_vertical_endpoints(self.start, self.end)
+        return are_same_vertical_points(self.start, self.end)
 
     def inverse(self) -> 'SiteEvent':
         self.start, self.end, self.is_inverse = (self.end, self.start,

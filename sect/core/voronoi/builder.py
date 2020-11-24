@@ -17,7 +17,7 @@ from .enums import SourceCategory
 from .events import (CircleEvent,
                      SiteEvent)
 from .events.computers import compute_circle_event
-from .utils import (are_vertical_endpoints,
+from .utils import (are_same_vertical_points,
                     to_unique_just_seen)
 
 if TYPE_CHECKING:
@@ -104,8 +104,8 @@ class Builder:
         else:
             skip = 0
             while (self._site_event_index < len(self.site_events)
-                   and are_vertical_endpoints(self.site_event.start,
-                                              self.site_events[0].start)
+                   and are_same_vertical_points(self.site_event.start,
+                                                self.site_events[0].start)
                    and self.site_event.is_vertical):
                 self._site_event_index += 1
                 skip += 1
