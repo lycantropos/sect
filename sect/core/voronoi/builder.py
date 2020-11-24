@@ -32,7 +32,7 @@ class Builder:
                  index: int = 0,
                  site_events: Optional[List[SiteEvent]] = None) -> None:
         self.index = index
-        self._beach_line = red_black.map_()
+        self._beach_line = red_black.Tree.from_components([])
         self._circle_events = PriorityQueue(key=itemgetter(0))
         self._end_points = PriorityQueue(key=itemgetter(0))
         self.site_events = [] if site_events is None else site_events
@@ -42,7 +42,7 @@ class Builder:
 
     @property
     def beach_line(self) -> List[Tuple[BeachLineKey, BeachLineValue]]:
-        return list(self._beach_line.items())
+        return [node.item for node in self._beach_line]
 
     @property
     def site_event(self) -> SiteEvent:
@@ -55,13 +55,13 @@ class Builder:
                 else self._site_event_index)
 
     def activate_circle_event(self,
-                              site1: SiteEvent,
-                              site2: SiteEvent,
-                              site3: SiteEvent,
-                              bisector_node: red_black.Node):
+                              first_site: SiteEvent,
+                              second_site: SiteEvent,
+                              third_site: SiteEvent,
+                              bisector_node: red_black.Node) -> None:
         event = CircleEvent(0., 0., 0.)
         # check if the three input sites create a circle event
-        if compute_circle_event(event, site1, site2, site3):
+        if compute_circle_event(event, first_site, second_site, third_site):
             # add the new circle event to the circle events queue;
             # update bisector's circle event iterator to point
             # to the new circle event in the circle event queue
@@ -118,17 +118,16 @@ class Builder:
                 self.init_beach_line_collinear_sites(diagram)
 
     def init_beach_line_collinear_sites(self, diagram: 'Diagram') -> None:
-        first_index = 0
-        second_index = 1
+        first_index, second_index = 0, 1
         while second_index != self.site_event_index:
             # create a new beach line node
-            first_site = self.site_events[first_index]
-            second_site = self.site_events[second_index]
+            first_site, second_site = (self.site_events[first_index],
+                                       self.site_events[second_index])
             new_node = BeachLineKey(first_site, second_site)
             # update the diagram
             edge, _ = diagram._insert_new_edge(first_site, second_site)
             # insert a new bisector into the beach line
-            self._beach_line[new_node] = BeachLineValue(edge)
+            self._beach_line.insert(new_node, BeachLineValue(edge))
             first_index += 1
             second_index += 1
 
@@ -140,30 +139,29 @@ class Builder:
         self._site_event_index += 1
 
     def insert_new_arc(self,
-                       site_arc1: SiteEvent,
-                       site_arc2: SiteEvent,
+                       first_arc_site: SiteEvent,
+                       second_arc_site: SiteEvent,
                        site_event: SiteEvent,
                        output: 'Diagram') -> red_black.Node:
         # create two new bisectors with opposite directions
-        new_left_node = BeachLineKey(site_arc1, site_event)
-        new_right_node = BeachLineKey(site_event, site_arc2)
+        new_left_node = BeachLineKey(first_arc_site, site_event)
+        new_right_node = BeachLineKey(site_event, second_arc_site)
         # set correct orientation for the first site of the second node
         if site_event.is_segment:
             new_right_node.left_site.inverse()
         # update the output
-        edges = output._insert_new_edge(site_arc2, site_event)
-        self._beach_line[new_right_node] = BeachLineValue(edges[1])
+        edges = output._insert_new_edge(second_arc_site, site_event)
+        self._beach_line.insert(new_right_node, BeachLineValue(edges[1]))
         if site_event.is_segment:
             # update the beach line with temporary bisector,
             # that will # disappear after processing site event
             # corresponding to the second endpoint of the segment site
             new_node = BeachLineKey(site_event, site_event)
             new_node.right_site.inverse()
-            node = self._beach_line.tree.insert(new_node, BeachLineValue(None))
+            node = self._beach_line.insert(new_node, BeachLineValue(None))
             # update the data structure that holds temporary bisectors
             self._end_points.push((site_event.end, node))
-        return self._beach_line.tree.insert(new_left_node,
-                                            BeachLineValue(edges[0]))
+        return self._beach_line.insert(new_left_node, BeachLineValue(edges[0]))
 
     def init_sites_queue(self) -> None:
         self.site_events.sort()
@@ -207,29 +205,30 @@ class Builder:
     def process_circle_event(self, output: 'Diagram') -> None:
         circle_event, first_node = self._circle_events.pop()
         last_node = first_node
-        site3 = copy(first_node.key.right_site)
-        bisector2 = first_node.value.edge
-        first_node = self._beach_line.tree.predecessor(first_node)
-        bisector1 = first_node.value.edge
-        site1 = copy(first_node.key.left_site)
-        if (not site1.is_segment and site3.is_segment
-                and site3.end == site1.start):
-            site3.inverse()
-        first_node.key.right_site = site3
+        second_site = copy(first_node.key.right_site)
+        second_bisector = first_node.value.edge
+        first_node = self._beach_line.predecessor(first_node)
+        first_bisector = first_node.value.edge
+        first_site = copy(first_node.key.left_site)
+        if (not first_site.is_segment and second_site.is_segment
+                and second_site.end == first_site.start):
+            second_site.inverse()
+        first_node.key.right_site = second_site
         first_node.value.edge, _ = output._insert_new_edge_from_intersection(
-                site1, site3, circle_event, bisector1, bisector2)
-        self._beach_line.tree.remove(last_node)
+                first_site, second_site, circle_event, first_bisector,
+                second_bisector)
+        self._beach_line.remove(last_node)
         last_node = first_node
-        if first_node is not self._beach_line.tree.min():
+        if first_node is not self._beach_line.min():
             self.deactivate_circle_event(first_node.value)
-            first_node = self._beach_line.tree.predecessor(first_node)
-            site_l1 = first_node.key.left_site
-            self.activate_circle_event(site_l1, site1, site3, last_node)
-        last_node = self._beach_line.tree.successor(last_node)
+            first_node = self._beach_line.predecessor(first_node)
+            self.activate_circle_event(first_node.key.left_site, first_site,
+                                       second_site, last_node)
+        last_node = self._beach_line.successor(last_node)
         if last_node is not red_black.NIL:
             self.deactivate_circle_event(last_node.value)
-            site_r1 = last_node.key.right_site
-            self.activate_circle_event(site1, site3, site_r1, last_node)
+            self.activate_circle_event(first_site, second_site,
+                                       last_node.key.right_site, last_node)
 
     def process_site_event(self, output: 'Diagram') -> None:
         last_index = self._site_event_index + 1
@@ -237,7 +236,7 @@ class Builder:
             while (self._end_points
                    and self._end_points.peek()[0] == self.site_event.start):
                 _, node = self._end_points.pop()
-                self._beach_line.tree.remove(node)
+                self._beach_line.remove(node)
         else:
             while (last_index < len(self.site_events)
                    and self.site_events[last_index].is_segment
@@ -247,18 +246,18 @@ class Builder:
         # find the node in the binary search tree
         # with left arc lying above the new site point
         new_key = BeachLineKey(self.site_event, self.site_event)
-        right_node = self._beach_line.tree.supremum(new_key)
+        right_node = self._beach_line.supremum(new_key)
         while self._site_event_index < last_index:
             site_event = copy(self.site_event)
             left_node = right_node
             if right_node is red_black.NIL:
                 # the above arc corresponds to the second arc of the last node,
                 # move the iterator to the last node
-                left_node = self._beach_line.tree.max()
+                left_node = self._beach_line.max()
                 # get the second site of the last node
-                site_arc = left_node.key.right_site
+                arc_site = left_node.key.right_site
                 # insert new nodes into the beach line, update the output
-                right_node = self.insert_new_arc(site_arc, site_arc,
+                right_node = self.insert_new_arc(arc_site, arc_site,
                                                  site_event, output)
                 # add a candidate circle to the circle event queue;
                 # there could be only one new circle event
@@ -266,16 +265,15 @@ class Builder:
                 self.activate_circle_event(left_node.key.left_site,
                                            left_node.key.right_site,
                                            site_event, right_node)
-            elif right_node is self._beach_line.tree.min():
+            elif right_node is self._beach_line.min():
                 # the above arc corresponds to the first site of the first node
-                site_arc = right_node.key.left_site
+                arc_site = right_node.key.left_site
                 # Insert new nodes into the beach line. Update the output.
-                left_node = self.insert_new_arc(site_arc, site_arc, site_event,
+                left_node = self.insert_new_arc(arc_site, arc_site, site_event,
                                                 output)
                 # if the site event is a segment, update its direction
                 if site_event.is_segment:
                     site_event.inverse()
-
                 # add a candidate circle to the circle event queue;
                 # there could be only one new circle event
                 # formed by a new bisector and the one on the right
@@ -287,25 +285,25 @@ class Builder:
             else:
                 # the above arc corresponds neither to the first,
                 # nor to the last site in the beach line
-                site_arc2 = right_node.key.left_site
-                site3 = right_node.key.right_site
+                second_arc_site = right_node.key.left_site
+                third_site = right_node.key.right_site
                 # remove the candidate circle from the event queue
                 self.deactivate_circle_event(right_node.value)
-                left_node = self._beach_line.tree.predecessor(left_node)
-                site_arc1 = left_node.key.right_site
-                site1 = left_node.key.left_site
+                left_node = self._beach_line.predecessor(left_node)
+                first_arc_site = left_node.key.right_site
+                first_site = left_node.key.left_site
                 # insert new nodes into the beach line. Update the output
-                new_node = self.insert_new_arc(site_arc1, site_arc2,
+                new_node = self.insert_new_arc(first_arc_site, second_arc_site,
                                                site_event, output)
                 # add candidate circles to the circle event queue;
                 # there could be up to two circle events
                 # formed by a new bisector and the one on the left or right
-                self.activate_circle_event(site1, site_arc1, site_event,
-                                           new_node)
+                self.activate_circle_event(first_site, first_arc_site,
+                                           site_event, new_node)
                 # if the site event is a segment, update its direction
                 if site_event.is_segment:
                     site_event.inverse()
-                self.activate_circle_event(site_event, site_arc2, site3,
-                                           right_node)
+                self.activate_circle_event(site_event, second_arc_site,
+                                           third_site, right_node)
                 right_node = new_node
             self._site_event_index += 1
