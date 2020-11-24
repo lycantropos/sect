@@ -4,8 +4,8 @@ from typing import (List,
 
 from reprit.base import generate_repr
 
-from sect.hints import (Point,
-                        Segment)
+from sect.hints import (Multipoint,
+                        Multisegment)
 from .builder import Builder
 from .events import (CircleEvent,
                      SiteEvent)
@@ -32,13 +32,18 @@ class Diagram:
         self.edges.clear()
         self.vertices.clear()
 
-    def construct(self, points: List[Point], segments: List[Segment]) -> None:
+    @classmethod
+    def from_sources(cls,
+                     multipoint: Multipoint,
+                     multisegment: Multisegment) -> 'Diagram':
+        result = Diagram()
         builder = Builder()
-        for point in points:
+        for point in multipoint:
             builder.insert_point(point)
-        for segment in segments:
+        for segment in multisegment:
             builder.insert_segment(segment)
-        builder.construct(self)
+        builder.construct(result)
+        return result
 
     def _build(self) -> None:
         edge_index = last_edge_index = 0
