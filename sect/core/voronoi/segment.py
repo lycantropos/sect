@@ -16,3 +16,7 @@ class Segment:
         return (self.start == other.start and self.end == other.end
                 if isinstance(other, Segment)
                 else NotImplemented)
+
+    def __iter__(self):
+        yield self.start
+        yield self.end
