@@ -106,8 +106,7 @@ def multipoint_voronoi(multipoint: Multipoint) -> Diagram:
 
 def _voronoi(multipoint: Multipoint, multisegment: Multisegment) -> Diagram:
     diagram = Diagram()
-    from sect.core.voronoi.segment import Segment
     diagram.construct([(x, y) for x, y in multipoint],
-                      [Segment((start_x, start_y), (end_x, end_y))
+                      [((start_x, start_y), (end_x, end_y))
                        for (start_x, start_y), (end_x, end_y) in multisegment])
     return diagram

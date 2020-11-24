@@ -4,14 +4,14 @@ from typing import (List,
 
 from reprit.base import generate_repr
 
-from sect.hints import Point
+from sect.hints import (Point,
+                        Segment)
 from .builder import Builder
 from .events import (CircleEvent,
                      SiteEvent)
 from .faces import (Cell,
                     Edge,
                     Vertex)
-from .segment import Segment
 
 
 class Diagram:

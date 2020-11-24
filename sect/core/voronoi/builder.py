@@ -9,14 +9,14 @@ from dendroid import red_black
 from prioq.base import PriorityQueue
 from reprit.base import generate_repr
 
-from sect.hints import Point
+from sect.hints import (Point,
+                        Segment)
 from .beach_line_key import BeachLineKey
 from .beach_line_value import BeachLineValue
 from .enums import SourceCategory
 from .events import (CircleEvent,
                      SiteEvent)
 from .events.computers import compute_circle_event
-from .segment import Segment
 from .utils import (are_vertical_endpoints,
                     to_unique_just_seen)
 
