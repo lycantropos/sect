@@ -184,7 +184,7 @@ class Builder:
     def insert_segment(self, segment: Segment) -> int:
         site_events = self.site_events
         index = self.index
-        start, end = segment.start, segment.end
+        start, end = segment
         site_events.append(SiteEvent.from_point(
                 start,
                 initial_index=index,
