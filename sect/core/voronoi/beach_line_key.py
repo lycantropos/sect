@@ -100,19 +100,23 @@ def distance_to_point_arc(site: SiteEvent, point: Point) -> float:
 
 def distance_to_segment_arc(site: SiteEvent, point: Point) -> float:
     if site.is_vertical:
-        return (float(site.start.x) - float(point.x)) * 0.5
+        start_x, _ = site.start
+        x, _ = point
+        return (float(start_x) - float(x)) * 0.5
     else:
-        start, end = site.start, site.end
-        a1 = float(end.x) - float(start.x)
-        b1 = float(end.y) - float(start.y)
+        start_x, start_y = site.start
+        end_x, end_y = site.end
+        a1 = float(end_x) - float(start_x)
+        b1 = float(end_y) - float(start_y)
         k = sqrt(a1 * a1 + b1 * b1)
         # avoid subtraction while computing k
         if not b1 < 0:
             k = 1. / (b1 + k)
         else:
             k = (k - b1) / (a1 * a1)
-        return k * robust_cross_product(end.x - start.x, end.y - start.y,
-                                        point.x - start.x, point.y - start.y)
+        x, y = point
+        return k * robust_cross_product(end_x - start_x, end_y - start_y,
+                                        x - start_x, y - start_y)
 
 
 def horizontal_goes_through_right_arc_first(left_site: SiteEvent,
