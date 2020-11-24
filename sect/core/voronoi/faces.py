@@ -11,6 +11,30 @@ from .hints import Source
 from .utils import compare_floats
 
 
+class Cell:
+    __slots__ = 'source', 'source_category', 'incident_edge'
+
+    def __init__(self,
+                 source: Source,
+                 source_category: SourceCategory) -> None:
+        self.source, self.source_category = source, source_category
+        self.incident_edge = None  # type: Optional[Edge]
+
+    __repr__ = generate_repr(__init__)
+
+    @property
+    def contains_point(self) -> bool:
+        return self.source_category.belongs(GeometryCategory.POINT)
+
+    @property
+    def contains_segment(self) -> bool:
+        return self.source_category.belongs(GeometryCategory.SEGMENT)
+
+    @property
+    def is_degenerate(self) -> bool:
+        return self.incident_edge is None
+
+
 class Vertex:
     __slots__ = 'x', 'y', 'incident_edge'
 
@@ -43,7 +67,7 @@ class Edge:
                  twin: Optional['Edge'],
                  prev: Optional['Edge'],
                  next_: Optional['Edge'],
-                 cell: Optional['Cell'],
+                 cell: Cell,
                  is_linear: bool,
                  is_primary: bool) -> None:
         self.start = start
@@ -120,27 +144,3 @@ class Edge:
         self.cell.incident_edge = self
         if self.start is not None:
             self.start.incident_edge = self
-
-
-class Cell:
-    __slots__ = 'source', 'source_category', 'incident_edge'
-
-    def __init__(self,
-                 source: Source,
-                 source_category: SourceCategory) -> None:
-        self.source, self.source_category = source, source_category
-        self.incident_edge = None  # type: Optional[Edge]
-
-    __repr__ = generate_repr(__init__)
-
-    @property
-    def contains_point(self) -> bool:
-        return self.source_category.belongs(GeometryCategory.POINT)
-
-    @property
-    def contains_segment(self) -> bool:
-        return self.source_category.belongs(GeometryCategory.SEGMENT)
-
-    @property
-    def is_degenerate(self) -> bool:
-        return self.incident_edge is None
