@@ -90,8 +90,10 @@ class BeachLineKey:
 
 
 def distance_to_point_arc(site: SiteEvent, point: Point) -> float:
-    dx = float(site.start.x) - float(point.x)
-    dy = float(site.start.y) - float(point.y)
+    start_x, start_y = site.start
+    x, y = point
+    dx = float(start_x) - float(x)
+    dy = float(start_y) - float(y)
     # the relative error is at most 3EPS
     return safe_divide_floats(dx * dx + dy * dy, 2.0 * dx)
 
