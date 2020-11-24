@@ -162,25 +162,28 @@ def point_segment_horizontal_goes_through_right_arc_first(
         right_site: SiteEvent,
         point: Point,
         reverse_order: bool) -> bool:
-    site_point = left_site.start
-    segment_start, segment_end = right_site.start, right_site.end
+    segment_start = right_site.start
+    segment_end = right_site.end
     if (to_orientation(segment_start, segment_end, point)
             is not Orientation.RIGHT):
         return not right_site.is_inverse
-    points_dx, points_dy = (float(point.x) - float(site_point.x),
-                            float(point.y) - float(site_point.y))
-    segment_dx, segment_dy = (float(segment_end.x) - float(segment_start.x),
-                              float(segment_end.y) - float(segment_start.y))
+    site_point_x, site_point_y = left_site.start
+    segment_start_x, segment_start_y = segment_start
+    segment_end_x, segment_end_y = segment_end
+    x, y = point
+    points_dx, points_dy = (float(x) - float(site_point_x),
+                            float(y) - float(site_point_y))
+    segment_dx, segment_dy = (float(segment_end_x) - float(segment_start_x),
+                              float(segment_end_y) - float(segment_start_y))
     if right_site.is_vertical:
-        if point.y < site_point.y and not reverse_order:
+        if y < site_point_y and not reverse_order:
             return False
-        elif point.y > site_point.y and reverse_order:
+        elif y > site_point_y and reverse_order:
             return True
     else:
-        if (deltas_to_orientation(segment_end.x - segment_start.x,
-                                  segment_end.y - segment_start.y,
-                                  point.x - site_point.x,
-                                  point.y - site_point.y)
+        if (deltas_to_orientation(segment_end_x - segment_start_x,
+                                  segment_end_y - segment_start_y,
+                                  x - site_point_x, y - site_point_y)
                 is Orientation.LEFT):
             if not right_site.is_inverse:
                 if reverse_order:
