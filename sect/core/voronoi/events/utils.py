@@ -3,7 +3,7 @@ from math import (frexp,
                   inf)
 from typing import Tuple
 
-from .big_float import BigFloat
+from sect.core.voronoi.big_float import BigFloat
 
 MAX_DIGITS_COUNT = 64
 

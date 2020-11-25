@@ -1,12 +1,6 @@
 from copy import copy
 from math import sqrt
 
-from sect.core.voronoi.big_int import (
-    robust_sum_of_products_with_sqrt_pairs as pairs_sum_expression,
-    robust_sum_of_products_with_sqrt_quadruplets as quadruplets_sum_expression,
-    robust_sum_of_products_with_sqrt_triplets as triplets_sum_expression,
-    to_second_point_segment_segment_quadruplets_expression
-    as to_quadruplets_expression)
 from sect.core.voronoi.robust_difference import RobustDifference
 from sect.core.voronoi.robust_float import RobustFloat
 from sect.core.voronoi.utils import (robust_cross_product,
@@ -18,6 +12,12 @@ from .predicates import (point_point_point_circle_exists,
                          point_point_segment_circle_exists,
                          point_segment_segment_circle_exists,
                          segment_segment_segment_circle_exists)
+from .utils import (
+    robust_sum_of_products_with_sqrt_pairs as pairs_sum_expression,
+    robust_sum_of_products_with_sqrt_quadruplets as quadruplets_sum_expression,
+    robust_sum_of_products_with_sqrt_triplets as triplets_sum_expression,
+    to_second_point_segment_segment_quadruplets_expression
+    as to_quadruplets_expression)
 
 
 def compute_circle_event(circle_event: CircleEvent,
