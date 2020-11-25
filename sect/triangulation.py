@@ -30,7 +30,7 @@ def delaunay(points: Iterable[Point]) -> Triangulation:
     Reference:
         http://www.sccg.sk/~samuelcik/dgs/quad_edge.pdf
 
-    :param points: points to triangulate
+    :param points: 3 or more points to triangulate.
     :returns: triangulation of the points.
     """
     return Triangulation.from_points(points)
@@ -108,7 +108,7 @@ def delaunay_triangles(points: Sequence[Point]) -> List[Triangle]:
     Reference:
         http://www.sccg.sk/~samuelcik/dgs/quad_edge.pdf
 
-    :param points: points to triangulate
+    :param points: 3 or more points to triangulate.
     :returns: Delaunay subdivision of the points into triangles.
 
     >>> (delaunay_triangles([(0, 0), (3, 0), (0, 3)])
