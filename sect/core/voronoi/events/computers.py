@@ -5,6 +5,7 @@ from sect.core.voronoi.robust_difference import RobustDifference
 from sect.core.voronoi.robust_float import RobustFloat
 from sect.core.voronoi.utils import (robust_cross_product,
                                      safe_divide_floats)
+from sect.hints import Coordinate
 from .models import (ULPS,
                      CircleEvent,
                      SiteEvent)
@@ -16,10 +17,9 @@ from .utils import (
     as to_quadruplets_expression)
 
 
-def compute_point_point_point_circle_event(circle_event: CircleEvent,
-                                           first_site: SiteEvent,
-                                           second_site: SiteEvent,
-                                           third_site: SiteEvent) -> None:
+def to_point_point_point_circle_event(first_site: SiteEvent,
+                                      second_site: SiteEvent,
+                                      third_site: SiteEvent) -> CircleEvent:
     first_site_start_x, first_site_start_y = first_site.start
     second_site_start_x, second_site_start_y = second_site.start
     third_site_start_x, third_site_start_y = third_site.start
@@ -40,46 +40,54 @@ def compute_point_point_point_circle_event(circle_event: CircleEvent,
     second_sy = float(second_site_start_y) + float(third_site_start_y)
     first_third_dx = float(first_site_start_x) - float(third_site_start_x)
     first_third_dy = float(first_site_start_y) - float(third_site_start_y)
-    center_x, center_y = RobustDifference.zero(), RobustDifference.zero()
-    center_x += RobustFloat(first_second_dx * first_sx * second_third_dy, 2.)
-    center_x += RobustFloat(first_second_dy * first_sy * second_third_dy, 2.)
-    center_x -= RobustFloat(second_third_dx * second_sx * first_second_dy, 2.)
-    center_x -= RobustFloat(second_third_dy * second_sy * first_second_dy, 2.)
-    center_y += RobustFloat(second_third_dx * second_sx * first_second_dx, 2.)
-    center_y += RobustFloat(second_third_dy * second_sy * first_second_dx, 2.)
-    center_y -= RobustFloat(first_second_dx * first_sx * second_third_dx, 2.)
-    center_y -= RobustFloat(first_second_dy * first_sy * second_third_dx, 2.)
-    lower_x = copy(center_x)
-    lower_x -= RobustFloat(sqrt((first_second_dx * first_second_dx
-                                 + first_second_dy * first_second_dy)
-                                * (second_third_dx * second_third_dx
-                                   + second_third_dy * second_third_dy)
-                                * (first_third_dx * first_third_dx
-                                   + first_third_dy * first_third_dy)),
-                           5.)
-    center_x = center_x.evaluate()
-    center_y = center_y.evaluate()
-    lower_x = lower_x.evaluate()
-    circle_event.center_x = center_x.value * inverted_signed_area.value
-    circle_event.center_y = center_y.value * inverted_signed_area.value
-    circle_event.lower_x = lower_x.value * inverted_signed_area.value
-    circle_event.is_active = True
-    recompute_center_x = center_x.relative_error > ULPS
-    recompute_center_y = center_y.relative_error > ULPS
-    recompute_lower_x = lower_x.relative_error > ULPS
-    if recompute_center_x or recompute_center_y or recompute_lower_x:
-        recompute_point_point_point_circle_event(circle_event, first_site,
-                                                 second_site, third_site,
-                                                 recompute_center_x,
-                                                 recompute_center_y,
-                                                 recompute_lower_x)
+    center_x_numerator, center_y_numerator = (RobustDifference.zero(),
+                                              RobustDifference.zero())
+    center_x_numerator += RobustFloat(
+            first_second_dx * first_sx * second_third_dy, 2.)
+    center_x_numerator += RobustFloat(
+            first_second_dy * first_sy * second_third_dy, 2.)
+    center_x_numerator -= RobustFloat(
+            second_third_dx * second_sx * first_second_dy, 2.)
+    center_x_numerator -= RobustFloat(
+            second_third_dy * second_sy * first_second_dy, 2.)
+    center_y_numerator += RobustFloat(
+            second_third_dx * second_sx * first_second_dx, 2.)
+    center_y_numerator += RobustFloat(
+            second_third_dy * second_sy * first_second_dx, 2.)
+    center_y_numerator -= RobustFloat(
+            first_second_dx * first_sx * second_third_dx, 2.)
+    center_y_numerator -= RobustFloat(
+            first_second_dy * first_sy * second_third_dx, 2.)
+    lower_x_numerator = copy(center_x_numerator)
+    lower_x_numerator -= RobustFloat(
+            sqrt((first_second_dx * first_second_dx
+                  + first_second_dy * first_second_dy)
+                 * (second_third_dx * second_third_dx
+                    + second_third_dy * second_third_dy)
+                 * (first_third_dx * first_third_dx
+                    + first_third_dy * first_third_dy)),
+            5.)
+    center_x_numerator = center_x_numerator.evaluate()
+    center_y_numerator = center_y_numerator.evaluate()
+    lower_x_numerator = lower_x_numerator.evaluate()
+    center_x = center_x_numerator.value * inverted_signed_area.value
+    center_y = center_y_numerator.value * inverted_signed_area.value
+    lower_x = lower_x_numerator.value * inverted_signed_area.value
+    recompute_center_x = center_x_numerator.relative_error > ULPS
+    recompute_center_y = center_y_numerator.relative_error > ULPS
+    recompute_lower_x = lower_x_numerator.relative_error > ULPS
+    return (_to_point_point_point_circle_event(
+            center_x, center_y, lower_x, first_site, second_site,
+            third_site, recompute_center_x, recompute_center_y,
+            recompute_lower_x)
+            if recompute_center_x or recompute_center_y or recompute_lower_x
+            else CircleEvent(center_x, center_y, lower_x))
 
 
-def compute_point_point_segment_circle_event(circle_event: CircleEvent,
-                                             first_site: SiteEvent,
-                                             second_site: SiteEvent,
-                                             third_site: SiteEvent,
-                                             segment_index: int) -> None:
+def to_point_point_segment_circle_event(first_site: SiteEvent,
+                                        second_site: SiteEvent,
+                                        third_site: SiteEvent,
+                                        segment_index: int) -> CircleEvent:
     first_site_start_x, first_site_start_y = first_site.start
     second_site_start_x, second_site_start_y = second_site.start
     third_site_start_x, third_site_start_y = third_site.start
@@ -148,27 +156,26 @@ def compute_point_point_segment_circle_event(circle_event: CircleEvent,
     center_x = center_x.evaluate()
     center_y = center_y.evaluate()
     lower_x = lower_x.evaluate()
-    circle_event.center_x = center_x.value
-    circle_event.center_y = center_y.value
-    circle_event.lower_x = lower_x.value
-    circle_event.is_active = True
     recompute_center_x = center_x.relative_error > ULPS
     recompute_center_y = center_y.relative_error > ULPS
     recompute_lower_x = lower_x.relative_error > ULPS
-    if recompute_center_x or recompute_center_y or recompute_lower_x:
-        recompute_point_point_segment_circle_event(circle_event, first_site,
-                                                   second_site, third_site,
-                                                   segment_index,
-                                                   recompute_center_x,
-                                                   recompute_center_y,
-                                                   recompute_lower_x)
+    center_x = center_x.value
+    center_y = center_y.value
+    lower_x = lower_x.value
+    return (_to_point_point_segment_circle_event(center_x, center_y, lower_x,
+                                                 first_site, second_site,
+                                                 third_site, segment_index,
+                                                 recompute_center_x,
+                                                 recompute_center_y,
+                                                 recompute_lower_x)
+            if recompute_center_x or recompute_center_y or recompute_lower_x
+            else CircleEvent(center_x, center_y, lower_x))
 
 
-def compute_point_segment_segment_circle_event(circle_event: CircleEvent,
-                                               first_site: SiteEvent,
-                                               second_site: SiteEvent,
-                                               third_site: SiteEvent,
-                                               point_index: int) -> None:
+def to_point_segment_segment_circle_event(first_site: SiteEvent,
+                                          second_site: SiteEvent,
+                                          third_site: SiteEvent,
+                                          point_index: int) -> CircleEvent:
     first_segment_start_x, first_segment_start_y = second_site.start
     first_segment_end_x, first_segment_end_y = second_site.end
     second_segment_start_x, second_segment_start_y = third_site.start
@@ -328,24 +335,23 @@ def compute_point_segment_segment_circle_event(circle_event: CircleEvent,
     recompute_center_x = center_x.relative_error > ULPS
     recompute_center_y = center_y.relative_error > ULPS
     recompute_lower_x = lower_x.relative_error > ULPS
-    circle_event.center_x = center_x.value
-    circle_event.center_y = center_y.value
-    circle_event.lower_x = lower_x.value
-    circle_event.is_active = True
-    if recompute_center_x or recompute_center_y or recompute_lower_x:
-        recompute_point_segment_segment_circle_event(circle_event, first_site,
-                                                     second_site, third_site,
-                                                     point_index,
-                                                     recompute_center_x,
-                                                     recompute_center_y,
-                                                     recompute_lower_x)
+    center_x = center_x.value
+    center_y = center_y.value
+    lower_x = lower_x.value
+    return (_to_point_segment_segment_circle_event(center_x, center_y, lower_x,
+                                                   first_site, second_site,
+                                                   third_site, point_index,
+                                                   recompute_center_x,
+                                                   recompute_center_y,
+                                                   recompute_lower_x)
+            if recompute_center_x or recompute_center_y or recompute_lower_x
+            else CircleEvent(center_x, center_y, lower_x))
 
 
-def compute_segment_segment_segment_circle_event(circle_event: CircleEvent,
-                                                 first_site: SiteEvent,
-                                                 second_site: SiteEvent,
-                                                 third_site: SiteEvent
-                                                 ) -> None:
+def to_segment_segment_segment_circle_event(first_site: SiteEvent,
+                                            second_site: SiteEvent,
+                                            third_site: SiteEvent
+                                            ) -> CircleEvent:
     first_site_start_x, first_site_start_y = first_site.start
     first_site_end_x, first_site_end_y = first_site.end
     second_site_start_x, second_site_start_y = second_site.start
@@ -424,27 +430,26 @@ def compute_segment_segment_segment_circle_event(circle_event: CircleEvent,
     recompute_center_x = center_x.relative_error > ULPS
     recompute_center_y = center_y.relative_error > ULPS
     recompute_lower_x = lower_x.relative_error > ULPS
-    circle_event.center_x = center_x.value
-    circle_event.center_y = center_y.value
-    circle_event.lower_x = lower_x.value
-    circle_event.is_active = True
-    if recompute_center_x or recompute_center_y or recompute_lower_x:
-        recompute_segment_segment_segment_circle_event(circle_event,
-                                                       first_site, second_site,
-                                                       third_site,
-                                                       recompute_center_x,
-                                                       recompute_center_y,
-                                                       recompute_lower_x)
+    center_x = center_x.value
+    center_y = center_y.value
+    lower_x = lower_x.value
+    return (_to_segment_segment_segment_circle_event(
+            center_x, center_y, lower_x, first_site, second_site, third_site,
+            recompute_center_x, recompute_center_y, recompute_lower_x)
+            if recompute_center_x or recompute_center_y or recompute_lower_x
+            else CircleEvent(center_x, center_y, lower_x))
 
 
-def recompute_point_point_point_circle_event(circle_event: CircleEvent,
-                                             first_site: SiteEvent,
-                                             second_site: SiteEvent,
-                                             third_site: SiteEvent,
-                                             recompute_center_x: bool = True,
-                                             recompute_center_y: bool = True,
-                                             recompute_lower_x: bool = True
-                                             ) -> None:
+def _to_point_point_point_circle_event(center_x: Coordinate,
+                                       center_y: Coordinate,
+                                       lower_x: Coordinate,
+                                       first_site: SiteEvent,
+                                       second_site: SiteEvent,
+                                       third_site: SiteEvent,
+                                       recompute_center_x: bool = True,
+                                       recompute_center_y: bool = True,
+                                       recompute_lower_x: bool = True
+                                       ) -> CircleEvent:
     first_site_start_x, first_site_start_y = first_site.start
     second_site_start_x, second_site_start_y = second_site.start
     third_site_start_x, third_site_start_y = third_site.start
@@ -464,8 +469,7 @@ def recompute_point_point_point_circle_event(circle_event: CircleEvent,
     if recompute_center_x or recompute_lower_x:
         center_x_numerator = (first_numerator * second_dy
                               - second_numerator * first_dy)
-        center_x = circle_event.center_x = (float(center_x_numerator)
-                                            * inverted_denominator)
+        center_x = float(center_x_numerator) * inverted_denominator
         if recompute_lower_x:
             third_dx = first_site_start_x - third_site_start_x
             third_dy = first_site_start_y - third_site_start_y
@@ -476,7 +480,7 @@ def recompute_point_point_point_circle_event(circle_event: CircleEvent,
             # if ``center_x >= 0`` then ``lower_x = center_x + r``,
             # else ``lower_x = (center_x * center_x - r * r) / (center_x - r)``
             # to guarantee epsilon relative error
-            circle_event.lower_x = (
+            lower_x = (
                 safe_divide_floats(
                         float(center_x_numerator * center_x_numerator
                               - squared_radius) * inverted_denominator,
@@ -486,20 +490,23 @@ def recompute_point_point_point_circle_event(circle_event: CircleEvent,
                       if inverted_denominator < 0
                       else center_x + radius * inverted_denominator))
     if recompute_center_y:
-        circle_event.center_y = (float(second_numerator * first_dx
-                                       - first_numerator * second_dx)
-                                 * inverted_denominator)
+        center_y = (float(second_numerator * first_dx
+                          - first_numerator * second_dx)
+                    * inverted_denominator)
+    return CircleEvent(center_x, center_y, lower_x)
 
 
-def recompute_point_point_segment_circle_event(circle_event: CircleEvent,
-                                               first_site: SiteEvent,
-                                               second_site: SiteEvent,
-                                               third_site: SiteEvent,
-                                               segment_index: int,
-                                               recompute_center_x: bool = True,
-                                               recompute_center_y: bool = True,
-                                               recompute_lower_x: bool = True
-                                               ) -> None:
+def _to_point_point_segment_circle_event(center_x: Coordinate,
+                                         center_y: Coordinate,
+                                         lower_x: Coordinate,
+                                         first_site: SiteEvent,
+                                         second_site: SiteEvent,
+                                         third_site: SiteEvent,
+                                         segment_index: int,
+                                         recompute_center_x: bool = True,
+                                         recompute_center_y: bool = True,
+                                         recompute_lower_x: bool = True
+                                         ) -> CircleEvent:
     first_site_start_x, first_site_start_y = first_site.start
     third_site_start_x, third_site_start_y = third_site.start
     third_site_end_x, third_site_end_y = third_site.end
@@ -535,15 +542,13 @@ def recompute_point_point_segment_circle_event(circle_event: CircleEvent,
                         * (2 * squared_points_area + numerator))
         inverted_denominator = safe_divide_floats(1., float(determinant))
         if recompute_center_x:
-            circle_event.center_x = (0.25 * float(coefficients[0])
-                                     * inverted_denominator)
+            center_x = 0.25 * float(coefficients[0]) * inverted_denominator
         if recompute_center_y:
-            circle_event.center_y = (0.25
-                                     * float((2 * determinant * points_sy)
-                                             + numerator * perpendicular_y)
-                                     * inverted_denominator)
+            center_y = (0.25 * float((2 * determinant * points_sy)
+                                     + numerator * perpendicular_y)
+                        * inverted_denominator)
         if recompute_lower_x:
-            circle_event.lower_x = safe_divide_floats(
+            lower_x = safe_divide_floats(
                     0.25 * float(pairs_sum_expression(coefficients[:2],
                                                       (segment_length, 1)))
                     * inverted_denominator,
@@ -566,11 +571,11 @@ def recompute_point_point_segment_circle_event(circle_event: CircleEvent,
                             if segment_index == 2
                             else perpendicular_x)
             if recompute_center_x:
-                circle_event.center_x = (0.5 * float(
-                        pairs_sum_expression(coefficients, (1, determinant)))
-                                         * squared_inverted_denominator)
+                center_x = (0.5 * float(pairs_sum_expression(coefficients,
+                                                             (1, determinant)))
+                            * squared_inverted_denominator)
             if recompute_lower_x:
-                circle_event.lower_x = (0.5 * float(quadruplets_sum_expression(
+                lower_x = (0.5 * float(quadruplets_sum_expression(
                         coefficients
                         + (signed_points_area
                            * (squared_perpendicular_projection_length
@@ -580,10 +585,10 @@ def recompute_point_point_segment_circle_event(circle_event: CircleEvent,
                            else signed_perpendicular_area),
                         (segment_length, determinant * segment_length, 1,
                          determinant)))
-                                        * squared_inverted_denominator
-                                        / sqrt(float(segment_length)))
+                           * squared_inverted_denominator
+                           / sqrt(float(segment_length)))
         if recompute_center_y:
-            circle_event.center_y = (0.5 * float(pairs_sum_expression(
+            center_y = (0.5 * float(pairs_sum_expression(
                     (points_sy * squared_perpendicular_projection_length
                      + (signed_perpendicular_area * signed_points_area
                         * perpendicular_y),
@@ -591,17 +596,20 @@ def recompute_point_point_segment_circle_event(circle_event: CircleEvent,
                      if segment_index == 2
                      else perpendicular_y),
                     (1, determinant))) * squared_inverted_denominator)
+    return CircleEvent(center_x, center_y, lower_x)
 
 
-def recompute_point_segment_segment_circle_event(
-        circle_event: CircleEvent,
-        first_site: SiteEvent,
-        second_site: SiteEvent,
-        third_site: SiteEvent,
-        point_index: int,
-        recompute_center_x: bool = True,
-        recompute_center_y: bool = True,
-        recompute_lower_x: bool = True) -> None:
+def _to_point_segment_segment_circle_event(center_x: Coordinate,
+                                           center_y: Coordinate,
+                                           lower_x: Coordinate,
+                                           first_site: SiteEvent,
+                                           second_site: SiteEvent,
+                                           third_site: SiteEvent,
+                                           point_index: int,
+                                           recompute_center_x: bool = True,
+                                           recompute_center_y: bool = True,
+                                           recompute_lower_x: bool = True
+                                           ) -> CircleEvent:
     first_site_start_x, first_site_start_y = first_site.start
     second_start_x, second_start_y = second_site.start
     second_end_x, second_end_y = second_site.end
@@ -640,14 +648,14 @@ def recompute_point_segment_segment_circle_event(
             denominator = temp * float(third_second_signed_area)
             squared_length = dx * dx + dy * dy
             if recompute_center_y:
-                circle_event.center_y = (float(to_quadruplets_expression(
+                center_y = (float(to_quadruplets_expression(
                         (third_dy * squared_length
                          - iy * (dx * third_dx + dy * third_dy),
                          iy * (dx * second_dx + dy * second_dy)
                          - second_dy * squared_length,
                          iy * sign, 0),
                         common_right_coefficients))
-                                         / denominator)
+                            / denominator)
             if recompute_center_x or recompute_lower_x:
                 common_left_coefficients = (
                     third_dx * squared_length
@@ -656,23 +664,21 @@ def recompute_point_segment_segment_circle_event(
                     - second_dx * squared_length,
                     ix * sign)
                 if recompute_center_x:
-                    circle_event.center_x = (float(to_quadruplets_expression(
-                            common_left_coefficients + ((0),),
+                    center_x = (float(to_quadruplets_expression(
+                            common_left_coefficients + (0,),
                             common_right_coefficients))
-                                             / denominator)
+                                / denominator)
                 if recompute_lower_x:
-                    circle_event.lower_x = (float(to_quadruplets_expression(
+                    lower_x = (float(to_quadruplets_expression(
                             common_left_coefficients
                             + (third_second_signed_area * squared_length
                                * (-1 if temp < 0 else 1),),
                             common_right_coefficients))
-                                            / denominator)
+                               / denominator)
         else:
             denominator = float(third_second_signed_area)
-            circle_event.center_x = circle_event.lower_x = (float(ix)
-                                                            / denominator)
-            circle_event.center_y = float(iy) / denominator
-            circle_event.is_active = True
+            center_x = lower_x = float(ix) / denominator
+            center_y = float(iy) / denominator
     else:
         denominator = 2. * float(squared_second_dx + squared_second_dy)
         dx = (second_dy * (first_site_start_x - second_end_x)
@@ -681,7 +687,7 @@ def recompute_point_segment_segment_circle_event(
               - second_dy * (first_site_start_x - third_start_x))
         common_right_coefficients = (dx * dy, 1)
         if recompute_center_y:
-            circle_event.center_y = safe_divide_floats(
+            center_y = safe_divide_floats(
                     float(pairs_sum_expression(
                             (second_dy * (-2 if point_index == 2 else 2),
                              squared_second_dx * (second_end_y + third_start_y)
@@ -702,14 +708,14 @@ def recompute_point_segment_segment_circle_event(
                                         + squared_second_dx
                                         * (2 * first_site_start_x))
             if recompute_center_x:
-                circle_event.center_x = safe_divide_floats(
+                center_x = safe_divide_floats(
                         float(pairs_sum_expression(common_left_coefficients,
                                                    common_right_coefficients)),
                         denominator)
             if recompute_lower_x:
                 third_start_second_end_dx = third_start_x - second_end_x
                 third_start_second_end_dy = third_start_y - second_end_y
-                circle_event.lower_x = safe_divide_floats(
+                lower_x = safe_divide_floats(
                         float(triplets_sum_expression(
                                 common_left_coefficients
                                 + (abs(second_dx * third_start_second_end_dy
@@ -718,16 +724,19 @@ def recompute_point_segment_segment_circle_event(
                                 common_right_coefficients
                                 + (squared_second_dx + squared_second_dy,))),
                         denominator)
+    return CircleEvent(center_x, center_y, lower_x)
 
 
-def recompute_segment_segment_segment_circle_event(
-        circle_event: CircleEvent,
-        first_site: SiteEvent,
-        second_site: SiteEvent,
-        third_site: SiteEvent,
-        recompute_center_x: bool = True,
-        recompute_center_y: bool = True,
-        recompute_lower_x: bool = True) -> None:
+def _to_segment_segment_segment_circle_event(center_x: Coordinate,
+                                             center_y: Coordinate,
+                                             lower_x: Coordinate,
+                                             first_site: SiteEvent,
+                                             second_site: SiteEvent,
+                                             third_site: SiteEvent,
+                                             recompute_center_x: bool = True,
+                                             recompute_center_y: bool = True,
+                                             recompute_lower_x: bool = True
+                                             ) -> CircleEvent:
     first_site_start_x, first_site_start_y = first_site.start
     first_site_end_x, first_site_end_y = first_site.end
     second_site_start_x, second_site_start_y = second_site.start
@@ -755,7 +764,7 @@ def recompute_segment_segment_segment_circle_event(
     third_signed_area = (third_site_start_x * third_site_end_y
                          - third_site_start_y * third_site_end_x)
     if recompute_center_y:
-        circle_event.center_y = safe_divide_floats(
+        center_y = safe_divide_floats(
                 float(triplets_sum_expression(
                         (second_dy * third_signed_area
                          - third_dy * second_signed_area,
@@ -773,12 +782,12 @@ def recompute_segment_segment_segment_circle_event(
                                     first_dx * second_signed_area
                                     - second_dx * first_signed_area)
         if recompute_center_x:
-            circle_event.center_x = safe_divide_floats(
+            center_x = safe_divide_floats(
                     float(triplets_sum_expression(common_left_coefficients,
                                                   segments_lengths)),
                     denominator)
         if recompute_lower_x:
-            circle_event.lower_x = safe_divide_floats(
+            lower_x = safe_divide_floats(
                     float(quadruplets_sum_expression(
                             common_left_coefficients
                             + (common_left_coefficients[0] * first_dy
@@ -786,3 +795,4 @@ def recompute_segment_segment_segment_circle_event(
                                + common_left_coefficients[2] * third_dy,),
                             segments_lengths + (1,))),
                     denominator)
+    return CircleEvent(center_x, center_y, lower_x)

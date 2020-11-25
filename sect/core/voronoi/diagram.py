@@ -17,10 +17,10 @@ from .beach_line_value import BeachLineValue
 from .enums import SourceCategory
 from .events import (CircleEvent,
                      SiteEvent)
-from .events.computers import (compute_point_point_point_circle_event,
-                               compute_point_point_segment_circle_event,
-                               compute_point_segment_segment_circle_event,
-                               compute_segment_segment_segment_circle_event)
+from .events.computers import (to_point_point_point_circle_event,
+                               to_point_point_segment_circle_event,
+                               to_point_segment_segment_circle_event,
+                               to_segment_segment_segment_circle_event)
 from .events.predicates import (point_point_point_circle_exists,
                                 point_point_segment_circle_exists,
                                 point_segment_segment_circle_exists,
@@ -77,7 +77,6 @@ class Diagram:
                                second_site: SiteEvent,
                                third_site: SiteEvent,
                                bisector_node: red_black.Node) -> None:
-        circle_event = CircleEvent(0., 0., 0.)
         # check if the three input sites create a circle event
         if first_site.is_point:
             if second_site.is_point:
@@ -86,66 +85,58 @@ class Diagram:
                     if not point_point_point_circle_exists(
                             first_site, second_site, third_site):
                         return
-                    compute_point_point_point_circle_event(
-                            circle_event, first_site, second_site, third_site)
+                    circle_event = to_point_point_point_circle_event(
+                            first_site, second_site, third_site)
                 else:
                     # (point, point, segment) sites
                     if not point_point_segment_circle_exists(
                             first_site, second_site, third_site, 3):
                         return
-                    compute_point_point_segment_circle_event(
-                            circle_event, first_site, second_site, third_site,
-                            3)
+                    circle_event = to_point_point_segment_circle_event(
+                            first_site, second_site, third_site, 3)
             elif third_site.is_point:
                 # (point, segment, point) sites
                 if not point_point_segment_circle_exists(
                         first_site, third_site, second_site, 2):
                     return
-                compute_point_point_segment_circle_event(
-                        circle_event, first_site, third_site, second_site, 2)
+                circle_event = to_point_point_segment_circle_event(
+                        first_site, third_site, second_site, 2)
             else:
                 # (point, segment, segment) sites.
                 if not point_segment_segment_circle_exists(
                         first_site, second_site, third_site, 1):
                     return
-                compute_point_segment_segment_circle_event(circle_event,
-                                                           first_site,
-                                                           second_site,
-                                                           third_site, 1)
+                circle_event = to_point_segment_segment_circle_event(
+                        first_site, second_site, third_site, 1)
         elif second_site.is_point:
             if third_site.is_point:
                 # (segment, point, point) sites
                 if not point_point_segment_circle_exists(
                         second_site, third_site, first_site, 1):
                     return
-                compute_point_point_segment_circle_event(
-                        circle_event, second_site, third_site, first_site, 1)
+                circle_event = to_point_point_segment_circle_event(
+                        second_site, third_site, first_site, 1)
             else:
                 # (segment, point, segment) sites
                 if not point_segment_segment_circle_exists(
                         second_site, first_site, third_site, 2):
                     return
-                compute_point_segment_segment_circle_event(
-                        circle_event, second_site, first_site, third_site, 2)
+                circle_event = to_point_segment_segment_circle_event(
+                        second_site, first_site, third_site, 2)
         elif third_site.is_point:
             # (segment, segment, point) sites
             if not point_segment_segment_circle_exists(
                     third_site, first_site, second_site, 3):
                 return
-            compute_point_segment_segment_circle_event(circle_event,
-                                                       third_site,
-                                                       first_site,
-                                                       second_site, 3)
+            circle_event = to_point_segment_segment_circle_event(
+                    third_site, first_site, second_site, 3)
         else:
             # (segment, segment, segment) sites
-            if not segment_segment_segment_circle_exists(first_site,
-                                                         second_site,
-                                                         third_site):
+            if not segment_segment_segment_circle_exists(
+                    first_site, second_site, third_site):
                 return
-            compute_segment_segment_segment_circle_event(circle_event,
-                                                         first_site,
-                                                         second_site,
-                                                         third_site)
+            circle_event = to_segment_segment_segment_circle_event(
+                    first_site, second_site, third_site)
         if (circle_event.lies_outside_vertical_segment(first_site)
                 or circle_event.lies_outside_vertical_segment(second_site)
                 or circle_event.lies_outside_vertical_segment(third_site)):
