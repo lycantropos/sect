@@ -710,7 +710,9 @@ def recompute_point_segment_segment_circle_event(
         dy = iy - third_second_signed_area * first_site_start_y
         if dx or dy:
             sign = ((-1 if point_index == 2 else 1)
-                    * third_second_signed_area.sign)
+                    * ((1 if third_second_signed_area > 0 else -1)
+                       if third_second_signed_area
+                       else 0))
             common_right_coefficients = (
                 squared_second_dx + squared_second_dy,
                 third_dx * third_dx + third_dy * third_dy,
