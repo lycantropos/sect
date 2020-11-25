@@ -8,98 +8,12 @@ from sect.core.voronoi.utils import (robust_cross_product,
 from .models import (ULPS,
                      CircleEvent,
                      SiteEvent)
-from .predicates import (point_point_point_circle_exists,
-                         point_point_segment_circle_exists,
-                         point_segment_segment_circle_exists,
-                         segment_segment_segment_circle_exists)
 from .utils import (
     robust_sum_of_products_with_sqrt_pairs as pairs_sum_expression,
     robust_sum_of_products_with_sqrt_quadruplets as quadruplets_sum_expression,
     robust_sum_of_products_with_sqrt_triplets as triplets_sum_expression,
     to_second_point_segment_segment_quadruplets_expression
     as to_quadruplets_expression)
-
-
-def compute_circle_event(circle_event: CircleEvent,
-                         first_site: SiteEvent,
-                         second_site: SiteEvent,
-                         third_site: SiteEvent) -> bool:
-    if first_site.is_point:
-        if second_site.is_point:
-            if third_site.is_point:
-                # (point, point, point) sites
-                if not point_point_point_circle_exists(first_site, second_site,
-                                                       third_site):
-                    return False
-                compute_point_point_point_circle_event(circle_event,
-                                                       first_site, second_site,
-                                                       third_site)
-            else:
-                # (point, point, segment) sites
-                if not point_point_segment_circle_exists(first_site,
-                                                         second_site,
-                                                         third_site, 3):
-                    return False
-                compute_point_point_segment_circle_event(circle_event,
-                                                         first_site,
-                                                         second_site,
-                                                         third_site, 3)
-        elif third_site.is_point:
-            # (point, segment, point) sites
-            if not point_point_segment_circle_exists(first_site, third_site,
-                                                     second_site, 2):
-                return False
-            compute_point_point_segment_circle_event(circle_event,
-                                                     first_site,
-                                                     third_site,
-                                                     second_site, 2)
-        else:
-            # (point, segment, segment) sites.
-            if not point_segment_segment_circle_exists(first_site, second_site,
-                                                       third_site, 1):
-                return False
-            compute_point_segment_segment_circle_event(circle_event,
-                                                       first_site, second_site,
-                                                       third_site, 1)
-    elif second_site.is_point:
-        if third_site.is_point:
-            # (segment, point, point) sites
-            if (not point_point_segment_circle_exists(second_site, third_site,
-                                                      first_site, 1)):
-                return False
-            compute_point_point_segment_circle_event(circle_event, second_site,
-                                                     third_site, first_site, 1)
-        else:
-            # (segment, point, segment) sites
-            if (not point_segment_segment_circle_exists(second_site,
-                                                        first_site, third_site,
-                                                        2)):
-                return False
-            compute_point_segment_segment_circle_event(circle_event,
-                                                       second_site, first_site,
-                                                       third_site, 2)
-    else:
-        if third_site.is_point:
-            # (segment, segment, point) sites
-            if (not point_segment_segment_circle_exists(third_site, first_site,
-                                                        second_site, 3)):
-                return False
-            compute_point_segment_segment_circle_event(circle_event,
-                                                       third_site, first_site,
-                                                       second_site, 3)
-        else:
-            # (segment, segment, segment) sites
-            if not segment_segment_segment_circle_exists(first_site,
-                                                         second_site,
-                                                         third_site):
-                return False
-            compute_segment_segment_segment_circle_event(circle_event,
-                                                         first_site,
-                                                         second_site,
-                                                         third_site)
-    return not (circle_event.lies_outside_vertical_segment(first_site)
-                or circle_event.lies_outside_vertical_segment(second_site)
-                or circle_event.lies_outside_vertical_segment(third_site))
 
 
 def compute_point_point_point_circle_event(circle_event: CircleEvent,
