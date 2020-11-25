@@ -92,7 +92,7 @@ def to_first_point_segment_segment_quadruplets_expression(
     return (robust_sum_of_products_with_sqrt_pairs(
             (left[0] * left[0] * right[0] + left[1] * left[1] * right[1]
              - left[2] * left[2] - left[3] * left[3] * right[0] * right[1],
-             2 * left[0] * left[1] - left[2] * left[3]),
+             2 * (left[0] * left[1] - left[2] * left[3])),
             (1, right[3]))
             / (lh - rh))
 
