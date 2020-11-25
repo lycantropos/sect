@@ -178,11 +178,10 @@ class Diagram:
                 self._process_site_event()
             elif self._site_event_index >= len(self._site_events):
                 self._process_circle_event()
+            elif self._site_event < self._circle_events.peek()[0]:
+                self._process_site_event()
             else:
-                if self._site_event < self._circle_events.peek()[0]:
-                    self._process_site_event()
-                else:
-                    self._process_circle_event()
+                self._process_circle_event()
             while (self._circle_events
                    and not self._circle_events.peek()[0].is_active):
                 self._circle_events.pop()
