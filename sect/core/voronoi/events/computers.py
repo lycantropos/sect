@@ -1,7 +1,6 @@
 from robust import (parallelogram,
                     projection)
 
-from sect.core.voronoi.robust_difference import RobustDifference
 from sect.core.voronoi.robust_float import RobustFloat
 from sect.core.voronoi.utils import (robust_cross_product,
                                      safe_divide_floats)
@@ -248,22 +247,22 @@ def to_segment_segment_segment_circle_event(first_site: SiteEvent,
                                  first_site_end_x - first_site_start_x,
                                  first_site_end_y - first_site_start_y),
             1.)
-    denominator = RobustDifference.zero()
+    denominator = RobustFloat()
     denominator += first_second_signed_area * third_length
     denominator += second_third_signed_area * first_length
     denominator += third_first_signed_area * second_length
-    r = RobustDifference.zero()
+    r = RobustFloat()
     r -= first_second_signed_area * third_signed_area
     r -= second_third_signed_area * first_signed_area
     r -= third_first_signed_area * second_signed_area
-    center_x = RobustDifference.zero()
+    center_x = RobustFloat()
     center_x += first_dx * second_signed_area * third_length
     center_x -= second_dx * first_signed_area * third_length
     center_x += second_dx * third_signed_area * first_length
     center_x -= third_dx * second_signed_area * first_length
     center_x += third_dx * first_signed_area * second_length
     center_x -= first_dx * third_signed_area * second_length
-    center_y = RobustDifference.zero()
+    center_y = RobustFloat()
     center_y += first_dy * second_signed_area * third_length
     center_y -= second_dy * first_signed_area * third_length
     center_y += second_dy * third_signed_area * first_length
@@ -271,10 +270,9 @@ def to_segment_segment_segment_circle_event(first_site: SiteEvent,
     center_y += third_dy * first_signed_area * second_length
     center_y -= first_dy * third_signed_area * second_length
     lower_x = center_x + r
-    denominator = denominator.evaluate()
-    center_x = center_x.evaluate() / denominator
-    center_y = center_y.evaluate() / denominator
-    lower_x = lower_x.evaluate() / denominator
+    center_x /= denominator
+    center_y /= denominator
+    lower_x /= denominator
     recompute_center_x = center_x.relative_error > ULPS
     recompute_center_y = center_y.relative_error > ULPS
     recompute_lower_x = lower_x.relative_error > ULPS
