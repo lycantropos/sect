@@ -77,14 +77,14 @@ def to_point_point_segment_circle_event(first_point_event: SiteEvent,
     return CircleEvent(center_x, center_y, lower_x)
 
 
-def to_point_segment_segment_circle_event(first_site: SiteEvent,
-                                          second_site: SiteEvent,
-                                          third_site: SiteEvent,
+def to_point_segment_segment_circle_event(point_event: SiteEvent,
+                                          first_segment_event: SiteEvent,
+                                          second_segment_event: SiteEvent,
                                           point_index: int) -> CircleEvent:
-    first_segment_start_x, first_segment_start_y = second_site.start
-    first_segment_end_x, first_segment_end_y = second_site.end
-    second_segment_start_x, second_segment_start_y = third_site.start
-    second_segment_end_x, second_segment_end_y = third_site.end
+    first_segment_start_x, first_segment_start_y = first_segment_event.start
+    first_segment_end_x, first_segment_end_y = first_segment_event.end
+    second_segment_start_x, second_segment_start_y = second_segment_event.start
+    second_segment_end_x, second_segment_end_y = second_segment_event.end
     first_segment_dx = (float(first_segment_end_x)
                         - float(first_segment_start_x))
     first_segment_dy = (float(first_segment_end_y)
@@ -102,7 +102,7 @@ def to_point_segment_segment_circle_event(first_site: SiteEvent,
             1.)
     first_segment_squared_length = (first_segment_dx * first_segment_dx
                                     + first_segment_dy * first_segment_dy)
-    first_site_start_x, first_site_start_y = first_site.start
+    point_x, point_y = point_event.start
     if segments_signed_area:
         first_segment_length = RobustFloat(sqrt(first_segment_squared_length),
                                            2.)
@@ -126,15 +126,15 @@ def to_point_segment_segment_circle_event(first_site: SiteEvent,
                 robust_cross_product(
                         first_segment_start_y - first_segment_end_y,
                         first_segment_start_x - first_segment_end_x,
-                        first_segment_start_y - first_site_start_y,
-                        first_segment_start_x - first_site_start_x),
+                        first_segment_start_y - point_y,
+                        first_segment_start_x - point_x),
                 1.)
         second_signed_area = RobustFloat(
                 robust_cross_product(
                         second_segment_end_x - second_segment_start_x,
                         second_segment_end_y - second_segment_start_y,
-                        second_segment_end_x - first_site_start_x,
-                        second_segment_end_y - first_site_start_y),
+                        second_segment_end_x - point_x,
+                        second_segment_end_y - point_y),
                 1.)
         determinant = (RobustFloat(2.) * a * first_signed_area
                        * second_signed_area)
@@ -171,15 +171,15 @@ def to_point_segment_segment_circle_event(first_site: SiteEvent,
               * RobustFloat(robust_cross_product(
                         second_segment_end_x - second_segment_start_x,
                         second_segment_end_y - second_segment_start_y,
-                        -first_site_start_y,
-                        first_site_start_x),
+                        -point_y,
+                        point_x),
                         1.))
         b -= (second_segment_length
               * RobustFloat(robust_cross_product(
                         first_segment_start_x - first_segment_end_x,
                         first_segment_start_y - first_segment_end_y,
-                        -first_site_start_y,
-                        first_site_start_x),
+                        -point_y,
+                        point_x),
                         1.))
         t -= b
         t += determinant.sqrt() if point_index == 2 else -determinant.sqrt()
@@ -205,23 +205,23 @@ def to_point_segment_segment_circle_event(first_site: SiteEvent,
                 robust_cross_product(
                         first_segment_start_x - first_segment_end_x,
                         first_segment_start_y - first_segment_end_y,
-                        first_site_start_x - first_segment_end_x,
-                        first_site_start_y - first_segment_end_y)
+                        point_x - first_segment_end_x,
+                        point_y - first_segment_end_y)
                 * robust_cross_product(
                         first_segment_start_y - first_segment_end_y,
                         first_segment_start_x - first_segment_end_x,
-                        first_site_start_y - second_segment_start_y,
-                        first_site_start_x - second_segment_start_x),
+                        point_y - second_segment_start_y,
+                        point_x - second_segment_start_x),
                 3.)
         t = RobustDifference.zero()
         t += (RobustFloat(first_segment_dx)
               * RobustFloat(0.5 * (float(first_segment_end_x)
                                    + float(second_segment_start_x))
-                            - float(first_site_start_x)))
+                            - float(point_x)))
         t += (RobustFloat(first_segment_dy)
               * RobustFloat(0.5 * (float(first_segment_end_y)
                                    + float(second_segment_start_y))
-                            - float(first_site_start_y)))
+                            - float(point_y)))
         t += determinant.sqrt() if point_index == 2 else -determinant.sqrt()
         t /= a
         center_x = RobustDifference.zero()
@@ -244,8 +244,10 @@ def to_point_segment_segment_circle_event(first_site: SiteEvent,
     center_y = center_y.value
     lower_x = lower_x.value
     return (_to_point_segment_segment_circle_event(center_x, center_y, lower_x,
-                                                   first_site, second_site,
-                                                   third_site, point_index,
+                                                   point_event,
+                                                   first_segment_event,
+                                                   second_segment_event,
+                                                   point_index,
                                                    recompute_center_x,
                                                    recompute_center_y,
                                                    recompute_lower_x)
