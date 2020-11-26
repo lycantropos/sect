@@ -4,11 +4,10 @@ from typing import Optional
 from reprit import seekers
 from reprit.base import generate_repr
 
-from .enums import (ComparisonResult,
-                    GeometryCategory,
+from sect.hints import Coordinate
+from .enums import (GeometryCategory,
                     SourceCategory)
 from .hints import Source
-from .utils import compare_floats
 
 
 class Cell:
@@ -38,18 +37,14 @@ class Cell:
 class Vertex:
     __slots__ = 'x', 'y', 'incident_edge'
 
-    def __init__(self, x: float, y: float) -> None:
+    def __init__(self, x: Coordinate, y: Coordinate) -> None:
         self.x, self.y = x, y
         self.incident_edge = None  # type: Optional[Edge]
 
     __repr__ = generate_repr(__init__)
 
-    def __eq__(self, other: 'Vertex',
-               *,
-               ulps: int = 128) -> bool:
-        return (compare_floats(self.x, other.x, ulps)
-                is compare_floats(self.y, other.y, ulps)
-                is ComparisonResult.EQUAL
+    def __eq__(self, other: 'Vertex') -> bool:
+        return (self.x == other.x and self.y == other.y
                 if isinstance(other, Vertex)
                 else NotImplemented)
 

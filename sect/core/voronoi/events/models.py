@@ -9,7 +9,8 @@ from sect.core.voronoi.enums import (ComparisonResult,
 from sect.core.voronoi.hints import Source
 from sect.core.voronoi.utils import (are_same_vertical_points,
                                      compare_floats)
-from sect.hints import Point
+from sect.hints import (Coordinate,
+                        Point)
 
 ULPS = 64
 
@@ -90,9 +91,9 @@ class CircleEvent:
     __slots__ = 'center_x', 'center_y', 'lower_x', 'is_active'
 
     def __init__(self,
-                 center_x: float,
-                 center_y: float,
-                 lower_x: float,
+                 center_x: Coordinate,
+                 center_y: Coordinate,
+                 lower_x: Coordinate,
                  is_active: bool = True) -> None:
         self.center_x, self.center_y = center_x, center_y
         self.lower_x = lower_x
@@ -113,29 +114,9 @@ class CircleEvent:
             other_start_x, _ = other.start
             return compare_floats(float(self.lower_x), float(other_start_x),
                                   ULPS) is ComparisonResult.LESS
-        return ((self.lower_x, self.y) < (other.lower_x, other.y)
+        return ((self.lower_x, self.center_y) < (other.lower_x, other.center_y)
                 if isinstance(other, CircleEvent)
                 else NotImplemented)
-
-    @property
-    def lower_y(self) -> float:
-        return self.center_y
-
-    @property
-    def x(self) -> float:
-        return self.center_x
-
-    @x.setter
-    def x(self, value: float) -> None:
-        self.center_x = value
-
-    @property
-    def y(self) -> float:
-        return self.center_y
-
-    @y.setter
-    def y(self, value: float) -> None:
-        self.center_y = value
 
     def lies_outside_vertical_segment(self, site: SiteEvent) -> bool:
         if not site.is_segment or not site.is_vertical:
@@ -145,9 +126,9 @@ class CircleEvent:
         start_y, end_y = ((site_end_y, site_start_y)
                           if site.is_inverse
                           else (site_start_y, site_end_y))
-        return (compare_floats(self.y, float(start_y),
+        return (compare_floats(float(self.center_y), float(start_y),
                                ULPS) is ComparisonResult.LESS
-                or compare_floats(self.y, float(end_y),
+                or compare_floats(float(self.center_y), float(end_y),
                                   ULPS) is ComparisonResult.MORE)
 
     def deactivate(self) -> None:
