@@ -75,13 +75,6 @@ def safe_divide_floats(dividend: float, divisor: float) -> float:
                 else nan)
 
 
-def safe_sqrt(value: float) -> float:
-    try:
-        return sqrt(value)
-    except ValueError:
-        return nan
-
-
 def to_orientation(vertex: Point,
                    first_ray_point: Point,
                    second_ray_point: Point) -> Orientation:
