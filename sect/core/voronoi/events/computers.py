@@ -151,14 +151,14 @@ def to_point_segment_segment_circle_event(point_event: SiteEvent,
                         second_segment_end_x, second_segment_end_y),
                 1.)
         inverted_segments_signed_area = RobustFloat(1.) / segments_signed_area
-        t = RobustDifference.zero()
-        b = RobustDifference.zero()
-        ix = RobustDifference.zero()
+        t = RobustFloat()
+        b = RobustFloat()
+        ix = RobustFloat()
         ix += (RobustFloat(second_segment_dx) * first_segment_signed_area
                * inverted_segments_signed_area)
         ix -= (RobustFloat(first_segment_dx) * second_segment_signed_area
                * inverted_segments_signed_area)
-        iy = RobustDifference.zero()
+        iy = RobustFloat()
         iy -= (RobustFloat(first_segment_dy) * second_segment_signed_area
                * inverted_segments_signed_area)
         iy += (RobustFloat(second_segment_dy) * first_segment_signed_area
@@ -213,7 +213,7 @@ def to_point_segment_segment_circle_event(point_event: SiteEvent,
                         point_y - second_segment_start_y,
                         point_x - second_segment_start_x),
                 3.)
-        t = RobustDifference.zero()
+        t = RobustFloat()
         t += (RobustFloat(first_segment_dx)
               * RobustFloat(0.5 * (float(first_segment_end_x)
                                    + float(second_segment_start_x))
@@ -224,19 +224,16 @@ def to_point_segment_segment_circle_event(point_event: SiteEvent,
                             - float(point_y)))
         t += determinant.sqrt() if point_index == 2 else -determinant.sqrt()
         t /= a
-        center_x = RobustDifference.zero()
+        center_x = RobustFloat()
         center_x += RobustFloat(0.5 * (float(first_segment_end_x)
                                        + float(second_segment_start_x)))
         center_x -= t * RobustFloat(first_segment_dx)
-        center_y = RobustDifference.zero()
+        center_y = RobustFloat()
         center_y += RobustFloat(0.5 * (float(first_segment_end_y)
                                        + float(second_segment_start_y)))
         center_y -= t * RobustFloat(first_segment_dy)
         lower_x = copy(center_x)
         lower_x += RobustFloat(0.5) * abs(c) / a.sqrt()
-    center_x = center_x.evaluate()
-    center_y = center_y.evaluate()
-    lower_x = lower_x.evaluate()
     recompute_center_x = center_x.relative_error > ULPS
     recompute_center_y = center_y.relative_error > ULPS
     recompute_lower_x = lower_x.relative_error > ULPS
