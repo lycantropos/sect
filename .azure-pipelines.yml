@@ -122,7 +122,7 @@ steps:
   - script: python -m pip install --upgrade codecov
     condition: succeeded()
     displayName: 'Install coverage dependencies'
-  - script: python -m codecov -f coverage.xml -X gcov
+  - script: python -m codecov -f coverage.xml -X gcov --build "$AGENT_JOBNAME"
     condition: succeeded()
     displayName: 'Upload coverage'
     env:
