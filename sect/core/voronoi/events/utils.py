@@ -1,9 +1,15 @@
 import ctypes
+from decimal import Decimal
+from fractions import Fraction
 from math import (frexp,
                   inf)
 from typing import Tuple
 
+from robust import projection
+
 from sect.core.voronoi.big_float import BigFloat
+from sect.hints import (Coordinate,
+                        Point)
 
 MAX_DIGITS_COUNT = 64
 
@@ -50,6 +56,26 @@ def robust_sum_of_products_with_sqrt_quadruplets(
                      first_right * second_right,
                      third_right * fourth_right))
             / (a - b))
+
+
+def robust_evenly_divide(dividend: Coordinate,
+                         divisor: int) -> Coordinate:
+    return (Fraction(dividend, divisor)
+            if isinstance(dividend, int)
+            else dividend / divisor)
+
+
+def robust_divide(dividend: Coordinate, divisor: Coordinate) -> Coordinate:
+    return (Fraction(dividend, divisor)
+            if isinstance(divisor, int)
+            else dividend / divisor)
+
+
+def robust_sqrt(value: Coordinate) -> Coordinate:
+    return Fraction.from_decimal((Decimal(value.numerator) / value.denominator
+                                  if isinstance(value, Fraction)
+                                  else Decimal(value))
+                                 .sqrt())
 
 
 def robust_sum_of_products_with_sqrt_triplets(
@@ -138,6 +164,10 @@ def to_second_point_segment_segment_quadruplets_expression(
                          2 * left[0] * left[1] - left[2] * left[2] * right[3]),
                         (1, right[0] * right[1]))
                 / (lh - rh))
+
+
+def to_segment_squared_length(start: Point, end: Point) -> Coordinate:
+    return projection.signed_length(start, end, start, end)
 
 
 def _to_uint32(value: int) -> int:
