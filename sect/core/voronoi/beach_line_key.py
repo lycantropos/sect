@@ -1,8 +1,8 @@
 from copy import copy
-from math import sqrt
 from typing import Tuple
 
 from reprit.base import generate_repr
+from robust import parallelogram
 
 from sect.hints import (Coordinate,
                         Point)
@@ -11,8 +11,9 @@ from .enums import (ComparisonResult,
 from .events import SiteEvent
 from .utils import (compare_floats,
                     deltas_to_orientation,
-                    robust_cross_product,
                     robust_divide,
+                    robust_evenly_divide,
+                    robust_sqrt,
                     to_orientation,
                     to_segment_squared_length)
 
@@ -100,25 +101,25 @@ def distance_to_point_arc(site: SiteEvent, point: Point) -> Coordinate:
     return robust_divide(to_segment_squared_length(point, site.start), 2 * dx)
 
 
-def distance_to_segment_arc(site: SiteEvent, point: Point) -> float:
-    if site.is_vertical:
-        start_x, _ = site.start
+def distance_to_segment_arc(segment_event: SiteEvent,
+                            point: Point) -> Coordinate:
+    if segment_event.is_vertical:
+        start_x, _ = segment_event.start
         x, _ = point
-        return (float(start_x) - float(x)) * 0.5
+        return robust_evenly_divide(start_x - x, 2)
     else:
-        start_x, start_y = site.start
-        end_x, end_y = site.end
-        a1 = float(end_x) - float(start_x)
-        b1 = float(end_y) - float(start_y)
-        k = sqrt(a1 * a1 + b1 * b1)
+        start_x, start_y = start = segment_event.start
+        end_x, end_y = end = segment_event.end
+        segment_length = robust_sqrt(to_segment_squared_length(start, end))
         # avoid subtraction while computing k
-        if not b1 < 0:
-            k = 1. / (b1 + k)
-        else:
-            k = (k - b1) / (a1 * a1)
-        x, y = point
-        return k * robust_cross_product(end_x - start_x, end_y - start_y,
-                                        x - start_x, y - start_y)
+        segment_dx = end_x - start_x
+        segment_dy = end_y - start_y
+        coefficient = (robust_divide(segment_length - segment_dy,
+                                     segment_dx * segment_dx)
+                       if segment_dy < 0
+                       else robust_divide(1, segment_dy + segment_length))
+        return coefficient * parallelogram.signed_area(start, end, start,
+                                                       point)
 
 
 def horizontal_goes_through_right_arc_first(left_site: SiteEvent,
