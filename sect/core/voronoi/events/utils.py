@@ -96,7 +96,7 @@ def robust_sum_of_products_with_sqrt_triplets(
             / (a - b))
 
 
-def to_first_point_segment_segment_quadruplets_expression2(
+def to_first_point_segment_segment_quadruplets_expression(
         left: Tuple[Coordinate, Coordinate, Coordinate, Coordinate],
         right: Tuple[Coordinate, Coordinate, Coordinate, Coordinate]
 ) -> Coordinate:
@@ -127,7 +127,7 @@ def to_second_point_segment_segment_quadruplets_expression(
                 if lh >= 0 and rh >= 0 or lh <= 0 and rh <= 0
                 else
                 robust_divide(
-                        to_first_point_segment_segment_quadruplets_expression2(
+                        to_first_point_segment_segment_quadruplets_expression(
                                 (2 * left[3] * left[0],
                                  2 * left[3] * left[1],
                                  left[0] * left[0] * right[0]
