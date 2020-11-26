@@ -1,20 +1,15 @@
 from robust import (parallelogram,
                     projection)
 
-from sect.core.voronoi.robust_float import RobustFloat
-from sect.core.voronoi.utils import (robust_cross_product,
-                                     safe_divide_floats)
 from sect.hints import (Coordinate,
                         Point)
-from .models import (ULPS,
-                     CircleEvent,
+from .models import (CircleEvent,
                      SiteEvent)
 from .utils import (
     robust_divide,
     robust_evenly_divide,
     robust_sqrt,
     robust_sum_of_products_with_sqrt_pairs as pairs_sum_expression,
-    robust_sum_of_products_with_sqrt_quadruplets as quadruplets_sum_expression,
     robust_sum_of_products_with_sqrt_triplets as triplets_sum_expression,
     to_second_point_segment_segment_quadruplets_expression
     as to_quadruplets_expression,
@@ -286,74 +281,3 @@ def _to_point_point_segment_coefficient(first_point: Point,
     else:
         return (robust_divide(scalar_product, 4 * first_point_signed_area)
                 - robust_divide(first_point_signed_area, scalar_product))
-
-
-def _to_segment_segment_segment_circle_event(center_x: Coordinate,
-                                             center_y: Coordinate,
-                                             lower_x: Coordinate,
-                                             first_site: SiteEvent,
-                                             second_site: SiteEvent,
-                                             third_site: SiteEvent,
-                                             recompute_center_x: bool = True,
-                                             recompute_center_y: bool = True,
-                                             recompute_lower_x: bool = True
-                                             ) -> CircleEvent:
-    first_site_start_x, first_site_start_y = first_site.start
-    first_site_end_x, first_site_end_y = first_site.end
-    second_site_start_x, second_site_start_y = second_site.start
-    second_site_end_x, second_site_end_y = second_site.end
-    third_site_start_x, third_site_start_y = third_site.start
-    third_site_end_x, third_site_end_y = third_site.end
-    first_dx = first_site_end_x - first_site_start_x
-    first_dy = first_site_end_y - first_site_start_y
-    second_dx = second_site_end_x - second_site_start_x
-    second_dy = second_site_end_y - second_site_start_y
-    third_dx = third_site_end_x - third_site_start_x
-    third_dy = third_site_end_y - third_site_start_y
-    segments_lengths = (first_dx * first_dx + first_dy * first_dy,
-                        second_dx * second_dx + second_dy * second_dy,
-                        third_dx * third_dx + third_dy * third_dy)
-    denominator = float(triplets_sum_expression(
-            (second_dx * third_dy - third_dx * second_dy,
-             third_dx * first_dy - first_dx * third_dy,
-             first_dx * second_dy - second_dx * first_dy),
-            segments_lengths))
-    first_signed_area = (first_site_start_x * first_site_end_y
-                         - first_site_start_y * first_site_end_x)
-    second_signed_area = (second_site_start_x * second_site_end_y
-                          - second_site_start_y * second_site_end_x)
-    third_signed_area = (third_site_start_x * third_site_end_y
-                         - third_site_start_y * third_site_end_x)
-    if recompute_center_y:
-        center_y = safe_divide_floats(
-                float(triplets_sum_expression(
-                        (second_dy * third_signed_area
-                         - third_dy * second_signed_area,
-                         third_dy * first_signed_area
-                         - first_dy * third_signed_area,
-                         first_dy * second_signed_area
-                         - second_dy * first_signed_area),
-                        segments_lengths)),
-                denominator)
-    if recompute_center_x or recompute_lower_x:
-        common_left_coefficients = (second_dx * third_signed_area
-                                    - third_dx * second_signed_area,
-                                    third_dx * first_signed_area
-                                    - first_dx * third_signed_area,
-                                    first_dx * second_signed_area
-                                    - second_dx * first_signed_area)
-        if recompute_center_x:
-            center_x = safe_divide_floats(
-                    float(triplets_sum_expression(common_left_coefficients,
-                                                  segments_lengths)),
-                    denominator)
-        if recompute_lower_x:
-            lower_x = safe_divide_floats(
-                    float(quadruplets_sum_expression(
-                            common_left_coefficients
-                            + (common_left_coefficients[0] * first_dy
-                               + common_left_coefficients[1] * second_dy
-                               + common_left_coefficients[2] * third_dy,),
-                            segments_lengths + (1,))),
-                    denominator)
-    return CircleEvent(center_x, center_y, lower_x)
