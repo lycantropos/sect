@@ -25,12 +25,13 @@ from .utils import (
     to_segment_squared_length)
 
 
-def to_point_point_point_circle_event(first_site: SiteEvent,
-                                      second_site: SiteEvent,
-                                      third_site: SiteEvent) -> CircleEvent:
-    first_x, first_y = first_point = first_site.start
-    second_x, second_y = second_point = second_site.start
-    third_x, third_y = third_point = third_site.start
+def to_point_point_point_circle_event(first_point_event: SiteEvent,
+                                      second_point_event: SiteEvent,
+                                      third_point_event: SiteEvent
+                                      ) -> CircleEvent:
+    first_x, first_y = first_point = first_point_event.start
+    second_x, second_y = second_point = second_point_event.start
+    third_x, third_y = third_point = third_point_event.start
     first_squared_norm = first_x * first_x + first_y * first_y
     second_squared_norm = second_x * second_x + second_y * second_y
     third_squared_norm = third_x * third_x + third_y * third_y
