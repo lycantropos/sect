@@ -3,14 +3,14 @@ from typing import Tuple
 
 from reprit.base import generate_repr
 from robust import parallelogram
+from robust.angular import (Orientation,
+                            orientation)
 
 from sect.hints import (Coordinate,
                         Point)
-from .enums import (ComparisonResult,
-                    Orientation)
+from .enums import ComparisonResult
 from .events import SiteEvent
 from .utils import (compare_floats,
-                    orientation,
                     robust_divide,
                     robust_evenly_divide,
                     robust_sqrt,

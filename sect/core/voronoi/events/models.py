@@ -1,14 +1,14 @@
 from typing import TypeVar
 
 from reprit.base import generate_repr
+from robust.angular import (Orientation,
+                            orientation)
 
 from sect.core.voronoi.enums import (ComparisonResult,
-                                     Orientation,
                                      SourceCategory)
 from sect.core.voronoi.hints import Source
 from sect.core.voronoi.utils import (are_same_vertical_points,
-                                     compare_floats,
-                                     orientation)
+                                     compare_floats)
 from sect.hints import Point
 
 ULPS = 64

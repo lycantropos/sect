@@ -1,5 +1,6 @@
-from sect.core.voronoi.enums import Orientation
-from sect.core.voronoi.utils import orientation
+from robust.angular import (Orientation,
+                            orientation)
+
 from .models import SiteEvent
 
 

@@ -14,8 +14,7 @@ from robust import projection
 
 from sect.hints import (Coordinate,
                         Point)
-from .enums import (ComparisonResult,
-                    Orientation)
+from .enums import ComparisonResult
 
 Domain = TypeVar('Domain')
 
@@ -36,14 +35,6 @@ def compare_floats(left: float, right: float, max_ulps: int
             else (ComparisonResult.EQUAL
                   if right_uint - left_uint <= max_ulps
                   else ComparisonResult.MORE))
-
-
-def deltas_to_orientation(first_dx: int,
-                          first_dy: int,
-                          second_dx: int,
-                          second_dy: int) -> Orientation:
-    return Orientation(to_sign(robust_cross_product(first_dx, first_dy,
-                                                    second_dx, second_dy)))
 
 
 def robust_cross_product(first_dx: int,
@@ -97,18 +88,6 @@ def safe_divide_floats(dividend: float, divisor: float) -> float:
         return (copysign(inf, dividend * divisor)
                 if dividend and not isnan(dividend)
                 else nan)
-
-
-def orientation(first_ray_point: Point,
-                vertex: Point,
-                second_ray_point: Point) -> Orientation:
-    vertex_x, vertex_y = vertex
-    first_ray_point_x, first_ray_point_y = first_ray_point
-    second_ray_point_x, second_ray_point_y = second_ray_point
-    return deltas_to_orientation(first_ray_point_x - vertex_x,
-                                 first_ray_point_y - vertex_y,
-                                 second_ray_point_x - vertex_x,
-                                 second_ray_point_y - vertex_y)
 
 
 def to_segment_squared_length(start: Point, end: Point) -> Coordinate:
