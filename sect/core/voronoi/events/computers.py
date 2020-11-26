@@ -200,53 +200,49 @@ def to_segment_segment_segment_circle_event(first_event: SiteEvent,
     second_end_x, second_end_y = second_end = second_event.end
     third_start_x, third_start_y = third_start = third_event.start
     third_end_x, third_end_y = third_end = third_event.end
-    first_length = robust_sqrt(to_segment_squared_length(first_start,
-                                                         first_end))
-    second_length = robust_sqrt(to_segment_squared_length(second_start,
-                                                          second_end))
-    third_length = robust_sqrt(to_segment_squared_length(third_start,
-                                                         third_end))
-    first_second_signed_area = parallelogram.signed_area(
-            first_start, first_end, second_start, second_end)
-    second_third_signed_area = parallelogram.signed_area(
-            second_start, second_end, third_start, third_end)
-    third_first_signed_area = parallelogram.signed_area(
-            third_start, third_end, first_start, first_end)
-    denominator = 0
-    denominator += first_second_signed_area * third_length
-    denominator += second_third_signed_area * first_length
-    denominator += third_first_signed_area * second_length
-    first_signed_area = parallelogram.signed_area((0, 0), first_start,
-                                                  (0, 0), first_end)
-    second_signed_area = parallelogram.signed_area((0, 0), second_start,
-                                                   (0, 0), second_end)
-    third_signed_area = parallelogram.signed_area((0, 0), third_start,
-                                                  (0, 0), third_end)
-    radius = 0
-    radius -= first_second_signed_area * third_signed_area
-    radius -= second_third_signed_area * first_signed_area
-    radius -= third_first_signed_area * second_signed_area
     first_dx = first_end_x - first_start_x
     first_dy = first_end_y - first_start_y
     second_dx = second_end_x - second_start_x
     second_dy = second_end_y - second_start_y
     third_dx = third_end_x - third_start_x
     third_dy = third_end_y - third_start_y
-    center_x_numerator = 0
-    center_x_numerator += first_dx * second_signed_area * third_length
-    center_x_numerator -= second_dx * first_signed_area * third_length
-    center_x_numerator += second_dx * third_signed_area * first_length
-    center_x_numerator -= third_dx * second_signed_area * first_length
-    center_x_numerator += third_dx * first_signed_area * second_length
-    center_x_numerator -= first_dx * third_signed_area * second_length
-    center_y_numerator = 0
-    center_y_numerator += first_dy * second_signed_area * third_length
-    center_y_numerator -= second_dy * first_signed_area * third_length
-    center_y_numerator += second_dy * third_signed_area * first_length
-    center_y_numerator -= third_dy * second_signed_area * first_length
-    center_y_numerator += third_dy * first_signed_area * second_length
-    center_y_numerator -= first_dy * third_signed_area * second_length
-    lower_x_numerator = center_x_numerator + radius
+    first_length = robust_sqrt(to_segment_squared_length(first_start,
+                                                         first_end))
+    second_length = robust_sqrt(to_segment_squared_length(second_start,
+                                                          second_end))
+    third_length = robust_sqrt(to_segment_squared_length(third_start,
+                                                         third_end))
+    first_signed_area = parallelogram.signed_area((0, 0), first_start,
+                                                  (0, 0), first_end)
+    second_signed_area = parallelogram.signed_area((0, 0), second_start,
+                                                   (0, 0), second_end)
+    third_signed_area = parallelogram.signed_area((0, 0), third_start,
+                                                  (0, 0), third_end)
+    second_third_coefficient = (second_signed_area * third_length
+                                - third_signed_area * second_length)
+    third_first_coefficient = (third_signed_area * first_length
+                               - first_signed_area * third_length)
+    first_second_coefficient = (first_signed_area * second_length
+                                - second_signed_area * first_length)
+    center_x_numerator = (first_dx * second_third_coefficient
+                          + second_dx * third_first_coefficient
+                          + third_dx * first_second_coefficient)
+    center_y_numerator = (first_dy * second_third_coefficient
+                          + second_dy * third_first_coefficient
+                          + third_dy * first_second_coefficient)
+    first_second_signed_area = parallelogram.signed_area(
+            first_start, first_end, second_start, second_end)
+    second_third_signed_area = parallelogram.signed_area(
+            second_start, second_end, third_start, third_end)
+    third_first_signed_area = parallelogram.signed_area(
+            third_start, third_end, first_start, first_end)
+    radius = (first_second_signed_area * third_signed_area
+              + second_third_signed_area * first_signed_area
+              + third_first_signed_area * second_signed_area)
+    lower_x_numerator = center_x_numerator - radius
+    denominator = (first_second_signed_area * third_length
+                   + second_third_signed_area * first_length
+                   + third_first_signed_area * second_length)
     center_x = robust_divide(center_x_numerator, denominator)
     center_y = robust_divide(center_y_numerator, denominator)
     lower_x = robust_divide(lower_x_numerator, denominator)
