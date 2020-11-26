@@ -22,9 +22,9 @@ class GeometryCategory(Base):
 
 @unique
 class Orientation(Base):
-    RIGHT = -1
+    CLOCKWISE = -1
     COLLINEAR = 0
-    LEFT = 1
+    COUNTERCLOCKWISE = 1
 
 
 @unique

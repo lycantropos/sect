@@ -7,7 +7,7 @@ def point_point_point_circle_exists(first_site: SiteEvent,
                                     second_site: SiteEvent,
                                     third_site: SiteEvent) -> bool:
     return orientation(second_site.start, first_site.start,
-                       third_site.start) is Orientation.RIGHT
+                       third_site.start) is Orientation.CLOCKWISE
 
 
 def point_point_segment_circle_exists(first_site: SiteEvent,
@@ -25,12 +25,12 @@ def point_point_segment_circle_exists(first_site: SiteEvent,
         first_site_start_x, _ = first_site.start
         second_site_start_x, _ = second_site.start
         if segment_index == 1 and second_site_start_x <= first_site_start_x:
-            return first_orientation is Orientation.RIGHT
+            return first_orientation is Orientation.CLOCKWISE
         elif segment_index == 3 and first_site_start_x <= second_site_start_x:
-            return second_orientation is Orientation.RIGHT
+            return second_orientation is Orientation.CLOCKWISE
         else:
-            return (first_orientation is Orientation.RIGHT
-                    or second_orientation is Orientation.RIGHT)
+            return (first_orientation is Orientation.CLOCKWISE
+                    or second_orientation is Orientation.CLOCKWISE)
 
 
 def point_segment_segment_circle_exists(first_site: SiteEvent,
@@ -43,7 +43,7 @@ def point_segment_segment_circle_exists(first_site: SiteEvent,
                  and (second_site.is_inverse is not third_site.is_inverse
                       or orientation(first_site.start, second_site.start,
                                      third_site.end)
-                      is Orientation.RIGHT)))
+                      is Orientation.CLOCKWISE)))
 
 
 def segment_segment_segment_circle_exists(first_site: SiteEvent,

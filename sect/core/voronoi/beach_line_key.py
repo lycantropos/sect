@@ -166,7 +166,7 @@ def point_segment_horizontal_goes_through_right_arc_first(
         reverse_order: bool) -> bool:
     segment_start, segment_end = segment_event.start, segment_event.end
     if (orientation(segment_end, segment_start, point)
-            is not Orientation.RIGHT):
+            is not Orientation.CLOCKWISE):
         return not segment_event.is_inverse
     if segment_event.is_vertical:
         _, point_event_y = point_event.start
@@ -209,7 +209,7 @@ def segment_segment_horizontal_goes_through_right_arc_first(
     # handle temporary segment sites
     if left_site.sorted_index == right_site.sorted_index:
         return (orientation(left_site.end, left_site.start, point)
-                is Orientation.LEFT)
+                is Orientation.COUNTERCLOCKWISE)
     distance_from_left = distance_to_segment_arc(left_site, point)
     distance_from_right = distance_to_segment_arc(right_site, point)
     # undefined ulp range is equal to 7EPS + 7EPS <= 14ULP

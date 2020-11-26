@@ -57,7 +57,7 @@ class SiteEvent:
                 return start_y < other_start_y
             else:
                 return (orientation(self.start, self.end, other.end)
-                        is Orientation.LEFT)
+                        is Orientation.COUNTERCLOCKWISE)
         else:
             start_x, _ = self.start
             return (compare_floats(float(start_x), float(other.lower_x),
