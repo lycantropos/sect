@@ -1,18 +1,21 @@
 from copy import copy
 from math import sqrt
 
-from robust import parallelogram
+from robust import (parallelogram,
+                    projection)
 
 from sect.core.voronoi.robust_difference import RobustDifference
 from sect.core.voronoi.robust_float import RobustFloat
 from sect.core.voronoi.utils import (robust_cross_product,
                                      safe_divide_floats)
-from sect.hints import Coordinate
+from sect.hints import (Coordinate,
+                        Point)
 from .models import (ULPS,
                      CircleEvent,
                      SiteEvent)
 from .utils import (
     robust_divide,
+    robust_evenly_divide,
     robust_sqrt,
     robust_sum_of_products_with_sqrt_pairs as pairs_sum_expression,
     robust_sum_of_products_with_sqrt_quadruplets as quadruplets_sum_expression,
@@ -49,92 +52,28 @@ def to_point_point_point_circle_event(first_site: SiteEvent,
                        lower_x_numerator * inverted_signed_area)
 
 
-def to_point_point_segment_circle_event(first_site: SiteEvent,
-                                        second_site: SiteEvent,
-                                        third_site: SiteEvent,
+def to_point_point_segment_circle_event(first_point_event: SiteEvent,
+                                        second_point_event: SiteEvent,
+                                        segment_event: SiteEvent,
                                         segment_index: int) -> CircleEvent:
-    first_site_start_x, first_site_start_y = first_site.start
-    second_site_start_x, second_site_start_y = second_site.start
-    third_site_start_x, third_site_start_y = third_site.start
-    third_site_end_x, third_site_end_y = third_site.end
-    segment_dx = float(third_site_end_x) - float(third_site_start_x)
-    segment_dy = float(third_site_end_y) - float(third_site_start_y)
-    points_dx = float(second_site_start_y) - float(first_site_start_y)
-    points_dy = float(second_site_start_x) - float(first_site_start_x)
-    theta = RobustFloat(
-            robust_cross_product(third_site_end_y - third_site_start_y,
-                                 third_site_start_x - third_site_end_x,
-                                 second_site_start_x - first_site_start_x,
-                                 second_site_start_y - first_site_start_y),
-            1.)
-    first_signed_area = RobustFloat(
-            robust_cross_product(third_site_start_y - third_site_end_y,
-                                 third_site_start_x - third_site_end_x,
-                                 third_site_end_y - first_site_start_y,
-                                 third_site_end_x - first_site_start_x),
-            1.)
-    second_signed_area = RobustFloat(
-            robust_cross_product(third_site_start_y - third_site_end_y,
-                                 third_site_start_x - third_site_end_x,
-                                 third_site_end_y - second_site_start_y,
-                                 third_site_end_x - second_site_start_x),
-            1.)
-    denominator = RobustFloat(
-            robust_cross_product(first_site_start_y - second_site_start_y,
-                                 first_site_start_x - second_site_start_x,
-                                 third_site_end_y - third_site_start_y,
-                                 third_site_end_x - third_site_start_x),
-            1.)
-    inverted_segment_length = RobustFloat(
-            safe_divide_floats(1., sqrt(segment_dy * segment_dy
-                                        + segment_dx * segment_dx)),
-            3.)
-    t = RobustDifference.zero()
-    if denominator:
-        squared_denominator = denominator * denominator
-        determinant = ((theta * theta + squared_denominator)
-                       * first_signed_area * second_signed_area).sqrt()
-        t += (-determinant
-              if segment_index == 2
-              else determinant) / squared_denominator
-        t += (theta * (first_signed_area + second_signed_area)
-              / (RobustFloat(2.) * squared_denominator))
-    else:
-        t += theta / (RobustFloat(8.) * first_signed_area)
-        t -= first_signed_area / (RobustFloat(2.) * theta)
-    center_x = RobustDifference.zero()
-    center_x += RobustFloat(0.5 * (float(first_site_start_x)
-                                   + float(second_site_start_x)))
-    center_x += t * RobustFloat(points_dx)
-    center_y = RobustDifference.zero()
-    center_y += RobustFloat(0.5 * (float(first_site_start_y)
-                                   + float(second_site_start_y)))
-    center_y -= t * RobustFloat(points_dy)
-    r = RobustDifference.zero()
-    r -= RobustFloat(segment_dy) * RobustFloat(third_site_start_x)
-    r += RobustFloat(segment_dx) * RobustFloat(third_site_start_y)
-    r += center_x * RobustFloat(segment_dy)
-    r -= center_y * RobustFloat(segment_dx)
-    r = abs(r)
-    lower_x = copy(center_x)
-    lower_x += r * inverted_segment_length
-    center_x = center_x.evaluate()
-    center_y = center_y.evaluate()
-    lower_x = lower_x.evaluate()
-    recompute_center_x = center_x.relative_error > ULPS
-    recompute_center_y = center_y.relative_error > ULPS
-    recompute_lower_x = lower_x.relative_error > ULPS
-    center_x = center_x.value
-    center_y = center_y.value
-    lower_x = lower_x.value
-    return (_to_point_point_segment_circle_event(center_x, center_y, lower_x,
-                                                 first_site, second_site,
-                                                 third_site, segment_index,
-                                                 recompute_center_x,
-                                                 recompute_center_y,
-                                                 recompute_lower_x)
-            if recompute_center_x or recompute_center_y or recompute_lower_x
-            else CircleEvent(center_x, center_y, lower_x))
+    first_point_x, first_point_y = first_point = first_point_event.start
+    second_point_x, second_point_y = second_point = second_point_event.start
+    segment_start, segment_end = segment_event.start, segment_event.end
+    points_dx = second_point_y - first_point_y
+    points_dy = second_point_x - first_point_x
+    coefficient = _to_point_point_segment_coefficient(
+            first_point, second_point, segment_start, segment_end,
+            segment_index)
+    center_x = robust_evenly_divide(first_point_x + second_point_x
+                                    + coefficient * points_dx, 2)
+    center_y = robust_evenly_divide(first_point_y + second_point_y
+                                    - coefficient * points_dy, 2)
+    r = abs(parallelogram.signed_area(segment_start, (center_x, center_y),
+                                      segment_start, segment_end))
+    squared_segment_length = to_segment_squared_length(segment_start,
+                                                       segment_end)
+    lower_x = center_x + r / robust_sqrt(squared_segment_length)
+    return CircleEvent(center_x, center_y, lower_x)
 
 
 def to_point_segment_segment_circle_event(first_site: SiteEvent,
@@ -405,107 +344,34 @@ def to_segment_segment_segment_circle_event(first_site: SiteEvent,
             else CircleEvent(center_x, center_y, lower_x))
 
 
-def _to_point_point_segment_circle_event(center_x: Coordinate,
-                                         center_y: Coordinate,
-                                         lower_x: Coordinate,
-                                         first_site: SiteEvent,
-                                         second_site: SiteEvent,
-                                         third_site: SiteEvent,
-                                         segment_index: int,
-                                         recompute_center_x: bool = True,
-                                         recompute_center_y: bool = True,
-                                         recompute_lower_x: bool = True
-                                         ) -> CircleEvent:
-    first_site_start_x, first_site_start_y = first_site.start
-    third_site_start_x, third_site_start_y = third_site.start
-    third_site_end_x, third_site_end_y = third_site.end
-    segment_dx = third_site_end_x - third_site_start_x
-    segment_dy = third_site_end_y - third_site_start_y
-    segment_length = segment_dx * segment_dx + segment_dy * segment_dy
-    second_site_start_x, second_site_start_y = second_site.start
-    perpendicular_x = second_site_start_y - first_site_start_y
-    perpendicular_y = first_site_start_x - second_site_start_x
-    points_sx = first_site_start_x + second_site_start_x
-    points_sy = first_site_start_y + second_site_start_y
-    signed_perpendicular_area = (perpendicular_x * segment_dy
-                                 - segment_dx * perpendicular_y)
-    signed_perpendicular_projection_length = (perpendicular_x * segment_dx
-                                              + perpendicular_y * segment_dy)
-    # signed area of parallelogram built on
-    signed_first_point_area = (
-            segment_dy * (first_site_start_x - third_site_end_x)
-            - segment_dx * (first_site_start_y - third_site_end_y))
-    signed_second_point_area = (
-            segment_dy * (second_site_start_x - third_site_end_x)
-            - segment_dx * (second_site_start_y - third_site_end_y))
-    signed_points_area = signed_first_point_area + signed_second_point_area
-    squared_perpendicular_area = (signed_perpendicular_area
-                                  * signed_perpendicular_area)
-    if not signed_perpendicular_projection_length:
-        squared_points_area = signed_points_area * signed_points_area
-        numerator = squared_perpendicular_area - squared_points_area
-        determinant = signed_perpendicular_area * signed_points_area
-        coefficients = (2 * determinant * points_sx
-                        + numerator * perpendicular_x,
-                        signed_perpendicular_area
-                        * (2 * squared_points_area + numerator))
-        inverted_denominator = safe_divide_floats(1., float(determinant))
-        if recompute_center_x:
-            center_x = 0.25 * float(coefficients[0]) * inverted_denominator
-        if recompute_center_y:
-            center_y = (0.25 * float((2 * determinant * points_sy)
-                                     + numerator * perpendicular_y)
-                        * inverted_denominator)
-        if recompute_lower_x:
-            lower_x = safe_divide_floats(
-                    0.25 * float(pairs_sum_expression(coefficients[:2],
-                                                      (segment_length, 1)))
-                    * inverted_denominator,
-                    sqrt(float(segment_length)))
+def _to_point_point_segment_coefficient(first_point: Point,
+                                        second_point: Point,
+                                        segment_start: Point,
+                                        segment_end: Point,
+                                        segment_index: int) -> Coordinate:
+    scalar_product = projection.signed_length(segment_start, segment_end,
+                                              first_point, second_point)
+    first_point_signed_area = parallelogram.signed_area(
+            segment_start, segment_end, first_point, segment_end)
+    signed_area = parallelogram.signed_area(first_point, second_point,
+                                            segment_start, segment_end)
+    if signed_area:
+        second_point_signed_area = parallelogram.signed_area(
+                segment_start, segment_end, second_point, segment_end)
+        squared_signed_area = signed_area * signed_area
+        determinant = robust_sqrt((scalar_product * scalar_product
+                                   + squared_signed_area)
+                                  * first_point_signed_area
+                                  * second_point_signed_area)
+        return robust_divide(2 * (-determinant
+                                  if segment_index == 2
+                                  else determinant)
+                             + scalar_product * (first_point_signed_area
+                                                 + second_point_signed_area),
+                             squared_signed_area)
     else:
-        squared_perpendicular_projection_length = (
-                signed_perpendicular_projection_length
-                * signed_perpendicular_projection_length)
-        determinant = (4 * (squared_perpendicular_area
-                            + squared_perpendicular_projection_length)
-                       * signed_first_point_area * signed_second_point_area)
-        squared_inverted_denominator = 1. / float(
-                signed_perpendicular_projection_length)
-        squared_inverted_denominator *= squared_inverted_denominator
-        if recompute_center_x or recompute_lower_x:
-            coefficients = (points_sx * squared_perpendicular_projection_length
-                            + (signed_perpendicular_area * signed_points_area
-                               * perpendicular_x),
-                            -perpendicular_x
-                            if segment_index == 2
-                            else perpendicular_x)
-            if recompute_center_x:
-                center_x = (0.5 * float(pairs_sum_expression(coefficients,
-                                                             (1, determinant)))
-                            * squared_inverted_denominator)
-            if recompute_lower_x:
-                lower_x = (0.5 * float(quadruplets_sum_expression(
-                        coefficients
-                        + (signed_points_area
-                           * (squared_perpendicular_projection_length
-                              + squared_perpendicular_area),
-                           -signed_perpendicular_area
-                           if segment_index == 2
-                           else signed_perpendicular_area),
-                        (segment_length, determinant * segment_length, 1,
-                         determinant)))
-                           * squared_inverted_denominator
-                           / sqrt(float(segment_length)))
-        if recompute_center_y:
-            center_y = (0.5 * float(pairs_sum_expression(
-                    (points_sy * squared_perpendicular_projection_length
-                     + (signed_perpendicular_area * signed_points_area
-                        * perpendicular_y),
-                     -perpendicular_y
-                     if segment_index == 2
-                     else perpendicular_y),
-                    (1, determinant))) * squared_inverted_denominator)
-    return CircleEvent(center_x, center_y, lower_x)
+        return (robust_divide(scalar_product, 4 * first_point_signed_area)
+                - robust_divide(first_point_signed_area, scalar_product))
 
 
 def _to_point_segment_segment_circle_event(center_x: Coordinate,
