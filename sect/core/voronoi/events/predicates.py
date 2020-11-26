@@ -1,13 +1,13 @@
 from sect.core.voronoi.enums import Orientation
-from sect.core.voronoi.utils import to_orientation
+from sect.core.voronoi.utils import orientation
 from .models import SiteEvent
 
 
 def point_point_point_circle_exists(first_site: SiteEvent,
                                     second_site: SiteEvent,
                                     third_site: SiteEvent) -> bool:
-    return to_orientation(second_site.start, first_site.start,
-                          third_site.start) is Orientation.RIGHT
+    return orientation(second_site.start, first_site.start,
+                       third_site.start) is Orientation.RIGHT
 
 
 def point_point_segment_circle_exists(first_site: SiteEvent,
@@ -18,10 +18,10 @@ def point_point_segment_circle_exists(first_site: SiteEvent,
         return (third_site.start != first_site.start
                 or third_site.end != second_site.start)
     else:
-        first_orientation = to_orientation(second_site.start, first_site.start,
-                                           third_site.start)
-        second_orientation = to_orientation(second_site.start,
-                                            first_site.start, third_site.end)
+        first_orientation = orientation(second_site.start, first_site.start,
+                                        third_site.start)
+        second_orientation = orientation(second_site.start,
+                                         first_site.start, third_site.end)
         first_site_start_x, _ = first_site.start
         second_site_start_x, _ = second_site.start
         if segment_index == 1 and second_site_start_x <= first_site_start_x:
@@ -41,8 +41,8 @@ def point_segment_segment_circle_exists(first_site: SiteEvent,
             and (point_index != 2
                  or (second_site.is_inverse or not third_site.is_inverse)
                  and (second_site.is_inverse is not third_site.is_inverse
-                      or to_orientation(first_site.start, second_site.start,
-                                        third_site.end)
+                      or orientation(first_site.start, second_site.start,
+                                     third_site.end)
                       is Orientation.RIGHT)))
 
 

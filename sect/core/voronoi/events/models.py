@@ -8,7 +8,7 @@ from sect.core.voronoi.enums import (ComparisonResult,
 from sect.core.voronoi.hints import Source
 from sect.core.voronoi.utils import (are_same_vertical_points,
                                      compare_floats,
-                                     to_orientation)
+                                     orientation)
 from sect.hints import Point
 
 ULPS = 64
@@ -56,7 +56,7 @@ class SiteEvent:
             elif start_y != other_start_y:
                 return start_y < other_start_y
             else:
-                return (to_orientation(self.start, self.end, other.end)
+                return (orientation(self.start, self.end, other.end)
                         is Orientation.LEFT)
         else:
             start_x, _ = self.start
