@@ -21,13 +21,6 @@ class GeometryCategory(Base):
 
 
 @unique
-class Orientation(Base):
-    CLOCKWISE = -1
-    COLLINEAR = 0
-    COUNTERCLOCKWISE = 1
-
-
-@unique
 class SourceCategory(Base):
     # point subtypes
     SINGLE_POINT = 0x0
