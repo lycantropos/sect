@@ -1,19 +1,19 @@
 from robust import (parallelogram,
                     projection)
 
+from sect.core.voronoi.utils import (robust_divide,
+                                     robust_evenly_divide,
+                                     robust_sqrt,
+                                     to_segment_squared_length)
 from sect.hints import (Coordinate,
                         Point)
 from .models import (CircleEvent,
                      SiteEvent)
 from .utils import (
-    robust_divide,
-    robust_evenly_divide,
-    robust_sqrt,
     robust_sum_of_products_with_sqrt_pairs as pairs_sum_expression,
     robust_sum_of_products_with_sqrt_triplets as triplets_sum_expression,
     to_second_point_segment_segment_quadruplets_expression
-    as to_quadruplets_expression,
-    to_segment_squared_length)
+    as to_quadruplets_expression)
 
 
 def to_point_point_point_circle_event(first_point_event: SiteEvent,

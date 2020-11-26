@@ -9,12 +9,12 @@ from sect.hints import (Coordinate,
 from .enums import (ComparisonResult,
                     Orientation)
 from .events import SiteEvent
-from .events.utils import (robust_divide,
-                           to_segment_squared_length)
 from .utils import (compare_floats,
                     deltas_to_orientation,
                     robust_cross_product,
-                    to_orientation)
+                    robust_divide,
+                    to_orientation,
+                    to_segment_squared_length)
 
 
 class BeachLineKey:

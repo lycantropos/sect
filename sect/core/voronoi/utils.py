@@ -1,15 +1,19 @@
 import ctypes
 import struct
+from decimal import Decimal
+from fractions import Fraction
 from itertools import groupby
 from math import (copysign,
                   inf,
                   isnan,
-                  nan,
-                  sqrt)
+                  nan)
 from typing import (List,
                     TypeVar)
 
-from sect.hints import Point
+from robust import projection
+
+from sect.hints import (Coordinate,
+                        Point)
 from .enums import (ComparisonResult,
                     Orientation)
 
@@ -66,6 +70,26 @@ def robust_cross_product(first_dx: int,
                 else float(_to_uint64(absolute_subtrahend - absolute_minuend)))
 
 
+def robust_evenly_divide(dividend: Coordinate,
+                         divisor: int) -> Coordinate:
+    return (Fraction(dividend, divisor)
+            if isinstance(dividend, int)
+            else dividend / divisor)
+
+
+def robust_divide(dividend: Coordinate, divisor: Coordinate) -> Coordinate:
+    return (Fraction(dividend, divisor)
+            if isinstance(divisor, int)
+            else dividend / divisor)
+
+
+def robust_sqrt(value: Coordinate) -> Coordinate:
+    return Fraction.from_decimal((Decimal(value.numerator) / value.denominator
+                                  if isinstance(value, Fraction)
+                                  else Decimal(value))
+                                 .sqrt())
+
+
 def safe_divide_floats(dividend: float, divisor: float) -> float:
     try:
         return dividend / divisor
@@ -85,6 +109,10 @@ def to_orientation(vertex: Point,
                                  first_ray_point_y - vertex_y,
                                  second_ray_point_x - vertex_x,
                                  second_ray_point_y - vertex_y)
+
+
+def to_segment_squared_length(start: Point, end: Point) -> Coordinate:
+    return projection.signed_length(start, end, start, end)
 
 
 def to_sign(value: float) -> int:
