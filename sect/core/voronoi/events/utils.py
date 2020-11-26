@@ -1,4 +1,3 @@
-import ctypes
 from decimal import Decimal
 from fractions import Fraction
 from typing import Tuple
@@ -7,8 +6,6 @@ from robust import projection
 
 from sect.hints import (Coordinate,
                         Point)
-
-MAX_DIGITS_COUNT = 64
 
 
 def robust_product_with_sqrt(left: Coordinate,
@@ -28,32 +25,6 @@ def robust_sum_of_products_with_sqrt_pairs(
             else ((first_left * first_left * first_right
                    - second_left * second_left * second_right)
                   / (a - b)))
-
-
-def robust_sum_of_products_with_sqrt_quadruplets(
-        left: Tuple[Coordinate, Coordinate, Coordinate, Coordinate],
-        right: Tuple[Coordinate, Coordinate, Coordinate, Coordinate]
-) -> Coordinate:
-    first_left, second_left, third_left, fourth_left = left
-    first_right, second_right, third_right, fourth_right = right
-    a = robust_sum_of_products_with_sqrt_pairs((first_left, second_left),
-                                               (first_right, second_right))
-    b = robust_sum_of_products_with_sqrt_pairs((third_left, fourth_left),
-                                               (third_right, fourth_right))
-    return (a + b
-            if a >= 0 and b >= 0 or a <= 0 and b <= 0
-            else
-            robust_sum_of_products_with_sqrt_triplets(
-                    (first_left * first_left * first_right
-                     + second_left * second_left * second_right
-                     - third_left * third_left * third_right
-                     - fourth_left * fourth_left * fourth_right,
-                     2 * first_left * second_left,
-                     -2 * third_left * fourth_left),
-                    (1,
-                     first_right * second_right,
-                     third_right * fourth_right))
-            / (a - b))
 
 
 def robust_evenly_divide(dividend: Coordinate,
@@ -158,7 +129,3 @@ def to_second_point_segment_segment_quadruplets_expression(
 
 def to_segment_squared_length(start: Point, end: Point) -> Coordinate:
     return projection.signed_length(start, end, start, end)
-
-
-def _to_uint32(value: int) -> int:
-    return ctypes.c_uint32(value).value
