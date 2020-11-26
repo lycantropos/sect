@@ -4,14 +4,16 @@ from typing import Tuple
 
 from reprit.base import generate_repr
 
-from sect.hints import Point
+from sect.hints import (Coordinate,
+                        Point)
 from .enums import (ComparisonResult,
                     Orientation)
 from .events import SiteEvent
+from .events.utils import (robust_divide,
+                           to_segment_squared_length)
 from .utils import (compare_floats,
                     deltas_to_orientation,
                     robust_cross_product,
-                    safe_divide_floats,
                     to_orientation)
 
 
@@ -91,13 +93,11 @@ class BeachLineKey:
             return right_site_start_y, -1
 
 
-def distance_to_point_arc(site: SiteEvent, point: Point) -> float:
-    start_x, start_y = site.start
-    x, y = point
-    dx = float(start_x) - float(x)
-    dy = float(start_y) - float(y)
-    # the relative error is at most 3EPS
-    return safe_divide_floats(dx * dx + dy * dy, 2.0 * dx)
+def distance_to_point_arc(site: SiteEvent, point: Point) -> Coordinate:
+    start_x, _ = site.start
+    x, _ = point
+    dx = start_x - x
+    return robust_divide(to_segment_squared_length(point, site.start), 2 * dx)
 
 
 def distance_to_segment_arc(site: SiteEvent, point: Point) -> float:
