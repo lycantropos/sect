@@ -1,6 +1,3 @@
-from copy import copy
-from math import sqrt
-
 from robust import (parallelogram,
                     projection)
 
@@ -81,121 +78,122 @@ def to_point_segment_segment_circle_event(point_event: SiteEvent,
                                           first_segment_event: SiteEvent,
                                           second_segment_event: SiteEvent,
                                           point_index: int) -> CircleEvent:
-    first_segment_start_x, first_segment_start_y = first_segment_event.start
-    first_segment_end_x, first_segment_end_y = first_segment_event.end
-    second_segment_start_x, second_segment_start_y = second_segment_event.start
-    second_segment_end_x, second_segment_end_y = second_segment_event.end
-    first_segment_dx = first_segment_end_x - first_segment_start_x
-    first_segment_dy = first_segment_end_y - first_segment_start_y
-    second_segment_dx = second_segment_end_x - second_segment_start_x
-    second_segment_dy = second_segment_end_y - second_segment_start_y
-    segments_signed_area = parallelogram.signed_area(
-            first_segment_event.start, first_segment_event.end,
-            second_segment_event.start, second_segment_event.end)
-    first_segment_squared_length = (first_segment_dx * first_segment_dx
-                                    + first_segment_dy * first_segment_dy)
-    point_x, point_y = point_event.start
+    point_x, point_y = point = point_event.start
+    first_start_x, first_start_y = first_start = first_segment_event.start
+    first_end_x, first_end_y = first_end = first_segment_event.end
+    second_start_x, second_start_y = second_start = second_segment_event.start
+    second_end_x, second_end_y = second_end = second_segment_event.end
+    first_dx = first_end_x - first_start_x
+    first_dy = first_end_y - first_start_y
+    segments_signed_area = parallelogram.signed_area(first_start, first_end,
+                                                     second_start, second_end)
+    first_squared_length = to_segment_squared_length(first_start, first_end)
     if segments_signed_area:
-        first_segment_length = robust_sqrt(first_segment_squared_length)
-        second_segment_length = robust_sqrt(
-                second_segment_dx * second_segment_dx
-                + second_segment_dy * second_segment_dy)
-        a = -projection.signed_length(first_segment_event.start,
-                                      first_segment_event.end,
-                                      second_segment_event.start,
-                                      second_segment_event.end)
-        if a < 0:
-            a = robust_divide(segments_signed_area * segments_signed_area,
-                              first_segment_length * second_segment_length
-                              - a)
+        first_start_signed_area = parallelogram.signed_area(
+                first_start, first_end, (0, 0), first_start)
+        second_end_signed_area = parallelogram.signed_area(
+                second_start, second_end, (0, 0), second_end)
+        second_dx = second_end_x - second_start_x
+        second_dy = second_end_y - second_start_y
+        ix = (second_dx * first_start_signed_area
+              - first_dx * second_end_signed_area)
+        iy = (second_dy * first_start_signed_area
+              - first_dy * second_end_signed_area)
+        scaled_point_x = segments_signed_area * point_x
+        scaled_point_y = segments_signed_area * point_y
+        if ix == scaled_point_x and iy == scaled_point_y:
+            denominator = segments_signed_area
+            center_x = lower_x = robust_divide(ix, denominator)
+            center_y = robust_divide(iy, denominator)
         else:
-            a += first_segment_length * second_segment_length
-        first_signed_area = parallelogram.signed_area(
-                first_segment_event.start, first_segment_event.end,
-                point_event.start, first_segment_event.start)
-        second_signed_area = parallelogram.signed_area(
-                second_segment_event.start, second_segment_event.end,
-                point_event.start, second_segment_event.end)
-        determinant = 2 * a * first_signed_area * second_signed_area
-        first_segment_signed_area = parallelogram.signed_area(
-                first_segment_event.start, first_segment_event.end, (0, 0),
-                first_segment_event.start)
-        second_segment_signed_area = parallelogram.signed_area(
-                second_segment_event.start, second_segment_event.end, (0, 0),
-                second_segment_event.end)
-        inverted_segments_signed_area = robust_divide(1, segments_signed_area)
-        b = 0
-        ix = 0
-        ix += (second_segment_dx * first_segment_signed_area
-               * inverted_segments_signed_area)
-        ix -= (first_segment_dx * second_segment_signed_area
-               * inverted_segments_signed_area)
-        iy = 0
-        iy -= (first_segment_dy * second_segment_signed_area
-               * inverted_segments_signed_area)
-        iy += (second_segment_dy * first_segment_signed_area
-               * inverted_segments_signed_area)
-        b -= ix * (first_segment_dx * second_segment_length)
-        b += ix * (second_segment_dx * first_segment_length)
-        b -= iy * (first_segment_dy * second_segment_length)
-        b += iy * (second_segment_dy * first_segment_length)
-        b -= (first_segment_length
-              * projection.signed_length(second_segment_event.start,
-                                         second_segment_event.end, (0, 0),
-                                         point_event.start))
-        b += (second_segment_length
-              * projection.signed_length(first_segment_event.start,
-                                         first_segment_event.end,
-                                         (0, 0), point_event.start))
-        t = 0
-        t -= b
-        t += (robust_sqrt(determinant)
-              if point_index == 2
-              else -robust_sqrt(determinant))
-        t /= a * a
-        center_x = copy(ix)
-        center_x -= t * (first_segment_dx * second_segment_length)
-        center_x += t * (second_segment_dx * first_segment_length)
-        center_y = copy(iy)
-        center_y -= t * (first_segment_dy * second_segment_length)
-        center_y += t * (second_segment_dy * first_segment_length)
-        lower_x = copy(center_x)
-        lower_x += abs(t) * abs(segments_signed_area)
+            sign = ((-1 if point_index == 2 else 1)
+                    * ((1 if segments_signed_area > 0 else -1)
+                       if segments_signed_area
+                       else 0))
+            second_squared_length = to_segment_squared_length(second_start,
+                                                              second_end)
+            segments_scalar_product = projection.signed_length(
+                    first_start, first_end, second_start, second_end)
+            scaled_point = (scaled_point_x, scaled_point_y)
+            i_point = (ix, iy)
+            first_cross_product = parallelogram.signed_area(
+                    scaled_point, i_point, first_start, first_end)
+            first_scalar_product = projection.signed_length(
+                    scaled_point, i_point, first_start, first_end)
+            second_cross_product = parallelogram.signed_area(
+                    scaled_point, i_point, second_start, second_end)
+            second_scalar_product = projection.signed_length(
+                    scaled_point, i_point, second_start, second_end)
+            common_right_coefficients = (first_squared_length,
+                                         second_squared_length,
+                                         -segments_scalar_product,
+                                         2 * first_cross_product
+                                         * second_cross_product)
+            coefficient = to_quadruplets_expression(
+                    (-second_scalar_product, first_scalar_product, sign, 0),
+                    common_right_coefficients)
+            denominator = coefficient * segments_signed_area
+            squared_length = to_segment_squared_length(i_point, scaled_point)
+            center_y = robust_divide(to_quadruplets_expression(
+                    (second_dy * squared_length - iy * second_scalar_product,
+                     iy * first_scalar_product - first_dy * squared_length,
+                     iy * sign, 0),
+                    common_right_coefficients),
+                    denominator)
+            common_left_coefficients = (second_dx * squared_length
+                                        - ix * second_scalar_product,
+                                        ix * first_scalar_product
+                                        - first_dx * squared_length,
+                                        ix * sign)
+            center_x = robust_divide(to_quadruplets_expression(
+                    common_left_coefficients + (0,),
+                    common_right_coefficients),
+                    denominator)
+            lower_x = robust_divide(to_quadruplets_expression(
+                    common_left_coefficients
+                    + (segments_signed_area * squared_length
+                       * (-1 if coefficient < 0 else 1),),
+                    common_right_coefficients), denominator)
     else:
-        a = first_segment_squared_length
-        c = -parallelogram.signed_area(
-                first_segment_event.start, first_segment_event.end,
-                second_segment_event.start, first_segment_event.end)
-        determinant = (parallelogram.signed_area(first_segment_event.start,
-                                                 first_segment_event.end,
-                                                 point_event.start,
-                                                 first_segment_event.end)
-                       * parallelogram.signed_area(first_segment_event.start,
-                                                   first_segment_event.end,
-                                                   second_segment_event.start,
-                                                   point_event.start))
-        t = 0
-        t += (first_segment_dx
-              * (robust_evenly_divide(first_segment_end_x
-                                      + second_segment_start_x, 2)
-                 - point_x))
-        t += (first_segment_dy
-              * (robust_evenly_divide(first_segment_end_y
-                                      + second_segment_start_y, 2)
-                 - point_y))
-        t += robust_sqrt(determinant) if point_index == 2 else -robust_sqrt(
-                determinant)
-        t /= a
-        center_x = 0
-        center_x += robust_evenly_divide(first_segment_end_x
-                                         + second_segment_start_x, 2)
-        center_x -= t * first_segment_dx
-        center_y = 0
-        center_y += robust_evenly_divide(first_segment_end_y
-                                         + second_segment_start_y, 2)
-        center_y -= t * first_segment_dy
-        lower_x = copy(center_x)
-        lower_x += abs(c) / (2 * robust_sqrt(a))
+        denominator = 2 * first_squared_length
+        dx = parallelogram.signed_area(first_start, first_end, point,
+                                       first_end)
+        dy = parallelogram.signed_area(first_start, first_end, second_start,
+                                       point)
+        common_right_coefficients = (dx * dy, 1)
+        squared_first_dx = first_dx * first_dx
+        squared_first_dy = first_dy * first_dy
+        center_y = robust_divide(
+                pairs_sum_expression(
+                        (first_dy * (-2 if point_index == 2 else 2),
+                         squared_first_dx * (first_end_y + second_start_y)
+                         - first_dx * first_dy
+                         * (first_end_x + second_start_x
+                            - point_x * 2)
+                         + squared_first_dy * (point_y * 2)),
+                        common_right_coefficients),
+                denominator)
+        common_left_coefficients = ((-2 if point_index == 2 else 2)
+                                    * first_dx,
+                                    squared_first_dy
+                                    * (first_end_x + second_start_x)
+                                    - first_dx * first_dy
+                                    * (first_end_y - point_y
+                                       + second_start_y - point_y)
+                                    + 2 * squared_first_dx * point_x)
+        center_x = robust_divide(
+                pairs_sum_expression(common_left_coefficients,
+                                     common_right_coefficients),
+                denominator)
+        lower_x = robust_divide(
+                triplets_sum_expression(
+                        common_left_coefficients
+                        + (abs(parallelogram.signed_area(
+                                first_start, first_end, first_end,
+                                second_start)),),
+                        common_right_coefficients
+                        + (first_squared_length,)),
+                denominator)
     return CircleEvent(center_x, center_y, lower_x)
 
 
@@ -319,134 +317,6 @@ def _to_point_point_segment_coefficient(first_point: Point,
     else:
         return (robust_divide(scalar_product, 4 * first_point_signed_area)
                 - robust_divide(first_point_signed_area, scalar_product))
-
-
-def _to_point_segment_segment_circle_event(center_x: Coordinate,
-                                           center_y: Coordinate,
-                                           lower_x: Coordinate,
-                                           first_site: SiteEvent,
-                                           second_site: SiteEvent,
-                                           third_site: SiteEvent,
-                                           point_index: int,
-                                           recompute_center_x: bool = True,
-                                           recompute_center_y: bool = True,
-                                           recompute_lower_x: bool = True
-                                           ) -> CircleEvent:
-    first_site_start_x, first_site_start_y = first_site.start
-    second_start_x, second_start_y = second_site.start
-    second_end_x, second_end_y = second_site.end
-    third_start_x, third_start_y = third_site.start
-    third_end_x, third_end_y = third_site.end
-    second_dx = second_end_x - second_start_x
-    second_dy = second_end_y - second_start_y
-    third_dx = third_end_x - third_start_x
-    third_dy = third_end_y - third_start_y
-    third_second_signed_area = second_dx * third_dy - third_dx * second_dy
-    squared_second_dx = second_dx * second_dx
-    squared_second_dy = second_dy * second_dy
-    if third_second_signed_area:
-        third_signed_area = third_dx * third_end_y - third_dy * third_end_x
-        second_signed_area = (second_dx * second_start_y
-                              - second_dy * second_start_x)
-        ix = third_dx * second_signed_area - second_dx * third_signed_area
-        iy = third_dy * second_signed_area - second_dy * third_signed_area
-        dx = ix - third_second_signed_area * first_site_start_x
-        dy = iy - third_second_signed_area * first_site_start_y
-        if dx or dy:
-            sign = ((-1 if point_index == 2 else 1)
-                    * ((1 if third_second_signed_area > 0 else -1)
-                       if third_second_signed_area
-                       else 0))
-            common_right_coefficients = (
-                squared_second_dx + squared_second_dy,
-                third_dx * third_dx + third_dy * third_dy,
-                -second_dx * third_dx - second_dy * third_dy,
-                -2 * (second_dy * dx - second_dx * dy)
-                * (third_dx * dy - third_dy * dx))
-            temp = float(to_quadruplets_expression(
-                    (-third_dx * dx - third_dy * dy,
-                     second_dx * dx + second_dy * dy, sign, 0),
-                    common_right_coefficients))
-            denominator = temp * float(third_second_signed_area)
-            squared_length = dx * dx + dy * dy
-            if recompute_center_y:
-                center_y = (float(to_quadruplets_expression(
-                        (third_dy * squared_length
-                         - iy * (dx * third_dx + dy * third_dy),
-                         iy * (dx * second_dx + dy * second_dy)
-                         - second_dy * squared_length,
-                         iy * sign, 0),
-                        common_right_coefficients))
-                            / denominator)
-            if recompute_center_x or recompute_lower_x:
-                common_left_coefficients = (
-                    third_dx * squared_length
-                    - ix * (dx * third_dx + dy * third_dy),
-                    ix * (dx * second_dx + dy * second_dy)
-                    - second_dx * squared_length,
-                    ix * sign)
-                if recompute_center_x:
-                    center_x = (float(to_quadruplets_expression(
-                            common_left_coefficients + (0,),
-                            common_right_coefficients))
-                                / denominator)
-                if recompute_lower_x:
-                    lower_x = (float(to_quadruplets_expression(
-                            common_left_coefficients
-                            + (third_second_signed_area * squared_length
-                               * (-1 if temp < 0 else 1),),
-                            common_right_coefficients))
-                               / denominator)
-        else:
-            denominator = float(third_second_signed_area)
-            center_x = lower_x = float(ix) / denominator
-            center_y = float(iy) / denominator
-    else:
-        denominator = 2. * float(squared_second_dx + squared_second_dy)
-        dx = (second_dy * (first_site_start_x - second_end_x)
-              - second_dx * (first_site_start_y - second_end_y))
-        dy = (second_dx * (first_site_start_y - third_start_y)
-              - second_dy * (first_site_start_x - third_start_x))
-        common_right_coefficients = (dx * dy, 1)
-        if recompute_center_y:
-            center_y = safe_divide_floats(
-                    float(pairs_sum_expression(
-                            (second_dy * (-2 if point_index == 2 else 2),
-                             squared_second_dx * (second_end_y + third_start_y)
-                             - second_dx * second_dy
-                             * (second_end_x + third_start_x
-                                - first_site_start_x * 2)
-                             + squared_second_dy * (first_site_start_y * 2)),
-                            common_right_coefficients)),
-                    denominator)
-        if recompute_center_x or recompute_lower_x:
-            common_left_coefficients = ((-2 if point_index == 2 else 2)
-                                        * second_dx,
-                                        squared_second_dy
-                                        * (second_end_x + third_start_x)
-                                        - second_dx * second_dy
-                                        * (second_end_y + third_start_y
-                                           - 2 * first_site_start_y)
-                                        + squared_second_dx
-                                        * (2 * first_site_start_x))
-            if recompute_center_x:
-                center_x = safe_divide_floats(
-                        float(pairs_sum_expression(common_left_coefficients,
-                                                   common_right_coefficients)),
-                        denominator)
-            if recompute_lower_x:
-                third_start_second_end_dx = third_start_x - second_end_x
-                third_start_second_end_dy = third_start_y - second_end_y
-                lower_x = safe_divide_floats(
-                        float(triplets_sum_expression(
-                                common_left_coefficients
-                                + (abs(second_dx * third_start_second_end_dy
-                                       - second_dy
-                                       * third_start_second_end_dx),),
-                                common_right_coefficients
-                                + (squared_second_dx + squared_second_dy,))),
-                        denominator)
-    return CircleEvent(center_x, center_y, lower_x)
 
 
 def _to_segment_segment_segment_circle_event(center_x: Coordinate,

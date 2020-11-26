@@ -1,40 +1,39 @@
 import ctypes
 from decimal import Decimal
 from fractions import Fraction
-from math import (frexp,
-                  inf)
 from typing import Tuple
 
 from robust import projection
 
-from sect.core.voronoi.big_float import BigFloat
 from sect.hints import (Coordinate,
                         Point)
 
 MAX_DIGITS_COUNT = 64
 
 
-def robust_product_with_sqrt(left: int, right: int) -> BigFloat:
-    return to_big_float(left) * to_big_float(right).sqrt()
+def robust_product_with_sqrt(left: Coordinate,
+                             right: Coordinate) -> Coordinate:
+    return left * robust_sqrt(right)
 
 
-def robust_sum_of_products_with_sqrt_pairs(left: Tuple[int, int],
-                                           right: Tuple[int, int]) -> BigFloat:
+def robust_sum_of_products_with_sqrt_pairs(
+        left: Tuple[Coordinate, Coordinate],
+        right: Tuple[Coordinate, Coordinate]) -> Coordinate:
     first_left, second_left = left
     first_right, second_right = right
     a, b = (robust_product_with_sqrt(first_left, first_right),
             robust_product_with_sqrt(second_left, second_right))
     return (a + b
-            if (a.mantissa >= 0 and b.mantissa >= 0
-                or a.mantissa <= 0 and b.mantissa <= 0)
-            else (to_big_float(first_left * first_left * first_right
-                               - second_left * second_left * second_right)
+            if (a >= 0 and b >= 0 or a <= 0 and b <= 0)
+            else ((first_left * first_left * first_right
+                   - second_left * second_left * second_right)
                   / (a - b)))
 
 
 def robust_sum_of_products_with_sqrt_quadruplets(
-        left: Tuple[int, int, int, int],
-        right: Tuple[int, int, int, int]) -> BigFloat:
+        left: Tuple[Coordinate, Coordinate, Coordinate, Coordinate],
+        right: Tuple[Coordinate, Coordinate, Coordinate, Coordinate]
+) -> Coordinate:
     first_left, second_left, third_left, fourth_left = left
     first_right, second_right, third_right, fourth_right = right
     a = robust_sum_of_products_with_sqrt_pairs((first_left, second_left),
@@ -42,8 +41,7 @@ def robust_sum_of_products_with_sqrt_quadruplets(
     b = robust_sum_of_products_with_sqrt_pairs((third_left, fourth_left),
                                                (third_right, fourth_right))
     return (a + b
-            if (a.mantissa >= 0 and b.mantissa >= 0
-                or a.mantissa <= 0 and b.mantissa <= 0)
+            if a >= 0 and b >= 0 or a <= 0 and b <= 0
             else
             robust_sum_of_products_with_sqrt_triplets(
                     (first_left * first_left * first_right
@@ -79,16 +77,15 @@ def robust_sqrt(value: Coordinate) -> Coordinate:
 
 
 def robust_sum_of_products_with_sqrt_triplets(
-        left: Tuple[int, int, int],
-        right: Tuple[int, int, int]) -> BigFloat:
+        left: Tuple[Coordinate, Coordinate, Coordinate],
+        right: Tuple[Coordinate, Coordinate, Coordinate]) -> Coordinate:
     first_left, second_left, third_left = left
     first_right, second_right, third_right = right
     a = robust_sum_of_products_with_sqrt_pairs((first_left, second_left),
                                                (first_right, second_right))
     b = robust_product_with_sqrt(third_left, third_right)
     return (a + b
-            if (a.mantissa >= 0 and b.mantissa >= 0
-                or a.mantissa <= 0 and b.mantissa <= 0)
+            if a >= 0 and b >= 0 or a <= 0 and b <= 0
             else
             robust_sum_of_products_with_sqrt_pairs(
                     (first_left * first_left * first_right
@@ -99,71 +96,64 @@ def robust_sum_of_products_with_sqrt_triplets(
             / (a - b))
 
 
-def to_big_float(value: int) -> BigFloat:
-    try:
-        mantissa, exponent = frexp(value)
-    except OverflowError:
-        mantissa, exponent = inf, 0
-    return BigFloat(mantissa, exponent)
-
-
-def to_first_point_segment_segment_quadruplets_expression(
-        left: Tuple[int, int, int, int],
-        right: Tuple[int, int, int, int]) -> BigFloat:
+def to_first_point_segment_segment_quadruplets_expression2(
+        left: Tuple[Coordinate, Coordinate, Coordinate, Coordinate],
+        right: Tuple[Coordinate, Coordinate, Coordinate, Coordinate]
+) -> Coordinate:
     lh = robust_sum_of_products_with_sqrt_pairs(left[:2], right[:2])
     rh = robust_sum_of_products_with_sqrt_pairs(left[2:], right[2:])
-    if (lh.mantissa >= 0 and rh.mantissa >= 0
-            or lh.mantissa <= 0 and rh.mantissa <= 0):
+    if lh >= 0 and rh >= 0 or lh <= 0 and rh <= 0:
         return lh + rh
-    return (robust_sum_of_products_with_sqrt_pairs(
+    return robust_divide(robust_sum_of_products_with_sqrt_pairs(
             (left[0] * left[0] * right[0] + left[1] * left[1] * right[1]
              - left[2] * left[2] - left[3] * left[3] * right[0] * right[1],
-             2 * (left[0] * left[1] - left[2] * left[3])),
-            (1, right[3]))
-            / (lh - rh))
+             2 * (left[0] * left[1] - left[2] * left[3])), (1, right[3])),
+            lh - rh)
 
 
 def to_second_point_segment_segment_quadruplets_expression(
-        left: Tuple[int, int, int, int],
-        right: Tuple[int, int, int, int]) -> BigFloat:
+        left: Tuple[Coordinate, Coordinate, Coordinate, Coordinate],
+        right: Tuple[Coordinate, Coordinate, Coordinate, Coordinate]
+) -> Coordinate:
     if left[3]:
         rh = (robust_product_with_sqrt(left[2], right[3])
-              * robust_sum_of_products_with_sqrt_pairs(
+              * robust_sqrt(robust_sum_of_products_with_sqrt_pairs(
                         (1, right[2]),
-                        (right[0] * right[1], 1)).sqrt())
+                        (right[0] * right[1], 1))))
         common_right_coefficients = (right[0], right[1], 1)
         lh = robust_sum_of_products_with_sqrt_triplets(
                 (left[0], left[1], left[3]), common_right_coefficients)
         return (lh + rh
-                if (lh.mantissa >= 0 and rh.mantissa >= 0
-                    or lh.mantissa <= 0 and rh.mantissa <= 0)
+                if lh >= 0 and rh >= 0 or lh <= 0 and rh <= 0
                 else
-                to_first_point_segment_segment_quadruplets_expression(
-                        (2 * left[3] * left[0],
-                         2 * left[3] * left[1],
-                         left[0] * left[0] * right[0]
-                         + left[1] * left[1] * right[1] + left[3] * left[3]
-                         - left[2] * left[2] * right[2] * right[3],
-                         2 * left[0] * left[1] - left[2] * left[2] * right[3]),
-                        common_right_coefficients + (right[0] * right[1],))
-                / (lh - rh))
+                robust_divide(
+                        to_first_point_segment_segment_quadruplets_expression2(
+                                (2 * left[3] * left[0],
+                                 2 * left[3] * left[1],
+                                 left[0] * left[0] * right[0]
+                                 + left[1] * left[1] * right[1] + left[3] *
+                                 left[3]
+                                 - left[2] * left[2] * right[2] * right[3],
+                                 2 * left[0] * left[1] - left[2] * left[2] *
+                                 right[3]),
+                                common_right_coefficients
+                                + (right[0] * right[1],)),
+                        lh - rh))
     else:
         lh = robust_sum_of_products_with_sqrt_pairs(left[:2], right[:2])
         rh = (robust_product_with_sqrt(left[2], right[3])
-              * robust_sum_of_products_with_sqrt_pairs(
-                        (1, right[2]), (right[0] * right[1], 1))
-              .sqrt())
+              * robust_sqrt(robust_sum_of_products_with_sqrt_pairs(
+                        (1, right[2]), (right[0] * right[1], 1))))
         return (lh + rh
-                if (lh.mantissa >= 0 and rh.mantissa >= 0
-                    or lh.mantissa <= 0 and rh.mantissa <= 0)
+                if lh >= 0 and rh >= 0 or lh <= 0 and rh <= 0
                 else
-                robust_sum_of_products_with_sqrt_pairs(
+                robust_divide(robust_sum_of_products_with_sqrt_pairs(
                         (left[0] * left[0] * right[0]
                          + left[1] * left[1] * right[1]
                          - left[2] * left[2] * right[3] * right[2],
                          2 * left[0] * left[1] - left[2] * left[2] * right[3]),
-                        (1, right[0] * right[1]))
-                / (lh - rh))
+                        (1, right[0] * right[1])),
+                        lh - rh))
 
 
 def to_segment_squared_length(start: Point, end: Point) -> Coordinate:
