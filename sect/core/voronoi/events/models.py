@@ -56,7 +56,7 @@ class SiteEvent:
             elif start_y != other_start_y:
                 return start_y < other_start_y
             else:
-                return (to_orientation(self.end, self.start, other.end)
+                return (to_orientation(self.start, self.end, other.end)
                         is Orientation.LEFT)
         else:
             start_x, _ = self.start

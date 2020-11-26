@@ -99,8 +99,8 @@ def safe_divide_floats(dividend: float, divisor: float) -> float:
                 else nan)
 
 
-def to_orientation(vertex: Point,
-                   first_ray_point: Point,
+def to_orientation(first_ray_point: Point,
+                   vertex: Point,
                    second_ray_point: Point) -> Orientation:
     vertex_x, vertex_y = vertex
     first_ray_point_x, first_ray_point_y = first_ray_point
