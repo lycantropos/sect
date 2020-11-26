@@ -8,13 +8,6 @@ class Base(IntEnum):
 
 
 @unique
-class ComparisonResult(Base):
-    LESS = -1
-    EQUAL = 0
-    MORE = 1
-
-
-@unique
 class GeometryCategory(Base):
     POINT = 0x0,
     SEGMENT = 0x1

@@ -8,10 +8,8 @@ from robust.angular import (Orientation,
 
 from sect.hints import (Coordinate,
                         Point)
-from .enums import ComparisonResult
 from .events import SiteEvent
-from .utils import (compare_floats,
-                    robust_divide,
+from .utils import (robust_divide,
                     robust_evenly_divide,
                     robust_sqrt,
                     to_segment_squared_length)
@@ -193,9 +191,7 @@ def point_segment_horizontal_goes_through_right_arc_first(
         fast_left_expr = (segment_dx * (points_dy + points_dx)
                           * (points_dy - points_dx))
         fast_right_expr = 2 * segment_dy * points_dx * points_dy
-        if ((compare_floats(float(fast_left_expr), float(fast_right_expr), 4)
-             is ComparisonResult.MORE)
-                is not reverse_order):
+        if (fast_right_expr < fast_left_expr) is not reverse_order:
             return reverse_order
     distance_from_left = distance_to_point_arc(point_event, point)
     distance_from_right = distance_to_segment_arc(segment_event, point)

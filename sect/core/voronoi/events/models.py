@@ -4,11 +4,9 @@ from reprit.base import generate_repr
 from robust.angular import (Orientation,
                             orientation)
 
-from sect.core.voronoi.enums import (ComparisonResult,
-                                     SourceCategory)
+from sect.core.voronoi.enums import SourceCategory
 from sect.core.voronoi.hints import Source
-from sect.core.voronoi.utils import (are_same_vertical_points,
-                                     compare_floats)
+from sect.core.voronoi.utils import are_same_vertical_points
 from sect.hints import (Coordinate,
                         Point)
 
@@ -61,8 +59,7 @@ class SiteEvent:
                         is Orientation.COUNTERCLOCKWISE)
         else:
             start_x, _ = self.start
-            return (compare_floats(float(start_x), float(other.lower_x),
-                                   ULPS) is ComparisonResult.LESS
+            return (start_x < other.lower_x
                     if isinstance(other, CircleEvent)
                     else NotImplemented)
 
@@ -112,8 +109,7 @@ class CircleEvent:
     def __lt__(self, other: 'Event') -> bool:
         if isinstance(other, SiteEvent):
             other_start_x, _ = other.start
-            return compare_floats(float(self.lower_x), float(other_start_x),
-                                  ULPS) is ComparisonResult.LESS
+            return self.lower_x < other_start_x
         return ((self.lower_x, self.center_y) < (other.lower_x, other.center_y)
                 if isinstance(other, CircleEvent)
                 else NotImplemented)
@@ -126,10 +122,7 @@ class CircleEvent:
         start_y, end_y = ((site_end_y, site_start_y)
                           if site.is_inverse
                           else (site_start_y, site_end_y))
-        return (compare_floats(float(self.center_y), float(start_y),
-                               ULPS) is ComparisonResult.LESS
-                or compare_floats(float(self.center_y), float(end_y),
-                                  ULPS) is ComparisonResult.MORE)
+        return self.center_y < start_y or end_y < self.center_y
 
     def deactivate(self) -> None:
         self.is_active = False

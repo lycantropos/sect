@@ -9,7 +9,6 @@ from robust import projection
 
 from sect.hints import (Coordinate,
                         Point)
-from .enums import ComparisonResult
 
 Domain = TypeVar('Domain')
 
@@ -18,18 +17,6 @@ def are_same_vertical_points(start: Point, end: Point) -> bool:
     start_x, _ = start
     end_x, _ = end
     return start_x == end_x
-
-
-def compare_floats(left: float, right: float, max_ulps: int
-                   ) -> ComparisonResult:
-    left_uint, right_uint = _float_to_uint(left), _float_to_uint(right)
-    return ((ComparisonResult.EQUAL
-             if left_uint - right_uint <= max_ulps
-             else ComparisonResult.LESS)
-            if left_uint > right_uint
-            else (ComparisonResult.EQUAL
-                  if right_uint - left_uint <= max_ulps
-                  else ComparisonResult.MORE))
 
 
 def robust_evenly_divide(dividend: Coordinate,
