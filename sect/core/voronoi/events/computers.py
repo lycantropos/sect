@@ -163,18 +163,17 @@ def to_point_segment_segment_circle_event(point_event: SiteEvent,
         common_right_coefficients = (dx * dy, 1)
         squared_first_dx = first_dx * first_dx
         squared_first_dy = first_dy * first_dy
+        sign = -1 if point_index == 2 else 1
         center_y = robust_divide(
                 pairs_sum_expression(
-                        (first_dy * (-2 if point_index == 2 else 2),
+                        (2 * sign * first_dy,
                          squared_first_dx * (first_end_y + second_start_y)
-                         - first_dx * first_dy
-                         * (first_end_x + second_start_x
-                            - point_x * 2)
+                         - first_dx * first_dy * (first_end_x - point_x
+                                                  + second_start_x - point_x)
                          + squared_first_dy * (point_y * 2)),
                         common_right_coefficients),
                 denominator)
-        common_left_coefficients = ((-2 if point_index == 2 else 2)
-                                    * first_dx,
+        common_left_coefficients = (2 * sign * first_dx,
                                     squared_first_dy
                                     * (first_end_x + second_start_x)
                                     - first_dx * first_dy
