@@ -26,6 +26,8 @@ from sect.hints import (Contour,
 Strategy = SearchStrategy
 Polygon = Tuple[Contour, Sequence[Contour]]
 
+MAX_COORDINATE_EXPONENT = 15
+
 
 def point_in_multisegment(point: Point,
                           multisegment: Multisegment) -> Relation:
