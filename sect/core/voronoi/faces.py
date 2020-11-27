@@ -59,17 +59,13 @@ class Edge:
 
     def __init__(self,
                  start: Optional[Vertex],
-                 twin: Optional['Edge'],
-                 prev: Optional['Edge'],
-                 next_: Optional['Edge'],
                  cell: Cell,
                  is_linear: bool,
                  is_primary: bool) -> None:
         self.start = start
-        self.twin = twin
-        self.prev, self.next = prev, next_
         self.cell = cell
         self.is_linear, self.is_primary = is_linear, is_primary
+        self.twin = self.prev = self.next = None
 
     __repr__ = recursive_repr()(generate_repr(__init__,
                                               field_seeker=seekers.complex_))

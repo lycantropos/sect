@@ -265,16 +265,13 @@ class Diagram:
                                second_site.source_category))
         is_linear = is_linear_edge(first_site, second_site)
         is_primary = is_primary_edge(first_site, second_site)
-        first_edge = Edge(None, None, None, None,
-                          self.cells[first_site.sorted_index], is_linear,
+        first_edge = Edge(None, self.cells[first_site.sorted_index], is_linear,
                           is_primary)
-        second_edge = Edge(None, first_edge, None, None,
-                           self.cells[second_site.sorted_index], is_linear,
-                           is_primary)
-        first_edge.twin = second_edge
+        second_edge = Edge(None, self.cells[second_site.sorted_index],
+                           is_linear, is_primary)
+        first_edge.twin, second_edge.twin = second_edge, first_edge
         self.edges.append(first_edge)
         self.edges.append(second_edge)
-        # add the initial cell during the first edge insertion
         return first_edge, second_edge
 
     def _insert_new_edge_from_intersection(self,
@@ -291,20 +288,20 @@ class Diagram:
         first_bisector.start = second_bisector.start = new_vertex
         is_linear = is_linear_edge(first_site_event, second_site_event)
         is_primary = is_primary_edge(first_site_event, second_site_event)
-        first_edge = Edge(None, None, None, first_bisector,
-                          self.cells[first_site_event.sorted_index],
+        first_edge = Edge(None, self.cells[first_site_event.sorted_index],
                           is_linear, is_primary)
-        second_edge = Edge(new_vertex, first_edge, second_bisector.twin, None,
+        second_edge = Edge(new_vertex,
                            self.cells[second_site_event.sorted_index],
                            is_linear, is_primary)
-        first_edge.twin = second_edge
+        first_edge.twin, second_edge.twin = second_edge, first_edge
+        first_edge.next, second_edge.prev = (first_bisector,
+                                             second_bisector.twin)
+        first_bisector.prev, second_bisector.prev = (first_edge,
+                                                     first_bisector.twin)
+        first_bisector.twin.next, second_bisector.twin.next = (second_bisector,
+                                                               second_edge)
         self.edges.append(first_edge)
         self.edges.append(second_edge)
-        # update Voronoi prev/next pointers
-        first_bisector.prev = first_edge
-        first_bisector.twin.next = second_bisector
-        second_bisector.prev = first_bisector.twin
-        second_bisector.twin.next = second_edge
         return first_edge, second_edge
 
     def _insert_point(self, point: Point) -> None:
