@@ -109,34 +109,34 @@ steps:
     inputs:
       versionSpec: '$(python.version)'
       architecture: '$(python.architecture)'
-  - script: python -m pip install --upgrade pip setuptools
+  - bash: python -m pip install --upgrade pip setuptools
     displayName: 'Install packaging tools'
-  - script: python -m pip install -r requirements.txt
+  - bash: python -m pip install -r requirements.txt
     displayName: 'Install dependencies'
-  - script: python -m doctest README.md
+  - bash: python -m doctest README.md
     displayName: 'Run doctests'
-  - script: python -m pip install -r requirements-tests.txt
+  - bash: python -m pip install -r requirements-tests.txt
     displayName: 'Install tests dependencies'
-  - script: pytest
+  - bash: pytest
     displayName: 'Run tests'
-  - script: python -m pip install --upgrade codecov
+  - bash: python -m pip install --upgrade codecov
     condition: succeeded()
     displayName: 'Install coverage dependencies'
-  - script: python -m codecov -f coverage.xml -X gcov --build "$AGENT_JOBNAME"
+  - bash: python -m codecov -f coverage.xml -X gcov --build "$AGENT_JOBNAME"
     condition: succeeded()
     displayName: 'Upload coverage'
     env:
       CODECOV_TOKEN: $(CODECOV_TOKEN)
-  - script: python -m pip install --upgrade wheel
+  - bash: python -m pip install --upgrade wheel
     condition: and(succeeded(), eq(variables['python.version'], '3.5'), startsWith(variables['Build.SourceBranch'], 'refs/tags/'))
     displayName: 'Install build dependencies'
-  - script: python setup.py sdist bdist_wheel
+  - bash: python setup.py sdist bdist_wheel
     condition: and(succeeded(), eq(variables['python.version'], '3.5'), startsWith(variables['Build.SourceBranch'], 'refs/tags/'))
     displayName: 'Build'
-  - script: python -m pip install --upgrade twine
+  - bash: python -m pip install --upgrade twine
     condition: and(succeeded(), eq(variables['python.version'], '3.5'), startsWith(variables['Build.SourceBranch'], 'refs/tags/'))
     displayName: 'Install deploy dependencies'
-  - script: twine upload --skip-existing dist/*
+  - bash: twine upload --skip-existing dist/*
     condition: and(succeeded(), eq(variables['python.version'], '3.5'), startsWith(variables['Build.SourceBranch'], 'refs/tags/'))
     displayName: 'Deploy'
     env:
