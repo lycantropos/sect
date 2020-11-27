@@ -9,6 +9,7 @@ from .hints import (Contour,
                     Multisegment,
                     Shuffler)
 
+Diagram = Diagram
 Graph = Graph
 Location = Location
 
