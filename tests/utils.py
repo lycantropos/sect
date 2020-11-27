@@ -10,12 +10,14 @@ from hypothesis import strategies
 from hypothesis.strategies import SearchStrategy
 from orient.planar import (Relation,
                            point_in_segment)
+from robust import parallelogram
 from robust.angular import (Orientation,
                             orientation)
 
 from sect.core.hints import Endpoints
 from sect.core.utils import (contour_to_segments,
                              normalize_contour)
+from sect.core.voronoi.utils import robust_divide
 from sect.hints import (Contour,
                         Multisegment,
                         Point,
@@ -89,3 +91,24 @@ def sub_lists(sequence: Sequence[Element]) -> SearchStrategy[List[Element]]:
     return strategies.builds(getitem,
                              strategies.permutations(sequence),
                              strategies.slices(max(len(sequence), 1)))
+
+
+def to_circumcenter(triangle: Contour) -> Point:
+    first_point, second_point, third_point = triangle
+    first_x, first_y = first_point
+    second_x, second_y = second_point
+    third_x, third_y = third_point
+    first_squared_norm = first_x * first_x + first_y * first_y
+    second_squared_norm = second_x * second_x + second_y * second_y
+    third_squared_norm = third_x * third_x + third_y * third_y
+    signed_area = parallelogram.signed_area(first_point, second_point,
+                                            second_point, third_point)
+    inverted_signed_area = robust_divide(1, 2 * signed_area)
+    return ((first_squared_norm * (second_y - third_y)
+             + second_squared_norm * (third_y - first_y)
+             + third_squared_norm * (first_y - second_y))
+            * inverted_signed_area,
+            -(first_squared_norm * (second_x - third_x)
+              + second_squared_norm * (third_x - first_x)
+              + third_squared_norm * (first_x - second_x))
+            * inverted_signed_area)

@@ -8,9 +8,12 @@ from sect.hints import (Contour,
                         Coordinate,
                         Multisegment,
                         Point)
-from tests.strategies import coordinates_strategies
+from tests.strategies import (coordinates_strategies,
+                              rational_coordinates_strategies)
 from tests.utils import Strategy
 
+multipoints = coordinates_strategies.flatmap(planar.contours)
+rational_multipoints = rational_coordinates_strategies.flatmap(planar.contours)
 to_non_empty_multisegments = partial(planar.multisegments,
                                      min_size=1)
 non_empty_multisegments = (coordinates_strategies

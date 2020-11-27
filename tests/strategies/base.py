@@ -50,9 +50,14 @@ def to_digits_count(number: float,
     return float(str(decimal))
 
 
+rational_coordinates_strategies_factories = (
+    strategies.integers,
+    partial(strategies.fractions,
+            max_denominator=MAX_COORDINATE))
+rational_coordinates_strategies = strategies.sampled_from(
+        [factory(MIN_COORDINATE, MAX_COORDINATE)
+         for factory in rational_coordinates_strategies_factories])
 coordinates_strategies = strategies.sampled_from(
         [factory(MIN_COORDINATE, MAX_COORDINATE)
-         for factory in (strategies.integers,
-                         partial(strategies.fractions,
-                                 max_denominator=MAX_COORDINATE),
+         for factory in (*rational_coordinates_strategies_factories,
                          to_floats)])
