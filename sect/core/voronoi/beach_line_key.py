@@ -91,11 +91,11 @@ class BeachLineKey:
             return right_site_start_y, -1
 
 
-def distance_to_point_arc(site: SiteEvent, point: Point) -> Coordinate:
-    start_x, _ = site.start
+def distance_to_point_arc(point_event: SiteEvent, point: Point) -> Coordinate:
+    start_x, _ = event_point = point_event.start
     x, _ = point
     dx = start_x - x
-    return robust_divide(to_segment_squared_length(point, site.start), 2 * dx)
+    return robust_divide(to_segment_squared_length(point, event_point), 2 * dx)
 
 
 def distance_to_segment_arc(segment_event: SiteEvent,
