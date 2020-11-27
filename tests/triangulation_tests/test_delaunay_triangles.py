@@ -2,10 +2,10 @@ from typing import Sequence
 
 from hypothesis import given
 
-from sect.core.contracts import is_point_inside_circumcircle
-from sect.core.utils import (contour_to_segments,
-                             normalize_contour,
-                             to_convex_hull)
+from sect.core.delaunay.contracts import is_point_inside_circumcircle
+from sect.core.delaunay.utils import (contour_to_segments,
+                                      normalize_contour,
+                                      to_convex_hull)
 from sect.hints import (Point,
                         Triangle)
 from sect.triangulation import delaunay_triangles

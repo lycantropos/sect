@@ -1,8 +1,8 @@
 import random
 from typing import Sequence
 
-from .core.location import Location
-from .core.trapezoidal import Graph
+from .core.trapezoidal.graph import Graph
+from .core.trapezoidal.location import Location
 from .core.voronoi.diagram import Diagram
 from .hints import (Contour,
                     Multipoint,

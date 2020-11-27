@@ -4,9 +4,9 @@ from typing import (Sequence,
 from hypothesis import given
 from hypothesis_geometry.hints import Polygon
 
-from sect.core.utils import (complete_vertices,
-                             contour_to_segments,
-                             flatten)
+from sect.core.delaunay.utils import (complete_vertices,
+                                      contour_to_segments)
+from sect.core.utils import flatten
 from sect.hints import (Contour,
                         Point)
 from sect.triangulation import (constrained_delaunay_triangles,

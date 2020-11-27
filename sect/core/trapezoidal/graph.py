@@ -4,6 +4,8 @@ from typing import (List,
 from reprit.base import generate_repr
 from robust.angular import Orientation
 
+from sect.core.utils import (flatten,
+                             to_contour_orientation)
 from sect.hints import (Contour,
                         Multisegment,
                         Point,
@@ -14,9 +16,7 @@ from .leaf import Leaf
 from .location import Location
 from .node import Node
 from .trapezoid import Trapezoid
-from .utils import (flatten,
-                    points_to_bounding_box,
-                    to_contour_orientation)
+from .utils import points_to_bounding_box
 from .x_node import XNode
 from .y_node import YNode
 

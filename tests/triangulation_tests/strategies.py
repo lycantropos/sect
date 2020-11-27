@@ -7,7 +7,7 @@ from hypothesis import strategies
 from hypothesis_geometry import planar
 from robust.linear import segment_contains
 
-from sect.core.utils import contour_to_segments
+from sect.core.delaunay.utils import contour_to_segments
 from sect.hints import (Point,
                         Segment)
 from tests.strategies import coordinates_strategies

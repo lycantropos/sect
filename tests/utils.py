@@ -14,9 +14,9 @@ from robust import parallelogram
 from robust.angular import (Orientation,
                             orientation)
 
-from sect.core.hints import Endpoints
-from sect.core.utils import (contour_to_segments,
-                             normalize_contour)
+from sect.core.delaunay.hints import Endpoints
+from sect.core.delaunay.utils import (contour_to_segments,
+                                      normalize_contour)
 from sect.core.voronoi.utils import robust_divide
 from sect.hints import (Contour,
                         Multisegment,

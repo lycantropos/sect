@@ -3,11 +3,11 @@ from typing import (Iterable,
                     List,
                     Sequence)
 
-from .core.delaunay import Triangulation
-from .core.quad_edge import QuadEdge
-from .core.utils import (complete_vertices as _complete_vertices,
-                         contour_to_segments as _contour_to_segments,
-                         flatten as _flatten)
+from .core.delaunay.quad_edge import QuadEdge
+from .core.delaunay.triangulation import Triangulation
+from .core.delaunay.utils import (complete_vertices as _complete_vertices,
+                                  contour_to_segments as _contour_to_segments)
+from .core.utils import flatten as _flatten
 from .hints import (Contour,
                     Point,
                     Segment,

@@ -16,6 +16,7 @@ from robust.angular import (Orientation,
 from robust.linear import (SegmentsRelationship,
                            segments_relationship)
 
+from sect.core.utils import (pairwise)
 from sect.hints import (Contour,
                         Point,
                         Segment,
@@ -28,9 +29,7 @@ from .quad_edge import (QuadEdge,
                         edge_to_non_adjacent_vertices,
                         edges_with_opposites)
 from .utils import (ceil_log2,
-                    contour_to_segments,
-                    normalize_contour,
-                    pairwise,
+                    contour_to_segments, normalize_contour,
                     to_clockwise_contour,
                     to_unique_objects)
 
