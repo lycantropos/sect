@@ -10,8 +10,6 @@ from sect.core.voronoi.utils import are_same_vertical_points
 from sect.hints import (Coordinate,
                         Point)
 
-ULPS = 64
-
 
 class SiteEvent:
     __slots__ = ('start', 'end', 'source', 'source_category', 'sorted_index',
