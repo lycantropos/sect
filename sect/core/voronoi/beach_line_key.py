@@ -108,7 +108,6 @@ def distance_to_segment_arc(segment_event: SiteEvent,
         start_x, start_y = start = segment_event.start
         end_x, end_y = end = segment_event.end
         segment_length = robust_sqrt(to_segment_squared_length(start, end))
-        # avoid subtraction while computing k
         segment_dx = end_x - start_x
         segment_dy = end_y - start_y
         coefficient = (robust_divide(segment_length - segment_dy,
