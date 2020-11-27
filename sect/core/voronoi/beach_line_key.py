@@ -166,7 +166,7 @@ def point_segment_horizontal_goes_through_right_arc_first(
     if (orientation(segment_end, segment_start, point)
             is not Orientation.CLOCKWISE):
         return not segment_event.is_inverse
-    if segment_event.is_vertical:
+    elif segment_event.is_vertical:
         _, point_event_y = point_event.start
         _, y = point
         if y < point_event_y and not reverse_order:
@@ -181,21 +181,9 @@ def point_segment_horizontal_goes_through_right_arc_first(
         elif not reverse_order:
             return False
     else:
-        point_event_x, point_event_y = point_event.start
-        segment_start_x, segment_start_y = segment_start
-        segment_end_x, segment_end_y = segment_end
-        x, y = point
-        points_dx, points_dy = x - point_event_x, y - point_event_y
-        segment_dx, segment_dy = (segment_end_x - segment_start_x,
-                                  segment_end_y - segment_start_y)
-        fast_left_expr = (segment_dx * (points_dy + points_dx)
-                          * (points_dy - points_dx))
-        fast_right_expr = 2 * segment_dy * points_dx * points_dy
-        if (fast_right_expr < fast_left_expr) is not reverse_order:
-            return reverse_order
-    distance_from_left = distance_to_point_arc(point_event, point)
-    distance_from_right = distance_to_segment_arc(segment_event, point)
-    return (distance_from_left < distance_from_right) is not reverse_order
+        return ((distance_to_point_arc(point_event, point)
+                 < distance_to_segment_arc(segment_event, point))
+                is not reverse_order)
 
 
 def segment_segment_horizontal_goes_through_right_arc_first(
