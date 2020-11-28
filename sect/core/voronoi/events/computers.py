@@ -235,10 +235,10 @@ def to_segment_segment_segment_circle_event(first_event: SiteEvent,
             second_start, second_end, third_start, third_end)
     third_first_signed_area = parallelogram.signed_area(
             third_start, third_end, first_start, first_end)
-    radius = (first_second_signed_area * third_signed_area
-              + second_third_signed_area * first_signed_area
-              + third_first_signed_area * second_signed_area)
-    lower_x_numerator = center_x_numerator - radius
+    radius_numerator = (first_second_signed_area * third_signed_area
+                        + second_third_signed_area * first_signed_area
+                        + third_first_signed_area * second_signed_area)
+    lower_x_numerator = center_x_numerator - radius_numerator
     denominator = (first_second_signed_area * third_length
                    + second_third_signed_area * first_length
                    + third_first_signed_area * second_length)
