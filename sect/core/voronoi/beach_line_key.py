@@ -178,6 +178,20 @@ def point_segment_horizontal_goes_through_right_arc_first(
                 return True
         elif not reverse_order:
             return False
+    else:
+        point_x, point_y = point
+        point_event_x, point_event_y = point_event.start
+        points_dx, points_dy = (point_x - point_event_x,
+                                point_y - point_event_y)
+        segment_start_x, segment_start_y = segment_start
+        segment_end_x, segment_end_y = segment_end
+        segment_dx, segment_dy = (segment_end_x - segment_start_x,
+                                  segment_end_y - segment_start_y)
+        fast_left_expr = (segment_dx * (points_dy + points_dx)
+                          * (points_dy - points_dx))
+        fast_right_expr = 2 * segment_dy * points_dx * points_dy
+        if (fast_left_expr > fast_right_expr) is not reverse_order:
+            return reverse_order
     return ((distance_to_point_arc(point_event, point)
              < distance_to_segment_arc(segment_event, point))
             is not reverse_order)
