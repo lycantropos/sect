@@ -1,3 +1,4 @@
+import sys
 from typing import TypeVar
 
 from reprit.base import generate_repr
@@ -57,7 +58,7 @@ class SiteEvent:
                         is Orientation.COUNTERCLOCKWISE)
         else:
             start_x, _ = self.start
-            return (start_x < other.lower_x
+            return (less_than(start_x, other.lower_x)
                     if isinstance(other, CircleEvent)
                     else NotImplemented)
 
@@ -107,7 +108,7 @@ class CircleEvent:
     def __lt__(self, other: 'Event') -> bool:
         if isinstance(other, SiteEvent):
             other_start_x, _ = other.start
-            return self.lower_x < other_start_x
+            return less_than(self.lower_x, other_start_x)
         return ((self.lower_x, self.center_y) < (other.lower_x, other.center_y)
                 if isinstance(other, CircleEvent)
                 else NotImplemented)
@@ -127,3 +128,9 @@ class CircleEvent:
 
 
 Event = TypeVar('Event', CircleEvent, SiteEvent)
+
+
+def less_than(left: Coordinate, right: Coordinate,
+              *,
+              tolerance: float = 64 * sys.float_info.epsilon) -> bool:
+    return left + tolerance < right
