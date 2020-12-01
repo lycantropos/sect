@@ -165,11 +165,9 @@ class Diagram:
         self._init_beach_line()
         while (self._circle_events
                or self._site_event_index < len(self._site_events)):
-            if not self._circle_events:
-                self._process_site_event()
-            elif self._site_event_index >= len(self._site_events):
-                self._process_circle_event()
-            elif self._site_event < self._circle_events.peek()[0]:
+            if (not self._circle_events
+                    or (self._site_event_index < len(self._site_events)
+                        and self._site_event < self._circle_events.peek()[0])):
                 self._process_site_event()
             else:
                 self._process_circle_event()
