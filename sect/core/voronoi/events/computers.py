@@ -182,8 +182,7 @@ def to_point_segment_segment_circle_event(point_event: SiteEvent,
                         + (abs(parallelogram.signed_area(
                                 first_start, first_end, first_end,
                                 second_start)),),
-                        common_right_coefficients
-                        + (first_squared_length,)),
+                        common_right_coefficients + (first_squared_length,)),
                 denominator)
     return CircleEvent(center_x, center_y, lower_x)
 
