@@ -63,7 +63,7 @@ class SiteEvent:
                     else NotImplemented)
 
     @property
-    def comparison_point(self) -> Point:
+    def min_point(self) -> Point:
         return min(self.start, self.end)
 
     @property

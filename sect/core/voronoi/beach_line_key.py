@@ -26,8 +26,8 @@ class BeachLineKey:
 
     def __lt__(self, other: 'BeachLineKey') -> bool:
         site, other_site = self.comparison_site, other.comparison_site
-        x, _ = point = site.comparison_point
-        other_x, _ = other_point = other_site.comparison_point
+        x, _ = point = site.min_point
+        other_x, _ = other_point = other_site.min_point
         if x < other_x:
             # second node contains a new site
             return horizontal_goes_through_right_arc_first(
