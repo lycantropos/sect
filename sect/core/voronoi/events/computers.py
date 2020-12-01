@@ -95,9 +95,8 @@ def to_point_segment_segment_circle_event(point_event: SiteEvent,
         scaled_point_x = segments_signed_area * point_x
         scaled_point_y = segments_signed_area * point_y
         if ix == scaled_point_x and iy == scaled_point_y:
-            denominator = segments_signed_area
-            center_x = lower_x = robust_divide(ix, denominator)
-            center_y = robust_divide(iy, denominator)
+            center_x = lower_x = point_x
+            center_y = point_y
         else:
             sign = ((-1 if point_index == 2 else 1)
                     * ((1 if segments_signed_area > 0 else -1)
