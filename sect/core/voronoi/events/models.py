@@ -97,14 +97,6 @@ class CircleEvent:
 
     __repr__ = generate_repr(__init__)
 
-    def __eq__(self, other: 'CircleEvent') -> bool:
-        return (self.center_x == other.center_x
-                and self.center_y == other.center_y
-                and self.lower_x == other.lower_x
-                and self.is_active is other.is_active
-                if isinstance(other, CircleEvent)
-                else NotImplemented)
-
     def __lt__(self, other: 'Event') -> bool:
         if isinstance(other, SiteEvent):
             other_start_x, _ = other.start
