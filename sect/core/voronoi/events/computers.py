@@ -126,64 +126,59 @@ def to_point_segment_segment_circle_event(point_event: SiteEvent,
                     common_right_coefficients)
             denominator = coefficient * segments_signed_area
             squared_length = to_segment_squared_length(i_point, scaled_point)
-            center_y = robust_divide(to_quadruplets_expression(
+            center_y_numerator = to_quadruplets_expression(
                     (second_dy * squared_length - iy * second_scalar_product,
                      iy * first_scalar_product - first_dy * squared_length,
-                     iy * sign, 0),
-                    common_right_coefficients),
-                    denominator)
+                     iy * sign, 0), common_right_coefficients)
             common_left_coefficients = (second_dx * squared_length
                                         - ix * second_scalar_product,
                                         ix * first_scalar_product
                                         - first_dx * squared_length,
                                         ix * sign)
-            center_x = robust_divide(to_quadruplets_expression(
-                    common_left_coefficients + (0,),
-                    common_right_coefficients),
-                    denominator)
-            lower_x = robust_divide(to_quadruplets_expression(
+            center_x_numerator = to_quadruplets_expression(
+                    common_left_coefficients + (0,), common_right_coefficients)
+            lower_x_numerator = to_quadruplets_expression(
                     common_left_coefficients
                     + (segments_signed_area * squared_length
                        * (-1 if coefficient < 0 else 1),),
-                    common_right_coefficients), denominator)
+                    common_right_coefficients)
+            center_y = robust_divide(center_y_numerator, denominator)
+            center_x = robust_divide(center_x_numerator, denominator)
+            lower_x = robust_divide(lower_x_numerator, denominator)
     else:
-        denominator = 2 * first_squared_length
-        dx = parallelogram.signed_area(first_start, first_end, point,
-                                       first_end)
-        dy = parallelogram.signed_area(first_start, first_end, second_start,
-                                       point)
-        common_right_coefficients = (dx * dy, 1)
+        first_start_point_signed_area = parallelogram.signed_area(
+                first_start, first_end, point, first_end)
+        second_start_point_signed_area = parallelogram.signed_area(
+                first_start, first_end, second_start, point)
         squared_first_dx = first_dx * first_dx
+        first_dx_dy = first_dx * first_dy
         squared_first_dy = first_dy * first_dy
         sign = -1 if point_index == 2 else 1
-        center_y = robust_divide(
-                pairs_sum_expression(
-                        (2 * sign * first_dy,
-                         squared_first_dx * (first_end_y + second_start_y)
-                         - first_dx * first_dy * (first_end_x - point_x
-                                                  + second_start_x - point_x)
-                         + squared_first_dy * (point_y * 2)),
-                        common_right_coefficients),
-                denominator)
-        common_left_coefficients = (2 * sign * first_dx,
-                                    squared_first_dy
-                                    * (first_end_x + second_start_x)
-                                    - first_dx * first_dy
-                                    * (first_end_y - point_y
-                                       + second_start_y - point_y)
-                                    + 2 * squared_first_dx * point_x)
-        center_x = robust_divide(
-                pairs_sum_expression(common_left_coefficients,
-                                     common_right_coefficients),
-                denominator)
-        lower_x = robust_divide(
-                triplets_sum_expression(
-                        common_left_coefficients
-                        + (abs(parallelogram.signed_area(
-                                first_start, first_end, first_end,
-                                second_start)),),
-                        common_right_coefficients + (first_squared_length,)),
-                denominator)
+        common_right_coefficients = (first_start_point_signed_area
+                                     * second_start_point_signed_area, 1)
+        center_y_numerator = pairs_sum_expression(
+                (2 * sign * first_dy,
+                 squared_first_dx * (first_end_y + second_start_y)
+                 - first_dx_dy * (first_end_x - point_x
+                                  + second_start_x - point_x)
+                 + 2 * squared_first_dy * point_y),
+                common_right_coefficients)
+        common_left_coefficients = (
+            2 * sign * first_dx,
+            squared_first_dy * (first_end_x + second_start_x)
+            - first_dx_dy * (first_end_y - point_y + second_start_y - point_y)
+            + 2 * squared_first_dx * point_x)
+        center_x_numerator = pairs_sum_expression(common_left_coefficients,
+                                                  common_right_coefficients)
+        lower_x_numerator = triplets_sum_expression(
+                common_left_coefficients
+                + (abs(parallelogram.signed_area(first_start, first_end,
+                                                 first_end, second_start)),),
+                common_right_coefficients + (first_squared_length,))
+        denominator = 2 * first_squared_length
+        center_x = robust_divide(center_x_numerator, denominator)
+        center_y = robust_divide(center_y_numerator, denominator)
+        lower_x = robust_divide(lower_x_numerator, denominator)
     return CircleEvent(center_x, center_y, lower_x)
 
 
