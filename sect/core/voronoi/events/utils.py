@@ -5,11 +5,6 @@ from sect.core.voronoi.utils import (robust_divide,
 from sect.hints import Coordinate
 
 
-def robust_product_with_sqrt(left: Coordinate,
-                             right: Coordinate) -> Coordinate:
-    return left * robust_sqrt(right)
-
-
 def robust_sum_of_products_with_sqrt_pairs(
         left: Tuple[Coordinate, Coordinate],
         right: Tuple[Coordinate, Coordinate]) -> Coordinate:
