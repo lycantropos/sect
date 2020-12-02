@@ -68,7 +68,7 @@ def to_second_point_segment_segment_quadruplets_expression(
         right: Tuple[Coordinate, Coordinate, Coordinate, Coordinate]
 ) -> Coordinate:
     if left[3]:
-        rh = (robust_product_with_sqrt(left[2], right[3])
+        rh = (left[2] * robust_sqrt(right[3])
               * robust_sqrt(robust_sum_of_products_with_sqrt_pairs(
                         (1, right[2]),
                         (right[0] * right[1], 1))))
@@ -83,17 +83,17 @@ def to_second_point_segment_segment_quadruplets_expression(
                                 (2 * left[3] * left[0],
                                  2 * left[3] * left[1],
                                  left[0] * left[0] * right[0]
-                                 + left[1] * left[1] * right[1] + left[3] *
-                                 left[3]
+                                 + left[1] * left[1] * right[1]
+                                 + left[3] * left[3]
                                  - left[2] * left[2] * right[2] * right[3],
-                                 2 * left[0] * left[1] - left[2] * left[2] *
-                                 right[3]),
+                                 2 * left[0] * left[1]
+                                 - left[2] * left[2] * right[3]),
                                 common_right_coefficients
                                 + (right[0] * right[1],)),
                         lh - rh))
     else:
         lh = robust_sum_of_products_with_sqrt_pairs(left[:2], right[:2])
-        rh = (robust_product_with_sqrt(left[2], right[3])
+        rh = (left[2] * robust_sqrt(right[3])
               * robust_sqrt(robust_sum_of_products_with_sqrt_pairs(
                         (1, right[2]), (right[0] * right[1], 1))))
         return (lh + rh
