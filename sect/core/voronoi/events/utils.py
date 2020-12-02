@@ -50,13 +50,17 @@ def to_first_point_segment_segment_quadruplets_expression(
 ) -> Coordinate:
     lh = robust_sum_of_products_with_sqrt_pairs(left[:2], right[:2])
     rh = robust_sum_of_products_with_sqrt_pairs(left[2:], right[2:])
-    if lh >= 0 and rh >= 0 or lh <= 0 and rh <= 0:
-        return lh + rh
-    return robust_divide(robust_sum_of_products_with_sqrt_pairs(
-            (left[0] * left[0] * right[0] + left[1] * left[1] * right[1]
-             - left[2] * left[2] - left[3] * left[3] * right[0] * right[1],
-             2 * (left[0] * left[1] - left[2] * left[3])), (1, right[3])),
-            lh - rh)
+    return (lh + rh
+            if lh >= 0 and rh >= 0 or lh <= 0 and rh <= 0
+            else
+            robust_divide(robust_sum_of_products_with_sqrt_pairs(
+                    (left[0] * left[0] * right[0]
+                     + left[1] * left[1] * right[1]
+                     - left[2] * left[2]
+                     - left[3] * left[3] * right[0] * right[1],
+                     2 * (left[0] * left[1] - left[2] * left[3])),
+                    (1, right[3])),
+                    lh - rh))
 
 
 def to_second_point_segment_segment_quadruplets_expression(
