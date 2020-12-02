@@ -15,13 +15,13 @@ def robust_sum_of_products_with_sqrt_pairs(
         right: Tuple[Coordinate, Coordinate]) -> Coordinate:
     first_left, second_left = left
     first_right, second_right = right
-    a, b = (robust_product_with_sqrt(first_left, first_right),
-            robust_product_with_sqrt(second_left, second_right))
-    return (a + b
-            if (a >= 0 and b >= 0 or a <= 0 and b <= 0)
-            else ((first_left * first_left * first_right
-                   - second_left * second_left * second_right)
-                  / (a - b)))
+    lh, rh = (first_left * robust_sqrt(first_right),
+              second_left * robust_sqrt(second_right))
+    return (lh + rh
+            if (lh >= 0 and rh >= 0 or lh <= 0 and rh <= 0)
+            else robust_divide(first_left * first_left * first_right
+                               - second_left * second_left * second_right,
+                               lh - rh))
 
 
 def robust_sum_of_products_with_sqrt_triplets(
