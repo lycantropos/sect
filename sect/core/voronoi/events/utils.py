@@ -75,8 +75,8 @@ def to_second_point_segment_segment_quadruplets_expression(
                 else
                 robust_divide(
                         to_first_point_segment_segment_quadruplets_expression(
-                                (2 * left[3] * left[0],
-                                 2 * left[3] * left[1],
+                                (2 * left[0] * left[3],
+                                 2 * left[1] * left[3],
                                  left[0] * left[0] * right[0]
                                  + left[1] * left[1] * right[1]
                                  + left[3] * left[3]
