@@ -108,14 +108,16 @@ def to_point_segment_segment_circle_event(point_event: SiteEvent,
                     first_start, first_end, second_start, second_end)
             scaled_point = (scaled_point_x, scaled_point_y)
             i_point = (ix, iy)
-            first_cross_product = parallelogram.signed_area(
-                    scaled_point, i_point, first_start, first_end)
-            first_scalar_product = projection.signed_length(
-                    scaled_point, i_point, first_start, first_end)
-            second_cross_product = parallelogram.signed_area(
-                    scaled_point, i_point, second_start, second_end)
-            second_scalar_product = projection.signed_length(
-                    scaled_point, i_point, second_start, second_end)
+            first_cross_product = (
+                    parallelogram.signed_area(point, first_end,
+                                              first_start, first_end)
+                    * parallelogram.signed_area(first_start, first_end,
+                                                second_start, second_end))
+            second_cross_product = (
+                    parallelogram.signed_area(point, second_end,
+                                              second_start, second_end)
+                    * parallelogram.signed_area(first_start, first_end,
+                                                second_start, second_end))
             common_right_coefficients = (first_squared_length,
                                          second_squared_length,
                                          -segments_scalar_product,
