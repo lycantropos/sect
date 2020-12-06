@@ -12,7 +12,8 @@ from .models import (CircleEvent,
 from .utils import (
     robust_sum_of_products_with_sqrt_pairs as pairs_sum_expression,
     robust_sum_of_products_with_sqrt_triplets as triplets_sum_expression,
-    to_second_point_segment_segment_quadruplets_expression
+    to_point_segment_segment_mixed_expression as to_mixed_expression,
+    to_point_segment_segment_quadruplets_expression
     as to_quadruplets_expression)
 
 
@@ -123,22 +124,22 @@ def to_point_segment_segment_circle_event(point_event: SiteEvent,
                     scaled_point, i_point, first_start, first_end)
             second_scalar_product = projection.signed_length(
                     scaled_point, i_point, second_start, second_end)
-            coefficient = to_quadruplets_expression(
-                    (-second_scalar_product, first_scalar_product, sign, 0),
+            coefficient = to_mixed_expression(
+                    (-second_scalar_product, first_scalar_product, sign),
                     common_right_coefficients)
             denominator = coefficient * segments_cross_product
             squared_length = to_segment_squared_length(i_point, scaled_point)
-            center_y_numerator = to_quadruplets_expression(
+            center_y_numerator = to_mixed_expression(
                     (second_dy * squared_length - iy * second_scalar_product,
                      iy * first_scalar_product - first_dy * squared_length,
-                     iy * sign, 0), common_right_coefficients)
+                     iy * sign), common_right_coefficients)
             common_left_coefficients = (second_dx * squared_length
                                         - ix * second_scalar_product,
                                         ix * first_scalar_product
                                         - first_dx * squared_length,
                                         ix * sign)
-            center_x_numerator = to_quadruplets_expression(
-                    common_left_coefficients + (0,), common_right_coefficients)
+            center_x_numerator = to_mixed_expression(
+                    common_left_coefficients, common_right_coefficients)
             lower_x_numerator = to_quadruplets_expression(
                     common_left_coefficients
                     + (segments_cross_product * squared_length

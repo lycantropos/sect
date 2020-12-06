@@ -39,7 +39,56 @@ def robust_sum_of_products_with_sqrt_triplets(
                     lh - rh))
 
 
-def to_first_point_segment_segment_quadruplets_expression(
+def to_point_segment_segment_mixed_expression(
+        left: Tuple[Coordinate, Coordinate, Coordinate],
+        right: Tuple[Coordinate, Coordinate, Coordinate, Coordinate]
+) -> Coordinate:
+    lh = robust_sum_of_products_with_sqrt_pairs(left[:2], right[:2])
+    rh = (left[2]
+          * robust_sqrt(right[3]
+                        * robust_sum_of_products_with_sqrt_pairs(
+                    (1, right[2]), (right[0] * right[1], 1))))
+    return (lh + rh
+            if lh >= 0 and rh >= 0 or lh <= 0 and rh <= 0
+            else
+            robust_divide(robust_sum_of_products_with_sqrt_pairs(
+                    (left[0] * left[0] * right[0]
+                     + left[1] * left[1] * right[1]
+                     - left[2] * left[2] * right[3] * right[2],
+                     2 * left[0] * left[1] - left[2] * left[2] * right[3]),
+                    (1, right[0] * right[1])),
+                    lh - rh))
+
+
+def to_point_segment_segment_quadruplets_expression(
+        left: Tuple[Coordinate, Coordinate, Coordinate, Coordinate],
+        right: Tuple[Coordinate, Coordinate, Coordinate, Coordinate]
+) -> Coordinate:
+    common_right_coefficients = (right[0], right[1], 1)
+    lh = robust_sum_of_products_with_sqrt_triplets(
+            (left[0], left[1], left[3]), common_right_coefficients)
+    rh = (left[2]
+          * robust_sqrt(right[3]
+                        * robust_sum_of_products_with_sqrt_pairs(
+                    (1, right[2]), (right[0] * right[1], 1))))
+    return (lh + rh
+            if lh >= 0 and rh >= 0 or lh <= 0 and rh <= 0
+            else
+            robust_divide(_to_point_segment_segment_quadruplets_expression(
+                    (2 * left[0] * left[3],
+                     2 * left[1] * left[3],
+                     left[0] * left[0] * right[0]
+                     + left[1] * left[1] * right[1]
+                     + left[3] * left[3]
+                     - left[2] * left[2] * right[2] * right[3],
+                     2 * left[0] * left[1]
+                     - left[2] * left[2] * right[3]),
+                    common_right_coefficients
+                    + (right[0] * right[1],)),
+                    lh - rh))
+
+
+def _to_point_segment_segment_quadruplets_expression(
         left: Tuple[Coordinate, Coordinate, Coordinate, Coordinate],
         right: Tuple[Coordinate, Coordinate, Coordinate, Coordinate]
 ) -> Coordinate:
@@ -56,48 +105,3 @@ def to_first_point_segment_segment_quadruplets_expression(
                      2 * (left[0] * left[1] - left[2] * left[3])),
                     (1, right[3])),
                     lh - rh))
-
-
-def to_second_point_segment_segment_quadruplets_expression(
-        left: Tuple[Coordinate, Coordinate, Coordinate, Coordinate],
-        right: Tuple[Coordinate, Coordinate, Coordinate, Coordinate]
-) -> Coordinate:
-    if left[3]:
-        rh = (left[2] * robust_sqrt(right[3])
-              * robust_sqrt(robust_sum_of_products_with_sqrt_pairs(
-                        (1, right[2]),
-                        (right[0] * right[1], 1))))
-        common_right_coefficients = (right[0], right[1], 1)
-        lh = robust_sum_of_products_with_sqrt_triplets(
-                (left[0], left[1], left[3]), common_right_coefficients)
-        return (lh + rh
-                if lh >= 0 and rh >= 0 or lh <= 0 and rh <= 0
-                else
-                robust_divide(
-                        to_first_point_segment_segment_quadruplets_expression(
-                                (2 * left[0] * left[3],
-                                 2 * left[1] * left[3],
-                                 left[0] * left[0] * right[0]
-                                 + left[1] * left[1] * right[1]
-                                 + left[3] * left[3]
-                                 - left[2] * left[2] * right[2] * right[3],
-                                 2 * left[0] * left[1]
-                                 - left[2] * left[2] * right[3]),
-                                common_right_coefficients
-                                + (right[0] * right[1],)),
-                        lh - rh))
-    else:
-        lh = robust_sum_of_products_with_sqrt_pairs(left[:2], right[:2])
-        rh = (left[2] * robust_sqrt(right[3])
-              * robust_sqrt(robust_sum_of_products_with_sqrt_pairs(
-                        (1, right[2]), (right[0] * right[1], 1))))
-        return (lh + rh
-                if lh >= 0 and rh >= 0 or lh <= 0 and rh <= 0
-                else
-                robust_divide(robust_sum_of_products_with_sqrt_pairs(
-                        (left[0] * left[0] * right[0]
-                         + left[1] * left[1] * right[1]
-                         - left[2] * left[2] * right[3] * right[2],
-                         2 * left[0] * left[1] - left[2] * left[2] * right[3]),
-                        (1, right[0] * right[1])),
-                        lh - rh))
