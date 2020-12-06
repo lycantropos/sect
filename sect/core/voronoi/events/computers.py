@@ -106,7 +106,7 @@ def to_point_segment_segment_circle_event(point_event: SiteEvent,
                        else 0))
             second_squared_length = to_segment_squared_length(second_start,
                                                               second_end)
-            segments_scalar_product = projection.signed_length(
+            segments_dot_product = projection.signed_length(
                     first_start, first_end, second_start, second_end)
             point_first_cross_product = parallelogram.signed_area(
                     first_start, first_end, point, first_end)
@@ -114,60 +114,58 @@ def to_point_segment_segment_circle_event(point_event: SiteEvent,
                     second_start, second_end, point, second_end)
             common_right_coefficients = (first_squared_length,
                                          second_squared_length,
-                                         -segments_scalar_product,
+                                         -segments_dot_product,
                                          2 * point_first_cross_product
                                          * point_second_cross_product
                                          * segments_cross_product ** 2)
-            center_y_first_left_coefficient = (segments_cross_product * (
-                    (first_dx * point_second_cross_product
-                     - second_dx * point_first_cross_product)
-                    * point_second_cross_product
-                    + (segments_scalar_product * point_second_cross_product
-                       - second_squared_length * point_first_cross_product)
-                    * point_y))
-            center_y_second_left_coefficient = (segments_cross_product * (
-                    (second_dx * point_first_cross_product
-                     - first_dx * point_second_cross_product)
-                    * point_first_cross_product
-                    + (segments_scalar_product * point_first_cross_product
-                       - first_squared_length * point_second_cross_product)
-                    * point_y))
+            first_mixed_product = (
+                    segments_dot_product * point_first_cross_product
+                    - first_squared_length * point_second_cross_product)
+            second_mixed_product = (
+                    segments_dot_product * point_second_cross_product
+                    - second_squared_length * point_first_cross_product)
+            total_cross_product_y = (second_dy * point_first_cross_product
+                                     - first_dy * point_second_cross_product)
+            total_cross_product_x = (second_dx * point_first_cross_product
+                                     - first_dx * point_second_cross_product)
+            center_y_first_left_coefficient = (
+                    segments_cross_product
+                    * (second_mixed_product * point_y
+                       - total_cross_product_x * point_second_cross_product))
+            center_y_second_left_coefficient = (
+                    segments_cross_product
+                    * (first_mixed_product * point_y
+                       + total_cross_product_x * point_first_cross_product))
             center_y_numerator = to_mixed_expression(
                     (center_y_first_left_coefficient,
                      center_y_second_left_coefficient,
                      iy * sign), common_right_coefficients)
-            center_x_first_left_coefficient = (segments_cross_product * (
-                    (second_dy * point_first_cross_product
-                     - first_dy * point_second_cross_product)
-                    * point_second_cross_product
-                    + (segments_scalar_product * point_second_cross_product
-                       - second_squared_length * point_first_cross_product)
-                    * point_x))
-            center_x_second_left_coefficient = (segments_cross_product * (
-                (first_dy * point_second_cross_product
-                 - second_dy * point_first_cross_product)
-                * point_first_cross_product
-                + (segments_scalar_product * point_first_cross_product
-                   - first_squared_length * point_second_cross_product)
-                * point_x))
+            center_x_first_left_coefficient = (
+                    segments_cross_product
+                    * (second_mixed_product * point_x
+                       + total_cross_product_y * point_second_cross_product))
+            center_x_second_left_coefficient = (
+                    segments_cross_product
+                    * (first_mixed_product * point_x
+                       - total_cross_product_y * point_first_cross_product))
             common_left_coefficients = (center_x_first_left_coefficient,
                                         center_x_second_left_coefficient,
                                         ix * sign)
             center_x_numerator = to_mixed_expression(
                     common_left_coefficients, common_right_coefficients)
             coefficient_part = (
-                    segments_scalar_product
+                    segments_dot_product
                     * parallelogram.signed_area(second_start, second_end,
                                                 (0, 0), second_end)
                     - second_squared_length
                     * parallelogram.signed_area(first_start, first_end,
                                                 (0, 0), first_start))
-            scaled_point = (scaled_point_x, scaled_point_y)
-            i_point = (ix, iy)
-            squared_length = to_segment_squared_length(i_point, scaled_point)
+            radius_numerator = (
+                    - first_mixed_product * point_second_cross_product
+                    - second_mixed_product * point_first_cross_product)
             lower_x_numerator = to_quadruplets_expression(
                     common_left_coefficients
-                    + (segments_cross_product * squared_length
+                    + (segments_cross_product * radius_numerator
                        * (-1 if coefficient_part < 0 else 1),),
                     common_right_coefficients)
             coefficient = coefficient_part * robust_sqrt(first_squared_length)
