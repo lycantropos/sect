@@ -110,8 +110,7 @@ def to_point_segment_segment_circle_event(point_event: SiteEvent,
                                          second_squared_length,
                                          -segments_dot_product,
                                          2 * point_first_cross_product
-                                         * point_second_cross_product
-                                         * segments_cross_product ** 2)
+                                         * point_second_cross_product)
             first_mixed_product = (
                     segments_dot_product * point_first_cross_product
                     - first_squared_length * point_second_cross_product)
@@ -119,13 +118,11 @@ def to_point_segment_segment_circle_event(point_event: SiteEvent,
                     segments_dot_product * point_second_cross_product
                     - second_squared_length * point_first_cross_product)
             center_y_first_left_coefficient = (
-                    segments_cross_product
-                    * (second_mixed_product * point_y
-                       - total_cross_product_x * point_second_cross_product))
+                (second_mixed_product * point_y
+                 - total_cross_product_x * point_second_cross_product))
             center_y_second_left_coefficient = (
-                    segments_cross_product
-                    * (first_mixed_product * point_y
-                       + total_cross_product_x * point_first_cross_product))
+                (first_mixed_product * point_y
+                 + total_cross_product_x * point_first_cross_product))
             center_y_third_left_coefficient = (
                     (total_cross_product_y + point_y * segments_cross_product)
                     * sign)
@@ -135,13 +132,11 @@ def to_point_segment_segment_circle_event(point_event: SiteEvent,
                      center_y_third_left_coefficient),
                     common_right_coefficients)
             center_x_first_left_coefficient = (
-                    segments_cross_product
-                    * (second_mixed_product * point_x
-                       + total_cross_product_y * point_second_cross_product))
+                (second_mixed_product * point_x
+                 + total_cross_product_y * point_second_cross_product))
             center_x_second_left_coefficient = (
-                    segments_cross_product
-                    * (first_mixed_product * point_x
-                       - total_cross_product_y * point_first_cross_product))
+                (first_mixed_product * point_x
+                 - total_cross_product_y * point_first_cross_product))
             center_x_third_left_coefficient = (
                     (total_cross_product_x + point_x * segments_cross_product)
                     * sign)
@@ -153,15 +148,13 @@ def to_point_segment_segment_circle_event(point_event: SiteEvent,
             radius_numerator = (
                     - first_mixed_product * point_second_cross_product
                     - second_mixed_product * point_first_cross_product)
-            coefficient = to_mixed_expression(
+            denominator = to_mixed_expression(
                     (second_mixed_product, first_mixed_product, sign),
                     common_right_coefficients)
             lower_x_numerator = to_quadruplets_expression(
                     common_left_coefficients
-                    + (segments_cross_product * radius_numerator
-                       * (-1 if coefficient < 0 else 1),),
+                    + (radius_numerator * (-1 if denominator < 0 else 1),),
                     common_right_coefficients)
-            denominator = coefficient * segments_cross_product
             center_y = robust_divide(center_y_numerator, denominator)
             center_x = robust_divide(center_x_numerator, denominator)
             lower_x = robust_divide(lower_x_numerator, denominator)
