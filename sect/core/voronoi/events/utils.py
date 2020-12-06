@@ -10,13 +10,14 @@ def robust_sum_of_products_with_sqrt_pairs(
         right: Tuple[Coordinate, Coordinate]) -> Coordinate:
     first_left, second_left = left
     first_right, second_right = right
-    lh, rh = (first_left * robust_sqrt(first_right),
-              second_left * robust_sqrt(second_right))
-    return (lh + rh
-            if lh >= 0 and rh >= 0 or lh <= 0 and rh <= 0
+    first_addend, second_addend = (first_left * robust_sqrt(first_right),
+                                   second_left * robust_sqrt(second_right))
+    return (first_addend + second_addend
+            if (first_addend >= 0 and second_addend >= 0
+                or first_addend <= 0 and second_addend <= 0)
             else robust_divide(first_left * first_left * first_right
                                - second_left * second_left * second_right,
-                               lh - rh))
+                               first_addend - second_addend))
 
 
 def robust_sum_of_products_with_sqrt_triplets(
@@ -24,11 +25,12 @@ def robust_sum_of_products_with_sqrt_triplets(
         right: Tuple[Coordinate, Coordinate, Coordinate]) -> Coordinate:
     first_left, second_left, third_left = left
     first_right, second_right, third_right = right
-    lh = robust_sum_of_products_with_sqrt_pairs((first_left, second_left),
-                                                (first_right, second_right))
-    rh = third_left * robust_sqrt(third_right)
-    return (lh + rh
-            if lh >= 0 and rh >= 0 or lh <= 0 and rh <= 0
+    first_addend = robust_sum_of_products_with_sqrt_pairs(
+            (first_left, second_left), (first_right, second_right))
+    second_addend = third_left * robust_sqrt(third_right)
+    return (first_addend + second_addend
+            if (first_addend >= 0 and second_addend >= 0
+                or first_addend <= 0 and second_addend <= 0)
             else
             robust_divide(robust_sum_of_products_with_sqrt_pairs(
                     (first_left * first_left * first_right
@@ -36,20 +38,20 @@ def robust_sum_of_products_with_sqrt_triplets(
                      - third_left * third_left * third_right,
                      2 * first_left * second_left),
                     (1, first_right * second_right)),
-                    lh - rh))
+                    first_addend - second_addend))
 
 
 def to_point_segment_segment_mixed_expression(
         left: Tuple[Coordinate, Coordinate, Coordinate],
         right: Tuple[Coordinate, Coordinate, Coordinate, Coordinate]
 ) -> Coordinate:
-    lh = robust_sum_of_products_with_sqrt_pairs(left[:2], right[:2])
-    rh = (left[2]
-          * robust_sqrt(right[3]
-                        * robust_sum_of_products_with_sqrt_pairs(
-                    (1, right[2]), (right[0] * right[1], 1))))
-    return (lh + rh
-            if lh >= 0 and rh >= 0 or lh <= 0 and rh <= 0
+    first_addend = robust_sum_of_products_with_sqrt_pairs(left[:2], right[:2])
+    second_addend = left[2] * robust_sqrt(
+            right[3] * robust_sum_of_products_with_sqrt_pairs(
+                    (1, right[2]), (right[0] * right[1], 1)))
+    return (first_addend + second_addend
+            if (first_addend >= 0 and second_addend >= 0
+                or first_addend <= 0 and second_addend <= 0)
             else
             robust_divide(robust_sum_of_products_with_sqrt_pairs(
                     (left[0] * left[0] * right[0]
@@ -57,7 +59,7 @@ def to_point_segment_segment_mixed_expression(
                      - left[2] * left[2] * right[3] * right[2],
                      2 * left[0] * left[1] - left[2] * left[2] * right[3]),
                     (1, right[0] * right[1])),
-                    lh - rh))
+                    first_addend - second_addend))
 
 
 def to_point_segment_segment_quadruplets_expression(
@@ -65,14 +67,14 @@ def to_point_segment_segment_quadruplets_expression(
         right: Tuple[Coordinate, Coordinate, Coordinate, Coordinate]
 ) -> Coordinate:
     common_right_coefficients = (right[0], right[1], 1)
-    lh = robust_sum_of_products_with_sqrt_triplets(
+    first_addend = robust_sum_of_products_with_sqrt_triplets(
             (left[0], left[1], left[3]), common_right_coefficients)
-    rh = (left[2]
-          * robust_sqrt(right[3]
-                        * robust_sum_of_products_with_sqrt_pairs(
-                    (1, right[2]), (right[0] * right[1], 1))))
-    return (lh + rh
-            if lh >= 0 and rh >= 0 or lh <= 0 and rh <= 0
+    second_addend = left[2] * robust_sqrt(
+            right[3] * robust_sum_of_products_with_sqrt_pairs(
+                    (1, right[2]), (right[0] * right[1], 1)))
+    return (first_addend + second_addend
+            if (first_addend >= 0 and second_addend >= 0
+                or first_addend <= 0 and second_addend <= 0)
             else
             robust_divide(_to_point_segment_segment_quadruplets_expression(
                     (2 * left[0] * left[3],
@@ -85,17 +87,18 @@ def to_point_segment_segment_quadruplets_expression(
                      - left[2] * left[2] * right[3]),
                     common_right_coefficients
                     + (right[0] * right[1],)),
-                    lh - rh))
+                    first_addend - second_addend))
 
 
 def _to_point_segment_segment_quadruplets_expression(
         left: Tuple[Coordinate, Coordinate, Coordinate, Coordinate],
         right: Tuple[Coordinate, Coordinate, Coordinate, Coordinate]
 ) -> Coordinate:
-    lh = robust_sum_of_products_with_sqrt_pairs(left[:2], right[:2])
-    rh = robust_sum_of_products_with_sqrt_pairs(left[2:], right[2:])
-    return (lh + rh
-            if lh >= 0 and rh >= 0 or lh <= 0 and rh <= 0
+    first_addend = robust_sum_of_products_with_sqrt_pairs(left[:2], right[:2])
+    second_addend = robust_sum_of_products_with_sqrt_pairs(left[2:], right[2:])
+    return (first_addend + second_addend
+            if (first_addend >= 0 and second_addend >= 0
+                or first_addend <= 0 and second_addend <= 0)
             else
             robust_divide(robust_sum_of_products_with_sqrt_pairs(
                     (left[0] * left[0] * right[0]
@@ -104,4 +107,4 @@ def _to_point_segment_segment_quadruplets_expression(
                      - left[3] * left[3] * right[0] * right[1],
                      2 * (left[0] * left[1] - left[2] * left[3])),
                     (1, right[3])),
-                    lh - rh))
+                    first_addend - second_addend))
