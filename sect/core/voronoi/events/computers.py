@@ -157,6 +157,7 @@ def to_point_segment_segment_circle_event(point_event: SiteEvent,
             center_x = robust_divide(center_x_numerator, denominator)
             lower_x = robust_divide(lower_x_numerator, denominator)
     else:
+        sign = -1 if point_index == 2 else 1
         first_start_point_signed_area = parallelogram.signed_area(
                 first_start, first_end, point, first_end)
         second_start_point_signed_area = parallelogram.signed_area(
@@ -164,7 +165,6 @@ def to_point_segment_segment_circle_event(point_event: SiteEvent,
         squared_first_dx = first_dx * first_dx
         first_dx_dy = first_dx * first_dy
         squared_first_dy = first_dy * first_dy
-        sign = -1 if point_index == 2 else 1
         common_right_coefficients = (first_start_point_signed_area
                                      * second_start_point_signed_area, 1)
         center_y_numerator = pairs_sum_expression(
