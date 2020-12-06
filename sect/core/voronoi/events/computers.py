@@ -98,10 +98,7 @@ def to_point_segment_segment_circle_event(point_event: SiteEvent,
             center_x = lower_x = point_x
             center_y = point_y
         else:
-            sign = ((-1 if point_index == 2 else 1)
-                    * ((1 if segments_cross_product > 0 else -1)
-                       if segments_cross_product
-                       else 0))
+            sign = -1 if point_index == 2 else 1
             second_squared_length = to_segment_squared_length(second_start,
                                                               second_end)
             segments_dot_product = projection.signed_length(
@@ -149,7 +146,8 @@ def to_point_segment_segment_circle_event(point_event: SiteEvent,
                     - first_mixed_product * point_second_cross_product
                     - second_mixed_product * point_first_cross_product)
             denominator = to_mixed_expression(
-                    (second_mixed_product, first_mixed_product, sign),
+                    (second_mixed_product, first_mixed_product,
+                     sign * segments_cross_product),
                     common_right_coefficients)
             lower_x_numerator = to_quadruplets_expression(
                     common_left_coefficients
