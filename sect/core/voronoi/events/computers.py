@@ -84,19 +84,17 @@ def to_point_segment_segment_circle_event(point_event: SiteEvent,
                                                        second_end)
     first_squared_length = to_segment_squared_length(first_start, first_end)
     if segments_cross_product:
-        first_start_signed_area = parallelogram.signed_area(
-                first_start, first_end, (0, 0), first_start)
-        second_end_signed_area = parallelogram.signed_area(
-                second_start, second_end, (0, 0), second_end)
         second_dx = second_end_x - second_start_x
         second_dy = second_end_y - second_start_y
-        ix = (second_dx * first_start_signed_area
-              - first_dx * second_end_signed_area)
-        iy = (second_dy * first_start_signed_area
-              - first_dy * second_end_signed_area)
-        scaled_point_x = segments_cross_product * point_x
-        scaled_point_y = segments_cross_product * point_y
-        if ix == scaled_point_x and iy == scaled_point_y:
+        point_first_cross_product = parallelogram.signed_area(
+                first_start, first_end, point, first_end)
+        point_second_cross_product = parallelogram.signed_area(
+                second_start, second_end, point, second_end)
+        total_cross_product_x = (second_dx * point_first_cross_product
+                                 - first_dx * point_second_cross_product)
+        total_cross_product_y = (second_dy * point_first_cross_product
+                                 - first_dy * point_second_cross_product)
+        if not total_cross_product_x and not total_cross_product_y:
             center_x = lower_x = point_x
             center_y = point_y
         else:
@@ -108,10 +106,6 @@ def to_point_segment_segment_circle_event(point_event: SiteEvent,
                                                               second_end)
             segments_dot_product = projection.signed_length(
                     first_start, first_end, second_start, second_end)
-            point_first_cross_product = parallelogram.signed_area(
-                    first_start, first_end, point, first_end)
-            point_second_cross_product = parallelogram.signed_area(
-                    second_start, second_end, point, second_end)
             common_right_coefficients = (first_squared_length,
                                          second_squared_length,
                                          -segments_dot_product,
@@ -124,10 +118,6 @@ def to_point_segment_segment_circle_event(point_event: SiteEvent,
             second_mixed_product = (
                     segments_dot_product * point_second_cross_product
                     - second_squared_length * point_first_cross_product)
-            total_cross_product_y = (second_dy * point_first_cross_product
-                                     - first_dy * point_second_cross_product)
-            total_cross_product_x = (second_dx * point_first_cross_product
-                                     - first_dx * point_second_cross_product)
             center_y_first_left_coefficient = (
                     segments_cross_product
                     * (second_mixed_product * point_y
@@ -136,10 +126,14 @@ def to_point_segment_segment_circle_event(point_event: SiteEvent,
                     segments_cross_product
                     * (first_mixed_product * point_y
                        + total_cross_product_x * point_first_cross_product))
+            center_y_third_left_coefficient = (
+                    (total_cross_product_y + point_y * segments_cross_product)
+                    * sign)
             center_y_numerator = to_mixed_expression(
                     (center_y_first_left_coefficient,
                      center_y_second_left_coefficient,
-                     iy * sign), common_right_coefficients)
+                     center_y_third_left_coefficient),
+                    common_right_coefficients)
             center_x_first_left_coefficient = (
                     segments_cross_product
                     * (second_mixed_product * point_x
@@ -148,9 +142,12 @@ def to_point_segment_segment_circle_event(point_event: SiteEvent,
                     segments_cross_product
                     * (first_mixed_product * point_x
                        - total_cross_product_y * point_first_cross_product))
+            center_x_third_left_coefficient = (
+                    (total_cross_product_x + point_x * segments_cross_product)
+                    * sign)
             common_left_coefficients = (center_x_first_left_coefficient,
                                         center_x_second_left_coefficient,
-                                        ix * sign)
+                                        center_x_third_left_coefficient)
             center_x_numerator = to_mixed_expression(
                     common_left_coefficients, common_right_coefficients)
             radius_numerator = (
