@@ -78,10 +78,11 @@ def to_point_segment_segment_circle_event(point_event: SiteEvent,
     second_end_x, second_end_y = second_end = second_segment_event.end
     first_dx = first_end_x - first_start_x
     first_dy = first_end_y - first_start_y
-    segments_signed_area = parallelogram.signed_area(first_start, first_end,
-                                                     second_start, second_end)
+    segments_cross_product = parallelogram.signed_area(first_start, first_end,
+                                                       second_start,
+                                                       second_end)
     first_squared_length = to_segment_squared_length(first_start, first_end)
-    if segments_signed_area:
+    if segments_cross_product:
         first_start_signed_area = parallelogram.signed_area(
                 first_start, first_end, (0, 0), first_start)
         second_end_signed_area = parallelogram.signed_area(
@@ -92,41 +93,40 @@ def to_point_segment_segment_circle_event(point_event: SiteEvent,
               - first_dx * second_end_signed_area)
         iy = (second_dy * first_start_signed_area
               - first_dy * second_end_signed_area)
-        scaled_point_x = segments_signed_area * point_x
-        scaled_point_y = segments_signed_area * point_y
+        scaled_point_x = segments_cross_product * point_x
+        scaled_point_y = segments_cross_product * point_y
         if ix == scaled_point_x and iy == scaled_point_y:
             center_x = lower_x = point_x
             center_y = point_y
         else:
             sign = ((-1 if point_index == 2 else 1)
-                    * ((1 if segments_signed_area > 0 else -1)
-                       if segments_signed_area
+                    * ((1 if segments_cross_product > 0 else -1)
+                       if segments_cross_product
                        else 0))
             second_squared_length = to_segment_squared_length(second_start,
                                                               second_end)
             segments_scalar_product = projection.signed_length(
                     first_start, first_end, second_start, second_end)
-            scaled_point = (scaled_point_x, scaled_point_y)
-            i_point = (ix, iy)
-            first_cross_product = (
-                    parallelogram.signed_area(point, first_end,
-                                              first_start, first_end)
-                    * parallelogram.signed_area(first_start, first_end,
-                                                second_start, second_end))
-            second_cross_product = (
-                    parallelogram.signed_area(point, second_end,
-                                              second_start, second_end)
-                    * parallelogram.signed_area(first_start, first_end,
-                                                second_start, second_end))
+            point_first_cross_product = parallelogram.signed_area(
+                    first_start, first_end, point, first_end)
+            point_second_cross_product = parallelogram.signed_area(
+                    second_start, second_end, point, second_end)
             common_right_coefficients = (first_squared_length,
                                          second_squared_length,
                                          -segments_scalar_product,
-                                         2 * first_cross_product
-                                         * second_cross_product)
+                                         2 * point_first_cross_product
+                                         * point_second_cross_product
+                                         * segments_cross_product ** 2)
+            scaled_point = (scaled_point_x, scaled_point_y)
+            i_point = (ix, iy)
+            first_scalar_product = projection.signed_length(
+                    scaled_point, i_point, first_start, first_end)
+            second_scalar_product = projection.signed_length(
+                    scaled_point, i_point, second_start, second_end)
             coefficient = to_quadruplets_expression(
                     (-second_scalar_product, first_scalar_product, sign, 0),
                     common_right_coefficients)
-            denominator = coefficient * segments_signed_area
+            denominator = coefficient * segments_cross_product
             squared_length = to_segment_squared_length(i_point, scaled_point)
             center_y_numerator = to_quadruplets_expression(
                     (second_dy * squared_length - iy * second_scalar_product,
@@ -141,7 +141,7 @@ def to_point_segment_segment_circle_event(point_event: SiteEvent,
                     common_left_coefficients + (0,), common_right_coefficients)
             lower_x_numerator = to_quadruplets_expression(
                     common_left_coefficients
-                    + (segments_signed_area * squared_length
+                    + (segments_cross_product * squared_length
                        * (-1 if coefficient < 0 else 1),),
                     common_right_coefficients)
             center_y = robust_divide(center_y_numerator, denominator)
