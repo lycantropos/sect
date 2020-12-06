@@ -136,17 +136,22 @@ def to_point_segment_segment_circle_event(point_event: SiteEvent,
                     (center_y_first_left_coefficient,
                      center_y_second_left_coefficient,
                      iy * sign), common_right_coefficients)
-            scaled_point = (scaled_point_x, scaled_point_y)
-            i_point = (ix, iy)
-            first_scalar_product = projection.signed_length(
-                    scaled_point, i_point, first_start, first_end)
-            second_scalar_product = projection.signed_length(
-                    scaled_point, i_point, second_start, second_end)
-            squared_length = to_segment_squared_length(i_point, scaled_point)
-            common_left_coefficients = (second_dx * squared_length
-                                        - ix * second_scalar_product,
-                                        ix * first_scalar_product
-                                        - first_dx * squared_length,
+            center_x_first_left_coefficient = (segments_cross_product * (
+                    (second_dy * point_first_cross_product
+                     - first_dy * point_second_cross_product)
+                    * point_second_cross_product
+                    + (segments_scalar_product * point_second_cross_product
+                       - second_squared_length * point_first_cross_product)
+                    * point_x))
+            center_x_second_left_coefficient = (segments_cross_product * (
+                (first_dy * point_second_cross_product
+                 - second_dy * point_first_cross_product)
+                * point_first_cross_product
+                + (segments_scalar_product * point_first_cross_product
+                   - first_squared_length * point_second_cross_product)
+                * point_x))
+            common_left_coefficients = (center_x_first_left_coefficient,
+                                        center_x_second_left_coefficient,
                                         ix * sign)
             center_x_numerator = to_mixed_expression(
                     common_left_coefficients, common_right_coefficients)
@@ -157,6 +162,9 @@ def to_point_segment_segment_circle_event(point_event: SiteEvent,
                     - second_squared_length
                     * parallelogram.signed_area(first_start, first_end,
                                                 (0, 0), first_start))
+            scaled_point = (scaled_point_x, scaled_point_y)
+            i_point = (ix, iy)
+            squared_length = to_segment_squared_length(i_point, scaled_point)
             lower_x_numerator = to_quadruplets_expression(
                     common_left_coefficients
                     + (segments_cross_product * squared_length
