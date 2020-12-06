@@ -153,22 +153,17 @@ def to_point_segment_segment_circle_event(point_event: SiteEvent,
                                         ix * sign)
             center_x_numerator = to_mixed_expression(
                     common_left_coefficients, common_right_coefficients)
-            coefficient_part = (
-                    segments_dot_product
-                    * parallelogram.signed_area(second_start, second_end,
-                                                (0, 0), second_end)
-                    - second_squared_length
-                    * parallelogram.signed_area(first_start, first_end,
-                                                (0, 0), first_start))
             radius_numerator = (
                     - first_mixed_product * point_second_cross_product
                     - second_mixed_product * point_first_cross_product)
+            coefficient = to_mixed_expression(
+                    (second_mixed_product, first_mixed_product, sign),
+                    common_right_coefficients)
             lower_x_numerator = to_quadruplets_expression(
                     common_left_coefficients
                     + (segments_cross_product * radius_numerator
-                       * (-1 if coefficient_part < 0 else 1),),
+                       * (-1 if coefficient < 0 else 1),),
                     common_right_coefficients)
-            coefficient = coefficient_part * robust_sqrt(first_squared_length)
             denominator = coefficient * segments_cross_product
             center_y = robust_divide(center_y_numerator, denominator)
             center_x = robust_divide(center_x_numerator, denominator)
