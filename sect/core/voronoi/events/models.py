@@ -1,4 +1,3 @@
-import sys
 from typing import TypeVar
 
 from reprit.base import generate_repr
@@ -7,7 +6,8 @@ from robust.angular import (Orientation,
 
 from sect.core.voronoi.enums import SourceCategory
 from sect.core.voronoi.hints import Source
-from sect.core.voronoi.utils import are_same_vertical_points
+from sect.core.voronoi.utils import (_float_to_uint,
+                                     are_same_vertical_points)
 from sect.hints import (Coordinate,
                         Point)
 
@@ -125,5 +125,7 @@ Event = TypeVar('Event', CircleEvent, SiteEvent)
 
 def less_than(left: Coordinate, right: Coordinate,
               *,
-              tolerance: float = 64 * sys.float_info.epsilon) -> bool:
-    return left + tolerance < right
+              max_ulps: int = 64) -> bool:
+    return (max_ulps < _float_to_uint(left) - _float_to_uint(right)
+            if isinstance(left, float) and isinstance(right, float)
+            else left < right)
