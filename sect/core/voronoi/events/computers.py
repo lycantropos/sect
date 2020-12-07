@@ -252,26 +252,25 @@ def _to_point_point_segment_coefficient(first_point: Point,
                                         segment_start: Point,
                                         segment_end: Point,
                                         segment_index: int) -> Coordinate:
-    scalar_product = projection.signed_length(segment_start, segment_end,
-                                              first_point, second_point)
-    first_point_signed_area = parallelogram.signed_area(
+    dot_product = projection.signed_length(segment_start, segment_end,
+                                           first_point, second_point)
+    first_point_cross_product = parallelogram.signed_area(
             segment_start, segment_end, first_point, segment_end)
-    signed_area = parallelogram.signed_area(first_point, second_point,
-                                            segment_start, segment_end)
-    if signed_area:
-        second_point_signed_area = parallelogram.signed_area(
+    cross_product = parallelogram.signed_area(segment_start, segment_end,
+                                              first_point, second_point)
+    if cross_product:
+        sign = -1 if segment_index == 2 else 1
+        second_point_cross_product = parallelogram.signed_area(
                 segment_start, segment_end, second_point, segment_end)
-        squared_signed_area = signed_area * signed_area
-        determinant = robust_sqrt((scalar_product * scalar_product
-                                   + squared_signed_area)
-                                  * first_point_signed_area
-                                  * second_point_signed_area)
-        return robust_divide(2 * (-determinant
-                                  if segment_index == 2
-                                  else determinant)
-                             + scalar_product * (first_point_signed_area
-                                                 + second_point_signed_area),
-                             squared_signed_area)
+        determinant = robust_sqrt(
+                to_segment_squared_length(first_point, second_point)
+                * to_segment_squared_length(segment_start, segment_end)
+                * first_point_cross_product
+                * second_point_cross_product)
+        return robust_divide(2 * sign * determinant
+                             + dot_product * (first_point_cross_product
+                                              + second_point_cross_product),
+                             cross_product * cross_product)
     else:
-        return (robust_divide(scalar_product, 4 * first_point_signed_area)
-                - robust_divide(first_point_signed_area, scalar_product))
+        return (robust_divide(dot_product, 4 * first_point_cross_product)
+                - robust_divide(first_point_cross_product, dot_product))
