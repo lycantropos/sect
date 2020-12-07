@@ -12,9 +12,7 @@ from .models import (CircleEvent,
 from .utils import (
     robust_sum_of_products_with_sqrt_pairs as pairs_sum_expression,
     robust_sum_of_products_with_sqrt_triplets as triplets_sum_expression,
-    to_point_segment_segment_mixed_expression as to_mixed_expression,
-    to_point_segment_segment_quadruplets_expression
-    as to_quadruplets_expression)
+    to_point_segment_segment_mixed_expression as to_mixed_expression)
 
 
 def to_point_point_point_circle_event(first_point_event: SiteEvent,
