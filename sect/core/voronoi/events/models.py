@@ -113,7 +113,8 @@ class CircleEvent:
         start_y, end_y = ((site_end_y, site_start_y)
                           if site.is_inverse
                           else (site_start_y, site_end_y))
-        return self.center_y < start_y or end_y < self.center_y
+        return (less_than(self.center_y, start_y)
+                or less_than(end_y, self.center_y))
 
     def deactivate(self) -> None:
         self.is_active = False
