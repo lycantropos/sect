@@ -1,5 +1,8 @@
 from typing import Tuple
 
+from robust.utils import (two_product,
+                          two_two_sum)
+
 from sect.core.voronoi.utils import (robust_divide,
                                      robust_sqrt)
 from sect.hints import Coordinate
@@ -10,14 +13,11 @@ def robust_sum_of_products_with_sqrt_pairs(
         right: Tuple[Coordinate, Coordinate]) -> Coordinate:
     first_left, second_left = left
     first_right, second_right = right
-    first_addend, second_addend = (first_left * robust_sqrt(first_right),
-                                   second_left * robust_sqrt(second_right))
-    return (first_addend + second_addend
-            if (first_addend >= 0 and second_addend >= 0
-                or first_addend <= 0 and second_addend <= 0)
-            else robust_divide(first_left * first_left * first_right
-                               - second_left * second_left * second_right,
-                               first_addend - second_addend))
+    first_addend, second_addend = (two_product(first_left,
+                                               robust_sqrt(first_right)),
+                                   two_product(second_left,
+                                               robust_sqrt(second_right)))
+    return sum(two_two_sum(*first_addend, *second_addend))
 
 
 def robust_sum_of_products_with_sqrt_triplets(
