@@ -112,6 +112,20 @@ def to_point_segment_segment_circle_event(point_event: SiteEvent,
             second_mixed_product = (
                     segments_dot_product * point_second_cross_product
                     - second_squared_length * point_first_cross_product)
+            center_x_first_left_coefficient = (
+                (second_mixed_product * point_x
+                 + total_cross_product_y * point_second_cross_product))
+            center_x_second_left_coefficient = (
+                (first_mixed_product * point_x
+                 - total_cross_product_y * point_first_cross_product))
+            center_x_third_left_coefficient = (
+                    (total_cross_product_x + point_x * segments_cross_product)
+                    * sign)
+            center_x_numerator = to_mixed_expression(
+                    (center_x_first_left_coefficient,
+                     center_x_second_left_coefficient,
+                     center_x_third_left_coefficient),
+                    common_right_coefficients)
             center_y_first_left_coefficient = (
                 (second_mixed_product * point_y
                  - total_cross_product_x * point_second_cross_product))
@@ -126,26 +140,12 @@ def to_point_segment_segment_circle_event(point_event: SiteEvent,
                      center_y_second_left_coefficient,
                      center_y_third_left_coefficient),
                     common_right_coefficients)
-            center_x_first_left_coefficient = (
-                (second_mixed_product * point_x
-                 + total_cross_product_y * point_second_cross_product))
-            center_x_second_left_coefficient = (
-                (first_mixed_product * point_x
-                 - total_cross_product_y * point_first_cross_product))
-            center_x_third_left_coefficient = (
-                    (total_cross_product_x + point_x * segments_cross_product)
-                    * sign)
-            common_left_coefficients = (center_x_first_left_coefficient,
-                                        center_x_second_left_coefficient,
-                                        center_x_third_left_coefficient)
-            center_x_numerator = to_mixed_expression(
-                    common_left_coefficients, common_right_coefficients)
             denominator = to_mixed_expression(
                     (second_mixed_product, first_mixed_product,
                      sign * segments_cross_product),
                     common_right_coefficients)
-            center_y = robust_divide(center_y_numerator, denominator)
             center_x = robust_divide(center_x_numerator, denominator)
+            center_y = robust_divide(center_y_numerator, denominator)
             radius = robust_divide(
                     - first_mixed_product * point_second_cross_product
                     - second_mixed_product * point_first_cross_product,
