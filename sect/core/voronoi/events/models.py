@@ -1,3 +1,5 @@
+import ctypes
+import struct
 from typing import TypeVar
 
 from reprit.base import generate_repr
@@ -6,8 +8,7 @@ from robust.angular import (Orientation,
 
 from sect.core.voronoi.enums import SourceCategory
 from sect.core.voronoi.hints import Source
-from sect.core.voronoi.utils import (_float_to_uint,
-                                     are_same_vertical_points)
+from sect.core.voronoi.utils import are_same_vertical_points
 from sect.hints import (Coordinate,
                         Point)
 
@@ -126,6 +127,16 @@ Event = TypeVar('Event', CircleEvent, SiteEvent)
 def less_than(left: Coordinate, right: Coordinate,
               *,
               max_ulps: int = 64) -> bool:
-    return (max_ulps < _float_to_uint(left) - _float_to_uint(right)
-            if isinstance(left, float) and isinstance(right, float)
-            else left < right)
+    return ((not (isinstance(left, float) and isinstance(right, float))
+             or abs(_double_to_uint(left) - _double_to_uint(right)) > max_ulps)
+            and left < right)
+
+
+def _double_to_uint(value: float,
+                    *,
+                    sign_bit_mask: int = 2 ** 63) -> int:
+    result, = struct.unpack('!Q', struct.pack('!d', value))
+    if sign_bit_mask & result:
+        return ctypes.c_uint64(~result + 1).value
+    else:
+        return ctypes.c_uint64(sign_bit_mask | result).value
