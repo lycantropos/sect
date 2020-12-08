@@ -35,12 +35,13 @@ def to_point_point_point_circle_event(first_point_event: SiteEvent,
             to_segment_squared_length(first_point, second_point)
             * to_segment_squared_length(second_point, third_point)
             * to_segment_squared_length(first_point, third_point))
-    signed_area = parallelogram.signed_area(first_point, second_point,
-                                            second_point, third_point)
-    inverted_signed_area = robust_divide(1, 2 * signed_area)
-    return CircleEvent(center_x_numerator * inverted_signed_area,
-                       center_y_numerator * inverted_signed_area,
-                       lower_x_numerator * inverted_signed_area)
+    denominator = 2 * parallelogram.signed_area(first_point, second_point,
+                                                second_point, third_point)
+    inverted_denominator = robust_divide(1, denominator)
+    center_x = center_x_numerator * inverted_denominator
+    center_y = center_y_numerator * inverted_denominator
+    lower_x = lower_x_numerator * inverted_denominator
+    return CircleEvent(center_x, center_y, lower_x)
 
 
 def to_point_point_segment_circle_event(first_point_event: SiteEvent,
