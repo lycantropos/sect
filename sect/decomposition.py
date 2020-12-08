@@ -104,3 +104,7 @@ def polygon_trapezoidal(border: Contour, holes: Sequence[Contour] = (),
 
 def multipoint_voronoi(multipoint: Multipoint) -> Diagram:
     return Diagram.from_sources(multipoint, ())
+
+
+def multisegment_voronoi(multisegment: Multisegment) -> Diagram:
+    return Diagram.from_sources((), multisegment)
