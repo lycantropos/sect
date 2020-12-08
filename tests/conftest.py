@@ -20,4 +20,4 @@ settings.register_profile('default',
 @pytest.fixture(autouse=True,
                 scope='session')
 def set_decimal_context() -> None:
-    getcontext().prec = MAX_COORDINATE_EXPONENT * 7
+    getcontext().prec = MAX_COORDINATE_EXPONENT * 9
