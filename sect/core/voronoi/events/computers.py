@@ -154,31 +154,31 @@ def to_point_segment_segment_circle_event(point_event: SiteEvent,
             lower_x = center_x + radius
     else:
         sign = -1 if point_index == 2 else 1
-        first_start_point_signed_area = parallelogram.signed_area(
-                first_start, first_end, point, first_end)
-        second_start_point_signed_area = parallelogram.signed_area(
-                first_start, first_end, second_start, point)
-        squared_first_dx = first_dx * first_dx
-        first_dx_dy = first_dx * first_dy
-        squared_first_dy = first_dy * first_dy
-        common_right_coefficients = (first_start_point_signed_area
-                                     * second_start_point_signed_area, 1)
-        center_y_numerator = pairs_sum_expression(
-                (2 * sign * first_dy,
-                 squared_first_dx * (first_end_y + second_start_y)
-                 - first_dx_dy * (first_end_x - point_x
-                                  + second_start_x - point_x)
-                 + 2 * squared_first_dy * point_y),
-                common_right_coefficients)
-        common_left_coefficients = (
-            2 * sign * first_dx,
-            squared_first_dy * (first_end_x + second_start_x)
-            - first_dx_dy * (first_end_y - point_y + second_start_y - point_y)
-            + 2 * squared_first_dx * point_x)
-        center_x_numerator = pairs_sum_expression(common_left_coefficients,
+        point_first_dot_product = projection.signed_length(
+                (0, 0), point, first_start, first_end)
+        minus_second_start = (-second_start_x, -second_start_y)
+        minus_second_point_cross_product = parallelogram.signed_area(
+                first_start, first_end, minus_second_start, first_end)
+        center_x_second_left_coefficient = (
+                2 * first_dx * point_first_dot_product
+                - first_dy * minus_second_point_cross_product)
+        center_y_second_left_coefficient = (
+                2 * first_dy * point_first_dot_product
+                + first_dx * minus_second_point_cross_product)
+        center_x_left_coefficients = (2 * sign * first_dx,
+                                      center_x_second_left_coefficient)
+        common_right_coefficients = (
+            parallelogram.signed_area(first_start, first_end, point, first_end)
+            * parallelogram.signed_area(first_start, first_end, second_start,
+                                        point),
+            1)
+        center_x_numerator = pairs_sum_expression(center_x_left_coefficients,
                                                   common_right_coefficients)
+        center_y_numerator = pairs_sum_expression(
+                (2 * sign * first_dy, center_y_second_left_coefficient),
+                common_right_coefficients)
         lower_x_numerator = triplets_sum_expression(
-                common_left_coefficients
+                center_x_left_coefficients
                 + (abs(parallelogram.signed_area(first_start, first_end,
                                                  first_end, second_start)),),
                 common_right_coefficients + (first_squared_length,))
