@@ -1,4 +1,3 @@
-import struct
 from decimal import Decimal
 from fractions import Fraction
 from itertools import groupby
@@ -45,10 +44,3 @@ def to_segment_squared_length(start: Point, end: Point) -> Coordinate:
 
 def to_unique_just_seen(iterable: List[Domain]) -> List[Domain]:
     return [key for key, _ in groupby(iterable)]
-
-
-def _float_to_uint(value: float,
-                   *,
-                   sign_bit_mask: int = 2 ** 63) -> int:
-    result = int.from_bytes(struct.pack('!d', value), 'big')
-    return sign_bit_mask - result if result < sign_bit_mask else result
