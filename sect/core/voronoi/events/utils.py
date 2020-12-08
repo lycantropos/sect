@@ -1,6 +1,10 @@
 from typing import Tuple
 
-from robust.utils import (two_product,
+from robust.utils import (scale_expansion,
+                          square,
+                          sum_expansions,
+                          two_product,
+                          two_two_diff,
                           two_two_sum)
 
 from sect.core.voronoi.utils import (robust_divide,
@@ -17,7 +21,15 @@ def robust_sum_of_products_with_sqrt_pairs(
                                                robust_sqrt(first_right)),
                                    two_product(second_left,
                                                robust_sqrt(second_right)))
-    return sum(two_two_sum(*first_addend, *second_addend))
+    return (sum(two_two_sum(*first_addend, *second_addend))
+            if (first_addend[-1] >= 0 and second_addend[-1] >= 0
+                or first_addend[-1] <= 0 and second_addend[-1] <= 0)
+            else
+            sum(scale_expansion(sum_expansions(
+                    scale_expansion(square(first_left), first_right),
+                    scale_expansion(square(second_left), -second_right)),
+                    robust_divide(1, sum(two_two_diff(*first_addend,
+                                                      *second_addend))))))
 
 
 def robust_sum_of_products_with_sqrt_triplets(
