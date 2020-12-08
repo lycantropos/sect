@@ -127,8 +127,8 @@ Event = TypeVar('Event', CircleEvent, SiteEvent)
 def less_than(left: Coordinate, right: Coordinate,
               *,
               max_ulps: int = 64) -> bool:
-    return ((not (isinstance(left, float) and isinstance(right, float))
-             or abs(_double_to_uint(left) - _double_to_uint(right)) > max_ulps)
+    return (abs(_double_to_uint(float(left)) - _double_to_uint(float(right)))
+            > max_ulps
             and left < right)
 
 
@@ -136,7 +136,7 @@ def _double_to_uint(value: float,
                     *,
                     sign_bit_mask: int = 2 ** 63) -> int:
     result, = struct.unpack('!Q', struct.pack('!d', value))
-    if sign_bit_mask & result:
-        return ctypes.c_uint64(~result + 1).value
-    else:
-        return ctypes.c_uint64(sign_bit_mask | result).value
+    return (ctypes.c_uint64(~result + 1
+                            if sign_bit_mask & result
+                            else sign_bit_mask | result)
+            .value)
