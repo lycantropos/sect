@@ -114,11 +114,11 @@ def to_point_segment_segment_circle_event(point_event: SiteEvent,
                     segments_dot_product * point_second_cross_product
                     - second_squared_length * point_first_cross_product)
             center_x_first_left_coefficient = (
-                (second_mixed_product * point_x
-                 + total_cross_product_y * point_second_cross_product))
+                    second_mixed_product * point_x
+                    + total_cross_product_y * point_second_cross_product)
             center_x_second_left_coefficient = (
-                (first_mixed_product * point_x
-                 - total_cross_product_y * point_first_cross_product))
+                    first_mixed_product * point_x
+                    - total_cross_product_y * point_first_cross_product)
             center_x_third_left_coefficient = (
                     (total_cross_product_x + point_x * segments_cross_product)
                     * sign)
@@ -128,11 +128,11 @@ def to_point_segment_segment_circle_event(point_event: SiteEvent,
                      center_x_third_left_coefficient),
                     common_right_coefficients)
             center_y_first_left_coefficient = (
-                (second_mixed_product * point_y
-                 - total_cross_product_x * point_second_cross_product))
+                    second_mixed_product * point_y
+                    - total_cross_product_x * point_second_cross_product)
             center_y_second_left_coefficient = (
-                (first_mixed_product * point_y
-                 + total_cross_product_x * point_first_cross_product))
+                    first_mixed_product * point_y
+                    + total_cross_product_x * point_first_cross_product)
             center_y_third_left_coefficient = (
                     (total_cross_product_y + point_y * segments_cross_product)
                     * sign)
@@ -148,7 +148,7 @@ def to_point_segment_segment_circle_event(point_event: SiteEvent,
             center_x = robust_divide(center_x_numerator, denominator)
             center_y = robust_divide(center_y_numerator, denominator)
             radius = robust_divide(
-                    - first_mixed_product * point_second_cross_product
+                    -first_mixed_product * point_second_cross_product
                     - second_mixed_product * point_first_cross_product,
                     abs(denominator))
             lower_x = center_x + radius
