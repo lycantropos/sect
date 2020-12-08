@@ -1,5 +1,6 @@
 from hypothesis import given
 
+from sect.core.voronoi.events.models import are_almost_equal
 from sect.decomposition import (Diagram,
                                 multipoint_voronoi)
 from sect.hints import Multipoint
@@ -19,6 +20,9 @@ def test_basic(multipoint: Multipoint) -> None:
 def test_duality(multipoint: Multipoint) -> None:
     result = multipoint_voronoi(multipoint)
 
-    assert ({(vertex.x, vertex.y) for vertex in result.vertices}
-            == {to_circumcenter(triangle)
-                for triangle in delaunay_triangles(multipoint)})
+    circumcenters = [to_circumcenter(triangle)
+                     for triangle in delaunay_triangles(multipoint)]
+    assert all(any(are_almost_equal(vertex.x, center_x)
+                   and are_almost_equal(vertex.y, center_y)
+                   for center_x, center_y in circumcenters)
+               for vertex in result.vertices)
