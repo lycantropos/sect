@@ -1,6 +1,7 @@
 from functools import partial
 from typing import Tuple
 
+from clipping.planar import segments_to_multisegment
 from hypothesis import strategies
 from hypothesis_geometry import planar
 
@@ -14,6 +15,11 @@ from tests.utils import Strategy
 
 multipoints = coordinates_strategies.flatmap(planar.contours)
 rational_multipoints = rational_coordinates_strategies.flatmap(planar.contours)
+empty_multisegments = strategies.builds(list)
+rational_multisegments = (rational_coordinates_strategies
+                          .flatmap(planar.multisegments)
+                          .map(partial(segments_to_multisegment,
+                                       accurate=False)))
 to_non_empty_multisegments = partial(planar.multisegments,
                                      min_size=1)
 non_empty_multisegments = (coordinates_strategies
