@@ -106,6 +106,9 @@ class CircleEvent:
                 if isinstance(other, CircleEvent)
                 else NotImplemented)
 
+    def deactivate(self) -> None:
+        self.is_active = False
+
     def lies_outside_vertical_segment(self, site: SiteEvent) -> bool:
         if not site.is_segment or not site.is_vertical:
             return False
@@ -116,9 +119,6 @@ class CircleEvent:
                           else (site_start_y, site_end_y))
         return (less_than(self.center_y, start_y)
                 or less_than(end_y, self.center_y))
-
-    def deactivate(self) -> None:
-        self.is_active = False
 
 
 Event = TypeVar('Event', CircleEvent, SiteEvent)
