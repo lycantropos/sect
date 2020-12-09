@@ -39,6 +39,11 @@ def robust_sum_of_products_with_sqrt_pairs(
 def robust_sum_of_products_with_sqrt_triplets(
         left: Tuple[Coordinate, Coordinate, Coordinate],
         right: Tuple[Coordinate, Coordinate, Coordinate]) -> Coordinate:
+    """
+    Evaluates expression:
+        left[0] * sqrt(right[0]) + left[1] * sqrt(right[1])
+        + left[2] * sqrt(right[2])
+    """
     first_left, second_left, third_left = left
     first_right, second_right, third_right = right
     first_addend = robust_sum_of_products_with_sqrt_pairs(
