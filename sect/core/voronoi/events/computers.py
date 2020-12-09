@@ -255,12 +255,12 @@ def _to_point_point_segment_coefficient(first_point: Point,
                                         segment_start: Point,
                                         segment_end: Point,
                                         segment_index: int) -> Coordinate:
+    cross_product = parallelogram.signed_area(segment_start, segment_end,
+                                              first_point, second_point)
     dot_product = projection.signed_length(segment_start, segment_end,
                                            first_point, second_point)
     first_point_cross_product = parallelogram.signed_area(
             segment_start, segment_end, first_point, segment_end)
-    cross_product = parallelogram.signed_area(segment_start, segment_end,
-                                              first_point, second_point)
     if cross_product:
         sign = -1 if segment_index == 2 else 1
         second_point_cross_product = parallelogram.signed_area(
