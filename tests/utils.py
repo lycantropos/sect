@@ -103,14 +103,15 @@ def to_circumcenter(triangle: Contour) -> Point:
     first_squared_norm = first_x * first_x + first_y * first_y
     second_squared_norm = second_x * second_x + second_y * second_y
     third_squared_norm = third_x * third_x + third_y * third_y
-    signed_area = parallelogram.signed_area(first_point, second_point,
-                                            second_point, third_point)
-    inverted_signed_area = robust_divide(1, 2 * signed_area)
-    return ((first_squared_norm * (second_y - third_y)
-             + second_squared_norm * (third_y - first_y)
-             + third_squared_norm * (first_y - second_y))
-            * inverted_signed_area,
-            -(first_squared_norm * (second_x - third_x)
-              + second_squared_norm * (third_x - first_x)
-              + third_squared_norm * (first_x - second_x))
-            * inverted_signed_area)
+    center_x_numerator = (first_squared_norm * (second_y - third_y)
+                          + second_squared_norm * (third_y - first_y)
+                          + third_squared_norm * (first_y - second_y))
+    center_y_numerator = -(first_squared_norm * (second_x - third_x)
+                           + second_squared_norm * (third_x - first_x)
+                           + third_squared_norm * (first_x - second_x))
+    denominator = 2 * parallelogram.signed_area(first_point, second_point,
+                                                second_point, third_point)
+    inverted_denominator = robust_divide(1, denominator)
+    center_x = center_x_numerator * inverted_denominator
+    center_y = center_y_numerator * inverted_denominator
+    return center_x, center_y
