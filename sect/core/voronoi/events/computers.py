@@ -53,15 +53,15 @@ def to_point_point_segment_circle_event(first_point_event: SiteEvent,
     first_point_x, first_point_y = first_point = first_point_event.start
     second_point_x, second_point_y = second_point = second_point_event.start
     segment_start, segment_end = segment_event.start, segment_event.end
-    points_dx = second_point_y - first_point_y
-    points_dy = second_point_x - first_point_x
+    points_dx = second_point_x - first_point_x
+    points_dy = second_point_y - first_point_y
     coefficient = _to_point_point_segment_coefficient(
             first_point, second_point, segment_start, segment_end,
             segment_index)
     center_x = robust_evenly_divide(first_point_x + second_point_x
-                                    + coefficient * points_dx, 2)
+                                    + coefficient * points_dy, 2)
     center_y = robust_evenly_divide(first_point_y + second_point_y
-                                    - coefficient * points_dy, 2)
+                                    - coefficient * points_dx, 2)
     radius = robust_divide(
             abs(parallelogram.signed_area(segment_start, (center_x, center_y),
                                           segment_start, segment_end)),
