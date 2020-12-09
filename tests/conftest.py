@@ -5,7 +5,7 @@ import pytest
 from hypothesis import (HealthCheck,
                         settings)
 
-from tests.utils import MAX_COORDINATE_EXPONENT
+from tests.utils import MAX_RATIONAL_COORDINATE_EXPONENT
 
 on_azure_pipelines = bool(os.getenv('TF_BUILD', False))
 settings.register_profile('default',
@@ -20,4 +20,4 @@ settings.register_profile('default',
 @pytest.fixture(autouse=True,
                 scope='session')
 def set_decimal_context() -> None:
-    getcontext().prec = MAX_COORDINATE_EXPONENT * 9
+    getcontext().prec = MAX_RATIONAL_COORDINATE_EXPONENT * 5
