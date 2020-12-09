@@ -95,10 +95,7 @@ def to_point_segment_segment_circle_event(point_event: SiteEvent,
                                  - first_dx * point_second_cross_product)
         total_cross_product_y = (second_dy * point_first_cross_product
                                  - first_dy * point_second_cross_product)
-        if not total_cross_product_x and not total_cross_product_y:
-            center_x = lower_x = point_x
-            center_y = point_y
-        else:
+        if total_cross_product_x or total_cross_product_y:
             sign = -1 if point_index == 2 else 1
             second_squared_length = to_segment_squared_length(second_start,
                                                               second_end)
@@ -154,6 +151,9 @@ def to_point_segment_segment_circle_event(point_event: SiteEvent,
                     - second_mixed_product * point_first_cross_product,
                     abs(denominator))
             lower_x = center_x + radius
+        else:
+            center_x = lower_x = point_x
+            center_y = point_y
     else:
         sign = -1 if point_index == 2 else 1
         point_first_dot_product = projection.signed_length(
