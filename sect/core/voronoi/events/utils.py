@@ -66,6 +66,11 @@ def to_point_segment_segment_mixed_expression(
         left: Tuple[Coordinate, Coordinate, Coordinate],
         right: Tuple[Coordinate, Coordinate, Coordinate, Coordinate]
 ) -> Coordinate:
+    """
+    Evaluates expression:
+        left[0] * sqrt(right[0]) + left[1] * sqrt(right[1])
+        + left[2] * sqrt(right[3] * (sqrt(right[0] * right[1]) + right[2]))
+    """
     first_addend = robust_sum_of_products_with_sqrt_pairs(left[:2], right[:2])
     second_addend = left[2] * robust_sqrt(
             right[3] * robust_sum_of_products_with_sqrt_pairs(
