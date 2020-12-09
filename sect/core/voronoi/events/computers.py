@@ -207,30 +207,28 @@ def to_segment_segment_segment_circle_event(first_event: SiteEvent,
     second_dy = second_end_y - second_start_y
     third_dx = third_end_x - third_start_x
     third_dy = third_end_y - third_start_y
-    first_length = robust_sqrt(to_segment_squared_length(first_start,
-                                                         first_end))
-    second_length = robust_sqrt(to_segment_squared_length(second_start,
-                                                          second_end))
-    third_length = robust_sqrt(to_segment_squared_length(third_start,
-                                                         third_end))
+    first_squared_length = to_segment_squared_length(first_start, first_end)
+    second_squared_length = to_segment_squared_length(second_start,
+                                                      second_end)
+    third_squared_length = to_segment_squared_length(third_start, third_end)
     first_signed_area = parallelogram.signed_area((0, 0), first_start,
                                                   (0, 0), first_end)
     second_signed_area = parallelogram.signed_area((0, 0), second_start,
                                                    (0, 0), second_end)
     third_signed_area = parallelogram.signed_area((0, 0), third_start,
                                                   (0, 0), third_end)
-    second_third_coefficient = (second_signed_area * third_length
-                                - third_signed_area * second_length)
-    third_first_coefficient = (third_signed_area * first_length
-                               - first_signed_area * third_length)
-    first_second_coefficient = (first_signed_area * second_length
-                                - second_signed_area * first_length)
-    center_x_numerator = (first_dx * second_third_coefficient
-                          + second_dx * third_first_coefficient
-                          + third_dx * first_second_coefficient)
-    center_y_numerator = (first_dy * second_third_coefficient
-                          + second_dy * third_first_coefficient
-                          + third_dy * first_second_coefficient)
+    center_x_numerator = triplets_sum_expression(
+            (second_dx * third_signed_area - third_dx * second_signed_area,
+             third_dx * first_signed_area - first_dx * third_signed_area,
+             first_dx * second_signed_area - second_dx * first_signed_area),
+            (first_squared_length, second_squared_length,
+             third_squared_length))
+    center_y_numerator = triplets_sum_expression(
+            (second_dy * third_signed_area - third_dy * second_signed_area,
+             third_dy * first_signed_area - first_dy * third_signed_area,
+             first_dy * second_signed_area - second_dy * first_signed_area),
+            (first_squared_length, second_squared_length,
+             third_squared_length))
     first_second_signed_area = parallelogram.signed_area(
             first_start, first_end, second_start, second_end)
     second_third_signed_area = parallelogram.signed_area(
@@ -241,9 +239,11 @@ def to_segment_segment_segment_circle_event(first_event: SiteEvent,
                         + second_third_signed_area * first_signed_area
                         + third_first_signed_area * second_signed_area)
     lower_x_numerator = center_x_numerator - radius_numerator
-    denominator = (first_second_signed_area * third_length
-                   + second_third_signed_area * first_length
-                   + third_first_signed_area * second_length)
+    denominator = triplets_sum_expression(
+            (first_second_signed_area, second_third_signed_area,
+             third_first_signed_area),
+            (third_squared_length, first_squared_length,
+             second_squared_length))
     center_x = robust_divide(center_x_numerator, denominator)
     center_y = robust_divide(center_y_numerator, denominator)
     lower_x = robust_divide(lower_x_numerator, denominator)
