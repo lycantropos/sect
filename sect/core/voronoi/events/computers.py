@@ -80,9 +80,8 @@ def to_point_segment_segment_circle_event(point_event: SiteEvent,
     second_end_x, second_end_y = second_end = second_segment_event.end
     first_dx = first_end_x - first_start_x
     first_dy = first_end_y - first_start_y
-    segments_cross_product = parallelogram.signed_area(first_start, first_end,
-                                                       second_start,
-                                                       second_end)
+    segments_cross_product = parallelogram.signed_area(
+            first_start, first_end, second_start, second_end)
     first_squared_length = to_segment_squared_length(first_start, first_end)
     if segments_cross_product:
         second_dx = second_end_x - second_start_x
