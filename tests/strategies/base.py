@@ -1,27 +1,26 @@
 import sys
 from decimal import Decimal
 from functools import partial
-from typing import Optional
 
 from hypothesis import strategies
 
 from sect.hints import Coordinate
 from tests.utils import (MAX_COORDINATE_EXPONENT,
+                         MAX_RATIONAL_COORDINATE_EXPONENT,
                          Strategy)
 
 MAX_COORDINATE = 10 ** MAX_COORDINATE_EXPONENT
 MIN_COORDINATE = -MAX_COORDINATE
+MAX_RATIONAL_COORDINATE = 10 ** MAX_RATIONAL_COORDINATE_EXPONENT
+MIN_RATIONAL_COORDINATE = -MAX_RATIONAL_COORDINATE
 
 
-def to_floats(min_value: Optional[Coordinate] = None,
-              max_value: Optional[Coordinate] = None,
-              *,
-              allow_nan: bool = False,
-              allow_infinity: bool = False) -> Strategy:
+def to_floats(min_value: Coordinate,
+              max_value: Coordinate) -> Strategy[float]:
     return (strategies.floats(min_value=min_value,
                               max_value=max_value,
-                              allow_nan=allow_nan,
-                              allow_infinity=allow_infinity)
+                              allow_nan=False,
+                              allow_infinity=False)
             .map(to_digits_count))
 
 
@@ -54,9 +53,9 @@ def to_digits_count(number: float,
 rational_coordinates_strategies_factories = (
     strategies.integers,
     partial(strategies.fractions,
-            max_denominator=MAX_COORDINATE))
+            max_denominator=MAX_RATIONAL_COORDINATE))
 rational_coordinates_strategies = strategies.sampled_from(
-        [factory(MIN_COORDINATE, MAX_COORDINATE)
+        [factory(MIN_RATIONAL_COORDINATE, MAX_RATIONAL_COORDINATE)
          for factory in rational_coordinates_strategies_factories])
 coordinates_strategies = strategies.sampled_from(
         [factory(MIN_COORDINATE, MAX_COORDINATE)

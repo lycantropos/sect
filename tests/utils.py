@@ -27,6 +27,7 @@ Strategy = SearchStrategy
 Polygon = Tuple[Contour, Sequence[Contour]]
 
 MAX_COORDINATE_EXPONENT = 15
+MAX_RATIONAL_COORDINATE_EXPONENT = 7
 
 
 def point_in_multisegment(point: Point,
