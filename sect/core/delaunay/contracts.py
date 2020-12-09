@@ -1,4 +1,4 @@
-from typing import Sequence
+from typing import Tuple
 
 from robust import cocircular
 
@@ -14,7 +14,6 @@ def is_point_inside_circumcircle(first_vertex: Point,
                                   point) > 0
 
 
-def points_form_convex_quadrilateral(points: Sequence[Point]) -> bool:
-    vertices = to_convex_hull(points)
-    return (len(vertices) == 4
-            and all(vertex in points for vertex in vertices))
+def points_form_convex_quadrilateral(points: Tuple[Point, Point, Point, Point]
+                                     ) -> bool:
+    return len(to_convex_hull(points)) == 4
