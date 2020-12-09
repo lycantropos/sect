@@ -15,6 +15,10 @@ from sect.hints import Coordinate
 def robust_sum_of_products_with_sqrt_pairs(
         left: Tuple[Coordinate, Coordinate],
         right: Tuple[Coordinate, Coordinate]) -> Coordinate:
+    """
+    Evaluates expression:
+        left[0] * sqrt(right[0]) + left[1] * sqrt(right[1])
+    """
     first_left, second_left = left
     first_right, second_right = right
     first_addend, second_addend = (two_product(first_left,
