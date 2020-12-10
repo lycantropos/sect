@@ -211,6 +211,13 @@ class Diagram:
         # the second site was already processed, move the position
         self._site_index += 1
 
+    def _init_sites_queue(self) -> None:
+        self._sites.sort()
+        self._sites = to_unique_just_seen(self._sites)
+        for index, site in enumerate(self._sites):
+            site.sorted_index = index
+        self._site_index = 0
+
     def _insert_new_arc(self,
                         first_arc_site: Site,
                         second_arc_site: Site,
@@ -234,13 +241,6 @@ class Diagram:
             # update the data structure that holds temporary bisectors
             self._end_points.push((site.end, node))
         return self._beach_line.insert(new_left_node, BeachLineValue(edges[0]))
-
-    def _init_sites_queue(self) -> None:
-        self._sites.sort()
-        self._sites = to_unique_just_seen(self._sites)
-        for index, site in enumerate(self._sites):
-            site.sorted_index = index
-        self._site_index = 0
 
     def _insert_new_edge(self,
                          first_site: Site,
