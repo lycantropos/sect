@@ -51,11 +51,6 @@ class Diagram:
 
     __repr__ = generate_repr(__init__)
 
-    def clear(self) -> None:
-        self.cells.clear()
-        self.edges.clear()
-        self.vertices.clear()
-
     @classmethod
     def from_sources(cls,
                      multipoint: Multipoint,
@@ -67,6 +62,11 @@ class Diagram:
             result._insert_segment(segment)
         result._construct()
         return result
+
+    def clear(self) -> None:
+        self.cells.clear()
+        self.edges.clear()
+        self.vertices.clear()
 
     @property
     def _site_event(self) -> SiteEvent:
