@@ -73,73 +73,72 @@ class Diagram:
         return self._site_events[self._site_event_index]
 
     def _activate_circle_event(self,
-                               first_site: SiteEvent,
-                               second_site: SiteEvent,
-                               third_site: SiteEvent,
+                               first_event: SiteEvent,
+                               second_event: SiteEvent,
+                               third_event: SiteEvent,
                                bisector_node: red_black.Node) -> None:
-        # check if the three input sites create a circle event
-        if first_site.is_point:
-            if second_site.is_point:
-                if third_site.is_point:
-                    # (point, point, point) sites
+        if first_event.is_point:
+            if second_event.is_point:
+                if third_event.is_point:
+                    # (point, point, point) events
                     if not point_point_point_circle_exists(
-                            first_site, second_site, third_site):
+                            first_event, second_event, third_event):
                         return
                     circle_event = to_point_point_point_circle_event(
-                            first_site, second_site, third_site)
+                            first_event, second_event, third_event)
                 else:
-                    # (point, point, segment) sites
+                    # (point, point, segment) events
                     if not point_point_segment_circle_exists(
-                            first_site, second_site, third_site, 3):
+                            first_event, second_event, third_event, 3):
                         return
                     circle_event = to_point_point_segment_circle_event(
-                            first_site, second_site, third_site, 3)
-            elif third_site.is_point:
-                # (point, segment, point) sites
+                            first_event, second_event, third_event, 3)
+            elif third_event.is_point:
+                # (point, segment, point) events
                 if not point_point_segment_circle_exists(
-                        first_site, third_site, second_site, 2):
+                        first_event, third_event, second_event, 2):
                     return
                 circle_event = to_point_point_segment_circle_event(
-                        first_site, third_site, second_site, 2)
+                        first_event, third_event, second_event, 2)
             else:
-                # (point, segment, segment) sites.
+                # (point, segment, segment) events.
                 if not point_segment_segment_circle_exists(
-                        first_site, second_site, third_site, 1):
+                        first_event, second_event, third_event, 1):
                     return
                 circle_event = to_point_segment_segment_circle_event(
-                        first_site, second_site, third_site, 1)
-        elif second_site.is_point:
-            if third_site.is_point:
-                # (segment, point, point) sites
+                        first_event, second_event, third_event, 1)
+        elif second_event.is_point:
+            if third_event.is_point:
+                # (segment, point, point) events
                 if not point_point_segment_circle_exists(
-                        second_site, third_site, first_site, 1):
+                        second_event, third_event, first_event, 1):
                     return
                 circle_event = to_point_point_segment_circle_event(
-                        second_site, third_site, first_site, 1)
+                        second_event, third_event, first_event, 1)
             else:
-                # (segment, point, segment) sites
+                # (segment, point, segment) events
                 if not point_segment_segment_circle_exists(
-                        second_site, first_site, third_site, 2):
+                        second_event, first_event, third_event, 2):
                     return
                 circle_event = to_point_segment_segment_circle_event(
-                        second_site, first_site, third_site, 2)
-        elif third_site.is_point:
-            # (segment, segment, point) sites
+                        second_event, first_event, third_event, 2)
+        elif third_event.is_point:
+            # (segment, segment, point) events
             if not point_segment_segment_circle_exists(
-                    third_site, first_site, second_site, 3):
+                    third_event, first_event, second_event, 3):
                 return
             circle_event = to_point_segment_segment_circle_event(
-                    third_site, first_site, second_site, 3)
+                    third_event, first_event, second_event, 3)
         else:
-            # (segment, segment, segment) sites
+            # (segment, segment, segment) events
             if not segment_segment_segment_circle_exists(
-                    first_site, second_site, third_site):
+                    first_event, second_event, third_event):
                 return
             circle_event = to_segment_segment_segment_circle_event(
-                    first_site, second_site, third_site)
-        if (circle_event.lies_outside_vertical_segment(first_site)
-                or circle_event.lies_outside_vertical_segment(second_site)
-                or circle_event.lies_outside_vertical_segment(third_site)):
+                    first_event, second_event, third_event)
+        if (circle_event.lies_outside_vertical_segment(first_event)
+                or circle_event.lies_outside_vertical_segment(second_event)
+                or circle_event.lies_outside_vertical_segment(third_event)):
             return
         self._circle_events.push((circle_event, bisector_node))
         bisector_node.value.circle_event = circle_event
