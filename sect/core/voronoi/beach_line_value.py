@@ -7,6 +7,8 @@ from .faces import Edge
 
 
 class BeachLineValue:
+    __slots__ = 'edge', 'circle_event'
+
     def __init__(self,
                  edge: Optional[Edge],
                  circle_event: Optional[CircleEvent] = None) -> None:
