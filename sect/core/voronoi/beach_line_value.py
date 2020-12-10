@@ -2,22 +2,22 @@ from typing import Optional
 
 from reprit.base import generate_repr
 
-from .events import CircleEvent
+from .events import Circle
 from .faces import Edge
 
 
 class BeachLineValue:
-    __slots__ = 'edge', 'circle_event'
+    __slots__ = 'edge', 'circle'
 
     def __init__(self,
                  edge: Optional[Edge],
-                 circle_event: Optional[CircleEvent] = None) -> None:
+                 circle: Optional[Circle] = None) -> None:
         self.edge = edge
-        self.circle_event = circle_event
+        self.circle = circle
 
     __repr__ = generate_repr(__init__)
 
-    def deactivate_circle_event(self) -> None:
-        if self.circle_event is not None:
-            self.circle_event.deactivate()
-            self.circle_event = None
+    def deactivate_circle(self) -> None:
+        if self.circle is not None:
+            self.circle.deactivate()
+            self.circle = None

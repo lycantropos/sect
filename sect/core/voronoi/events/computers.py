@@ -7,21 +7,20 @@ from sect.core.voronoi.utils import (robust_divide,
                                      to_segment_squared_length)
 from sect.hints import (Coordinate,
                         Point)
-from .models import (CircleEvent,
-                     SiteEvent)
+from .models import (Circle,
+                     Site)
 from .utils import (
     robust_sum_of_products_with_sqrt_pairs as pairs_sum_expression,
     robust_sum_of_products_with_sqrt_triplets as triplets_sum_expression,
     to_point_segment_segment_mixed_expression as to_mixed_expression)
 
 
-def to_point_point_point_circle_event(first_point_event: SiteEvent,
-                                      second_point_event: SiteEvent,
-                                      third_point_event: SiteEvent
-                                      ) -> CircleEvent:
-    first_x, first_y = first_point = first_point_event.start
-    second_x, second_y = second_point = second_point_event.start
-    third_x, third_y = third_point = third_point_event.start
+def to_point_point_point_circle(first_point_site: Site,
+                                second_point_site: Site,
+                                third_point_site: Site) -> Circle:
+    first_x, first_y = first_point = first_point_site.start
+    second_x, second_y = second_point = second_point_site.start
+    third_x, third_y = third_point = third_point_site.start
     first_squared_norm = first_x * first_x + first_y * first_y
     second_squared_norm = second_x * second_x + second_y * second_y
     third_squared_norm = third_x * third_x + third_y * third_y
@@ -43,16 +42,16 @@ def to_point_point_point_circle_event(first_point_event: SiteEvent,
     center_x = center_x_numerator * inverted_denominator
     center_y = center_y_numerator * inverted_denominator
     lower_x = lower_x_numerator * inverted_denominator
-    return CircleEvent(center_x, center_y, lower_x)
+    return Circle(center_x, center_y, lower_x)
 
 
-def to_point_point_segment_circle_event(first_point_event: SiteEvent,
-                                        second_point_event: SiteEvent,
-                                        segment_event: SiteEvent,
-                                        segment_index: int) -> CircleEvent:
-    first_point_x, first_point_y = first_point = first_point_event.start
-    second_point_x, second_point_y = second_point = second_point_event.start
-    segment_start, segment_end = segment_event.start, segment_event.end
+def to_point_point_segment_circle(first_point_site: Site,
+                                  second_point_site: Site,
+                                  segment_site: Site,
+                                  segment_index: int) -> Circle:
+    first_point_x, first_point_y = first_point = first_point_site.start
+    second_point_x, second_point_y = second_point = second_point_site.start
+    segment_start, segment_end = segment_site.start, segment_site.end
     points_dx = second_point_x - first_point_x
     points_dy = second_point_y - first_point_y
     coefficient = _to_point_point_segment_coefficient(
@@ -66,18 +65,18 @@ def to_point_point_segment_circle_event(first_point_event: SiteEvent,
             abs(parallelogram.signed_area(segment_start, (center_x, center_y),
                                           segment_start, segment_end)),
             robust_sqrt(to_segment_squared_length(segment_start, segment_end)))
-    return CircleEvent(center_x, center_y, center_x + radius)
+    return Circle(center_x, center_y, center_x + radius)
 
 
-def to_point_segment_segment_circle_event(point_event: SiteEvent,
-                                          first_segment_event: SiteEvent,
-                                          second_segment_event: SiteEvent,
-                                          point_index: int) -> CircleEvent:
-    point_x, point_y = point = point_event.start
-    first_start_x, first_start_y = first_start = first_segment_event.start
-    first_end_x, first_end_y = first_end = first_segment_event.end
-    second_start_x, second_start_y = second_start = second_segment_event.start
-    second_end_x, second_end_y = second_end = second_segment_event.end
+def to_point_segment_segment_circle(point_site: Site,
+                                    first_segment_site: Site,
+                                    second_segment_site: Site,
+                                    point_index: int) -> Circle:
+    point_x, point_y = point = point_site.start
+    first_start_x, first_start_y = first_start = first_segment_site.start
+    first_end_x, first_end_y = first_end = first_segment_site.end
+    second_start_x, second_start_y = second_start = second_segment_site.start
+    second_end_x, second_end_y = second_end = second_segment_site.end
     first_dx = first_end_x - first_start_x
     first_dy = first_end_y - first_start_y
     segments_cross_product = parallelogram.signed_area(
@@ -187,19 +186,18 @@ def to_point_segment_segment_circle_event(point_event: SiteEvent,
         center_x = robust_divide(center_x_numerator, denominator)
         center_y = robust_divide(center_y_numerator, denominator)
         lower_x = robust_divide(lower_x_numerator, denominator)
-    return CircleEvent(center_x, center_y, lower_x)
+    return Circle(center_x, center_y, lower_x)
 
 
-def to_segment_segment_segment_circle_event(first_event: SiteEvent,
-                                            second_event: SiteEvent,
-                                            third_event: SiteEvent
-                                            ) -> CircleEvent:
-    first_start_x, first_start_y = first_start = first_event.start
-    first_end_x, first_end_y = first_end = first_event.end
-    second_start_x, second_start_y = second_start = second_event.start
-    second_end_x, second_end_y = second_end = second_event.end
-    third_start_x, third_start_y = third_start = third_event.start
-    third_end_x, third_end_y = third_end = third_event.end
+def to_segment_segment_segment_circle(first_site: Site,
+                                      second_site: Site,
+                                      third_site: Site) -> Circle:
+    first_start_x, first_start_y = first_start = first_site.start
+    first_end_x, first_end_y = first_end = first_site.end
+    second_start_x, second_start_y = second_start = second_site.start
+    second_end_x, second_end_y = second_end = second_site.end
+    third_start_x, third_start_y = third_start = third_site.start
+    third_end_x, third_end_y = third_end = third_site.end
     first_dx = first_end_x - first_start_x
     first_dy = first_end_y - first_start_y
     second_dx = second_end_x - second_start_x
@@ -246,7 +244,7 @@ def to_segment_segment_segment_circle_event(first_event: SiteEvent,
     center_x = robust_divide(center_x_numerator, denominator)
     center_y = robust_divide(center_y_numerator, denominator)
     lower_x = robust_divide(lower_x_numerator, denominator)
-    return CircleEvent(center_x, center_y, lower_x)
+    return Circle(center_x, center_y, lower_x)
 
 
 def _to_point_point_segment_coefficient(first_point: Point,

@@ -1,2 +1,2 @@
-from .models import (CircleEvent,
-                     SiteEvent)
+from .models import (Circle,
+                     Site)

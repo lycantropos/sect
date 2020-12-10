@@ -8,7 +8,7 @@ from robust.angular import (Orientation,
 
 from sect.hints import (Coordinate,
                         Point)
-from .events import SiteEvent
+from .events import Site
 from .utils import (robust_divide,
                     robust_evenly_divide,
                     robust_sqrt,
@@ -18,7 +18,7 @@ from .utils import (robust_divide,
 class BeachLineKey:
     __slots__ = '_left_site', '_right_site'
 
-    def __init__(self, left_site: SiteEvent, right_site: SiteEvent) -> None:
+    def __init__(self, left_site: Site, right_site: Site) -> None:
         self.left_site = left_site
         self.right_site = right_site
 
@@ -38,7 +38,7 @@ class BeachLineKey:
                     other.left_site, other.right_site, point)
         elif site.sorted_index == other_site.sorted_index:
             # both nodes are new
-            # (inserted during same site event processing)
+            # (inserted during same site processing)
             return self.to_comparison_y() < other.to_comparison_y()
         elif site.sorted_index < other_site.sorted_index:
             y, flag = self.to_comparison_y(False)
@@ -54,25 +54,25 @@ class BeachLineKey:
                     else y < other_y)
 
     @property
-    def comparison_site(self) -> SiteEvent:
+    def comparison_site(self) -> Site:
         return (self.left_site
                 if self.left_site.sorted_index > self.right_site.sorted_index
                 else self.right_site)
 
     @property
-    def left_site(self) -> SiteEvent:
+    def left_site(self) -> Site:
         return self._left_site
 
     @left_site.setter
-    def left_site(self, value: SiteEvent) -> None:
+    def left_site(self, value: Site) -> None:
         self._left_site = copy(value)
 
     @property
-    def right_site(self) -> SiteEvent:
+    def right_site(self) -> Site:
         return self._right_site
 
     @right_site.setter
-    def right_site(self, value: SiteEvent) -> None:
+    def right_site(self, value: Site) -> None:
         self._right_site = copy(value)
 
     def to_comparison_y(self, is_new_node: bool = True) -> Tuple[int, int]:
@@ -91,22 +91,21 @@ class BeachLineKey:
             return right_site_start_y, -1
 
 
-def distance_to_point_arc(point_event: SiteEvent, point: Point) -> Coordinate:
-    start_x, _ = event_point = point_event.start
+def distance_to_point_arc(point_site: Site, point: Point) -> Coordinate:
+    start_x, _ = site_point = point_site.start
     x, _ = point
     dx = start_x - x
-    return robust_divide(to_segment_squared_length(point, event_point), 2 * dx)
+    return robust_divide(to_segment_squared_length(point, site_point), 2 * dx)
 
 
-def distance_to_segment_arc(segment_event: SiteEvent,
-                            point: Point) -> Coordinate:
-    if segment_event.is_vertical:
-        start_x, _ = segment_event.start
+def distance_to_segment_arc(segment_site: Site, point: Point) -> Coordinate:
+    if segment_site.is_vertical:
+        start_x, _ = segment_site.start
         x, _ = point
         return robust_evenly_divide(start_x - x, 2)
     else:
-        start_x, start_y = start = segment_event.start
-        end_x, end_y = end = segment_event.end
+        start_x, start_y = start = segment_site.start
+        end_x, end_y = end = segment_site.end
         segment_length = robust_sqrt(to_segment_squared_length(start, end))
         segment_dx = end_x - start_x
         segment_dy = end_y - start_y
@@ -118,8 +117,8 @@ def distance_to_segment_arc(segment_event: SiteEvent,
                                                        point)
 
 
-def horizontal_goes_through_right_arc_first(left_site: SiteEvent,
-                                            right_site: SiteEvent,
+def horizontal_goes_through_right_arc_first(left_site: Site,
+                                            right_site: Site,
                                             point: Point) -> bool:
     if left_site.is_segment:
         if right_site.is_segment:
@@ -137,52 +136,52 @@ def horizontal_goes_through_right_arc_first(left_site: SiteEvent,
 
 
 def point_point_horizontal_goes_through_right_arc_first(
-        first_point_event: SiteEvent,
-        second_point_event: SiteEvent,
+        first_point_site: Site,
+        second_point_site: Site,
         point: Point) -> bool:
-    first_point_event_x, first_point_event_y = first_point_event.start
-    second_point_event_x, second_point_event_y = second_point_event.start
+    first_point_site_x, first_point_site_y = first_point_site.start
+    second_point_site_x, second_point_site_y = second_point_site.start
     _, y = point
-    if second_point_event_x < first_point_event_x:
-        if y <= first_point_event_y:
+    if second_point_site_x < first_point_site_x:
+        if y <= first_point_site_y:
             return False
-    elif first_point_event_x < second_point_event_x:
-        if second_point_event_y <= y:
+    elif first_point_site_x < second_point_site_x:
+        if second_point_site_y <= y:
             return True
     else:
-        return first_point_event_y + second_point_event_y < 2 * y
-    return (distance_to_point_arc(first_point_event, point)
-            < distance_to_point_arc(second_point_event, point))
+        return first_point_site_y + second_point_site_y < 2 * y
+    return (distance_to_point_arc(first_point_site, point)
+            < distance_to_point_arc(second_point_site, point))
 
 
 def point_segment_horizontal_goes_through_right_arc_first(
-        point_event: SiteEvent,
-        segment_event: SiteEvent,
+        point_site: Site,
+        segment_site: Site,
         point: Point,
         reverse_order: bool) -> bool:
-    segment_start, segment_end = segment_event.start, segment_event.end
+    segment_start, segment_end = segment_site.start, segment_site.end
     if (orientation(segment_end, segment_start, point)
             is not Orientation.CLOCKWISE):
-        return not segment_event.is_inverse
-    elif segment_event.is_vertical:
-        _, point_event_y = point_event.start
+        return not segment_site.is_inverse
+    elif segment_site.is_vertical:
+        _, point_site_y = point_site.start
         _, y = point
-        if y < point_event_y and not reverse_order:
+        if y < point_site_y and not reverse_order:
             return False
-        elif y > point_event_y and reverse_order:
+        elif y > point_site_y and reverse_order:
             return True
     elif parallelogram.signed_area(segment_start, segment_end,
-                                   point_event.start, point) > 0:
-        if not segment_event.is_inverse:
+                                   point_site.start, point) > 0:
+        if not segment_site.is_inverse:
             if reverse_order:
                 return True
         elif not reverse_order:
             return False
     else:
         point_x, point_y = point
-        point_event_x, point_event_y = point_event.start
-        points_dx, points_dy = (point_x - point_event_x,
-                                point_y - point_event_y)
+        point_site_x, point_site_y = point_site.start
+        points_dx, points_dy = (point_x - point_site_x,
+                                point_y - point_site_y)
         segment_start_x, segment_start_y = segment_start
         segment_end_x, segment_end_y = segment_end
         segment_dx, segment_dy = (segment_end_x - segment_start_x,
@@ -192,18 +191,18 @@ def point_segment_horizontal_goes_through_right_arc_first(
         fast_right_expr = 2 * segment_dy * points_dx * points_dy
         if (fast_left_expr > fast_right_expr) is not reverse_order:
             return reverse_order
-    return ((distance_to_point_arc(point_event, point)
-             < distance_to_segment_arc(segment_event, point))
+    return ((distance_to_point_arc(point_site, point)
+             < distance_to_segment_arc(segment_site, point))
             is not reverse_order)
 
 
 def segment_segment_horizontal_goes_through_right_arc_first(
-        first_segment_event: SiteEvent,
-        second_segment_event: SiteEvent,
+        first_segment_site: Site,
+        second_segment_site: Site,
         point: Point) -> bool:
-    return (orientation(first_segment_event.end, first_segment_event.start,
+    return (orientation(first_segment_site.end, first_segment_site.start,
                         point) is Orientation.COUNTERCLOCKWISE
-            if (first_segment_event.sorted_index
-                == second_segment_event.sorted_index)
-            else (distance_to_segment_arc(first_segment_event, point)
-                  < distance_to_segment_arc(second_segment_event, point)))
+            if (first_segment_site.sorted_index
+                == second_segment_site.sorted_index)
+            else (distance_to_segment_arc(first_segment_site, point)
+                  < distance_to_segment_arc(second_segment_site, point)))

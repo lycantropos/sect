@@ -13,7 +13,7 @@ from sect.hints import (Coordinate,
                         Point)
 
 
-class SiteEvent:
+class Site:
     __slots__ = ('start', 'end', 'source', 'source_category', 'sorted_index',
                  'is_inverse')
 
@@ -31,13 +31,13 @@ class SiteEvent:
 
     __repr__ = generate_repr(__init__)
 
-    def __eq__(self, other: 'SiteEvent') -> bool:
+    def __eq__(self, other: 'Site') -> bool:
         return (self.start == other.start and self.end == other.end
-                if isinstance(other, SiteEvent)
+                if isinstance(other, Site)
                 else NotImplemented)
 
     def __lt__(self, other: 'Event') -> bool:
-        if isinstance(other, SiteEvent):
+        if isinstance(other, Site):
             start_x, start_y = self.start
             other_start_x, other_start_y = other.start
             if start_x != other_start_x:
@@ -60,7 +60,7 @@ class SiteEvent:
         else:
             start_x, _ = self.start
             return (less_than(start_x, other.lower_x)
-                    if isinstance(other, CircleEvent)
+                    if isinstance(other, Circle)
                     else NotImplemented)
 
     @property
@@ -84,7 +84,7 @@ class SiteEvent:
                                                  not self.is_inverse)
 
 
-class CircleEvent:
+class Circle:
     __slots__ = 'center_x', 'center_y', 'lower_x', 'is_active'
 
     def __init__(self,
@@ -99,17 +99,17 @@ class CircleEvent:
     __repr__ = generate_repr(__init__)
 
     def __lt__(self, other: 'Event') -> bool:
-        if isinstance(other, SiteEvent):
+        if isinstance(other, Site):
             other_start_x, _ = other.start
             return less_than(self.lower_x, other_start_x)
         return ((self.lower_x, self.center_y) < (other.lower_x, other.center_y)
-                if isinstance(other, CircleEvent)
+                if isinstance(other, Circle)
                 else NotImplemented)
 
     def deactivate(self) -> None:
         self.is_active = False
 
-    def lies_outside_vertical_segment(self, site: SiteEvent) -> bool:
+    def lies_outside_vertical_segment(self, site: Site) -> bool:
         if not site.is_segment or not site.is_vertical:
             return False
         _, site_start_y = site.start
@@ -121,7 +121,7 @@ class CircleEvent:
                 or less_than(end_y, self.center_y))
 
 
-Event = TypeVar('Event', CircleEvent, SiteEvent)
+Event = TypeVar('Event', Circle, Site)
 
 
 def less_than(left: Coordinate, right: Coordinate) -> bool:
