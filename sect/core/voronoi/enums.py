@@ -9,7 +9,7 @@ class Base(IntEnum):
 
 @unique
 class GeometryCategory(Base):
-    POINT = 0x0,
+    POINT = 0x0
     SEGMENT = 0x1
 
 
