@@ -159,7 +159,8 @@ class Diagram:
         self._init_sites_queue()
         self._init_beach_line()
         while self._circles or self._site_index < len(self._sites):
-            if not self._circles or self._site < self._circles.peek()[0]:
+            if not self._circles or (self._site_index < len(self._sites)
+                                     and self._site < self._circles.peek()[0]):
                 self._process_site()
             else:
                 self._process_circle()
