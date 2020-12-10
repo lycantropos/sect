@@ -384,8 +384,7 @@ class Diagram:
                 # there could be only one new circle
                 # formed by a new bisector and the one on the right
                 self._activate_circle(site, right_node.key.left_site,
-                                      right_node.key.right_site,
-                                      right_node)
+                                      right_node.key.right_site, right_node)
                 right_node = left_node
             else:
                 # the above arc corresponds neither to the first,
@@ -403,8 +402,8 @@ class Diagram:
                 # add candidate circles to the queue;
                 # there could be up to two circles
                 # formed by a new bisector and the one on the left or right
-                self._activate_circle(first_site, first_arc_site,
-                                      site, new_node)
+                self._activate_circle(first_site, first_arc_site, site,
+                                      new_node)
                 # if the site is a segment, update its direction
                 if site.is_segment:
                     site.inverse()
