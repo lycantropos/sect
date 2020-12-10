@@ -141,9 +141,6 @@ class Diagram:
                 or circle_event.lies_outside_vertical_segment(second_site)
                 or circle_event.lies_outside_vertical_segment(third_site)):
             return
-        # add the new circle event to the circle events queue;
-        # update bisector's circle event iterator to point
-        # to the new circle event in the circle event queue
         self._circle_events.push((circle_event, bisector_node))
         bisector_node.value.circle_event = circle_event
 
