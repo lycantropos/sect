@@ -270,7 +270,6 @@ class Diagram:
                                            first_bisector: Edge,
                                            second_bisector: Edge
                                            ) -> Tuple[Edge, Edge]:
-        # add a new Voronoi vertex
         new_vertex = Vertex(circle.center_x, circle.center_y)
         self.vertices.append(new_vertex)
         # update vertex pointers of the old edges
