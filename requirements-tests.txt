@@ -1,6 +1,6 @@
-clipping~=0.12
-orient~=0.10
+clipping>=0.12.1,<1.0
+orient>=0.10.0,<1.0
 pytest>=6.1.2
 pytest-cov>=2.10.1
 hypothesis>=5.33.2
-hypothesis-geometry~=0.17
+hypothesis-geometry>=0.17.1,<1.0
