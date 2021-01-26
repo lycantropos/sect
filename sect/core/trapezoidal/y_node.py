@@ -26,7 +26,7 @@ class YNode(Node):
         return max(self.below.height, self.above.height) + 1
 
     def locate(self, point: Point) -> Location:
-        point_orientation = self.edge.orientation_with(point)
+        point_orientation = self.edge.orientation_of(point)
         return (self.above.locate(point)
                 if point_orientation is Orientation.COUNTERCLOCKWISE
                 else (self.below.locate(point)

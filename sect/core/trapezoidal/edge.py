@@ -33,14 +33,14 @@ class Edge:
         >>> horizontal < diagonal < vertical
         True
         """
-        other_left_orientation = self.orientation_with(other.left)
-        other_right_orientation = self.orientation_with(other.right)
+        other_left_orientation = self.orientation_of(other.left)
+        other_right_orientation = self.orientation_of(other.right)
         if other_left_orientation is other_right_orientation:
             return other_left_orientation is Orientation.COUNTERCLOCKWISE
         elif other_left_orientation is Orientation.COLLINEAR:
             return other_right_orientation is Orientation.COUNTERCLOCKWISE
-        left_orientation = other.orientation_with(self.left)
-        right_orientation = other.orientation_with(self.right)
+        left_orientation = other.orientation_of(self.left)
+        right_orientation = other.orientation_of(self.right)
         if left_orientation is right_orientation:
             return left_orientation is Orientation.CLOCKWISE
         elif left_orientation is Orientation.COLLINEAR:
@@ -53,5 +53,5 @@ class Edge:
                     # crossing edges are incomparable
                     else NotImplemented)
 
-    def orientation_with(self, point: Point) -> Orientation:
+    def orientation_of(self, point: Point) -> Orientation:
         return orientation(self.right, self.left, point)

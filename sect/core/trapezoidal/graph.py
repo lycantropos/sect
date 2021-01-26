@@ -260,7 +260,7 @@ class Graph:
         right = edge.right
         while trapezoid.right < right:
             trapezoid = ((trapezoid.upper_right or trapezoid.lower_right)
-                         if (edge.orientation_with(trapezoid.right)
+                         if (edge.orientation_of(trapezoid.right)
                              is Orientation.CLOCKWISE)
                          else (trapezoid.lower_right or trapezoid.upper_right))
             assert trapezoid is not None, ('Expected neighbour trapezoid, '
