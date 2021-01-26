@@ -180,7 +180,7 @@ class QuadEdge:
         self.splice(self.right_from_start)
         self.opposite.splice(self.opposite.right_from_start)
 
-    def orientation_with(self, point: Point) -> Orientation:
+    def orientation_of(self, point: Point) -> Orientation:
         return orientation(self.end, self._start, point)
 
 
@@ -195,10 +195,10 @@ def edge_to_non_adjacent_vertices(edge: QuadEdge) -> Set[Point]:
 
 
 def _edge_to_incidents(edge: QuadEdge) -> Iterable[QuadEdge]:
-    if (edge.orientation_with(edge.right_from_start.end)
+    if (edge.orientation_of(edge.right_from_start.end)
             is Orientation.CLOCKWISE):
         yield edge.right_from_start
-    if (edge.orientation_with(edge.left_from_start.end)
+    if (edge.orientation_of(edge.left_from_start.end)
             is Orientation.COUNTERCLOCKWISE):
         yield edge.left_from_start
 

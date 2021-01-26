@@ -124,7 +124,7 @@ class Triangulation:
         visited_vertices = set(self._triangular_holes_vertices)
         for edge in self.edges():
             if (edge.left_from_start.end == edge.opposite.right_from_start.end
-                    and (edge.orientation_with(edge.left_from_start.end)
+                    and (edge.orientation_of(edge.left_from_start.end)
                          is Orientation.COUNTERCLOCKWISE)):
                 triangle = edge.start, edge.end, edge.left_from_start.end
                 vertices = frozenset(triangle)
@@ -138,10 +138,10 @@ class Triangulation:
 
     def _find_base_edge(self, other: 'Triangulation') -> QuadEdge:
         while True:
-            if (self.right_edge.orientation_with(other.left_edge.start)
+            if (self.right_edge.orientation_of(other.left_edge.start)
                     is Orientation.COUNTERCLOCKWISE):
                 self.right_edge = self.right_edge.left_from_end
-            elif (other.left_edge.orientation_with(self.right_edge.start)
+            elif (other.left_edge.orientation_of(self.right_edge.start)
                   is Orientation.CLOCKWISE):
                 other.left_edge = other.left_edge.right_from_end
             else:
@@ -301,11 +301,11 @@ def _merge(base_edge: QuadEdge) -> None:
 
 def _to_left_candidate(base_edge: QuadEdge) -> Optional[QuadEdge]:
     result = base_edge.opposite.left_from_start
-    if base_edge.orientation_with(result.end) is not Orientation.CLOCKWISE:
+    if base_edge.orientation_of(result.end) is not Orientation.CLOCKWISE:
         return None
     while (is_point_inside_circumcircle(base_edge.end, base_edge.start,
                                         result.end, result.left_from_start.end)
-           and (base_edge.orientation_with(result.left_from_start.end)
+           and (base_edge.orientation_of(result.left_from_start.end)
                 is Orientation.CLOCKWISE)):
         next_candidate = result.left_from_start
         result.disconnect()
@@ -315,12 +315,12 @@ def _to_left_candidate(base_edge: QuadEdge) -> Optional[QuadEdge]:
 
 def _to_right_candidate(base_edge: QuadEdge) -> Optional[QuadEdge]:
     result = base_edge.right_from_start
-    if base_edge.orientation_with(result.end) is not Orientation.CLOCKWISE:
+    if base_edge.orientation_of(result.end) is not Orientation.CLOCKWISE:
         return None
     while (is_point_inside_circumcircle(base_edge.end, base_edge.start,
                                         result.end,
                                         result.right_from_start.end)
-           and (base_edge.orientation_with(result.right_from_start.end)
+           and (base_edge.orientation_of(result.right_from_start.end)
                 is Orientation.CLOCKWISE)):
         next_candidate = result.right_from_start
         result.disconnect()
