@@ -13,9 +13,8 @@ class Edge:
                  right: Point,
                  interior_to_left: bool) -> None:
         assert left < right, 'Incorrect endpoints order'
-        self.left = left
-        self.right = right
-        self.interior_to_left = interior_to_left
+        self.left, self.right, self.interior_to_left = (left, right,
+                                                        interior_to_left)
 
     __repr__ = generate_repr(__init__)
 
