@@ -9,11 +9,11 @@ services:
         - IMAGE_VERSION=${CPYTHON_IMAGE_VERSION}
     image: lycantropos/sect-cpython:0.4.1
     volumes:
-      - ./sect/:/opt/sect/sect/
-      - ./tests/:/opt/sect/tests/
-      - ./README.md:/opt/sect/README.md
-      - ./requirements.txt:/opt/sect/requirements.txt
-      - ./requirements-tests.txt:/opt/sect/requirements-tests.txt
-      - ./setup.py:/opt/sect/setup.py
       - ./pytest.ini:/opt/sect/pytest.ini
+      - ./README.md:/opt/sect/README.md
+      - ./requirements-tests.txt:/opt/sect/requirements-tests.txt
+      - ./requirements.txt:/opt/sect/requirements.txt
+      - ./sect:/opt/sect/sect
+      - ./setup.py:/opt/sect/setup.py
+      - ./tests:/opt/sect/tests
     entrypoint: pytest
