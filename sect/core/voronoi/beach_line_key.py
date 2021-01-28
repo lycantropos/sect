@@ -159,7 +159,7 @@ def point_segment_horizontal_goes_through_right_arc_first(
         point: Point,
         reverse_order: bool) -> bool:
     segment_start, segment_end = segment_site.start, segment_site.end
-    if (orientation(segment_end, segment_start, point)
+    if (orientation(segment_start, segment_end, point)
             is not Orientation.CLOCKWISE):
         return not segment_site.is_inverse
     elif segment_site.is_vertical:
@@ -199,7 +199,7 @@ def segment_segment_horizontal_goes_through_right_arc_first(
         first_segment_site: Site,
         second_segment_site: Site,
         point: Point) -> bool:
-    return (orientation(first_segment_site.end, first_segment_site.start,
+    return (orientation(first_segment_site.start, first_segment_site.end,
                         point) is Orientation.COUNTERCLOCKWISE
             if (first_segment_site.sorted_index
                 == second_segment_site.sorted_index)

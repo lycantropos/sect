@@ -56,15 +56,15 @@ class SweepLineKey:
             return False
         start, end = event.start, event.end
         other_start, other_end = other_event.start, other_event.end
-        other_start_orientation = orientation(end, start, other_start)
-        other_end_orientation = orientation(end, start, other_end)
+        other_start_orientation = orientation(start, end, other_start)
+        other_end_orientation = orientation(start, end, other_end)
         if other_start_orientation is other_end_orientation:
             return (other_event.from_left
                     if other_start_orientation is Orientation.COLLINEAR
                     else (other_start_orientation
                           is Orientation.COUNTERCLOCKWISE))
-        start_orientation = orientation(other_end, other_start, start)
-        end_orientation = orientation(other_end, other_start, end)
+        start_orientation = orientation(other_start, other_end, start)
+        end_orientation = orientation(other_start, other_end, end)
         if start_orientation is end_orientation:
             return start_orientation is Orientation.CLOCKWISE
         elif other_start_orientation is Orientation.COLLINEAR:

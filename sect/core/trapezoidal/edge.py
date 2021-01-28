@@ -53,4 +53,4 @@ class Edge:
                     else NotImplemented)
 
     def orientation_of(self, point: Point) -> Orientation:
-        return orientation(self.right, self.left, point)
+        return orientation(self.left, self.right, point)

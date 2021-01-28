@@ -66,7 +66,7 @@ def dot_product(first_start: Point,
 flatten = chain.from_iterable
 
 
-def orientation(first, vertex, second):
+def orientation(vertex, first, second):
     context = get_context()
     point_cls = context.point_cls
     return context.angle_orientation(point_cls(*vertex), point_cls(*first),
@@ -123,5 +123,5 @@ def segments_relationship(first: Segment,
 
 def to_contour_orientation(contour: Contour) -> Orientation:
     index = arg_min(contour)
-    return orientation(contour[index], contour[index - 1],
+    return orientation(contour[index - 1], contour[index],
                        contour[(index + 1) % len(contour)])

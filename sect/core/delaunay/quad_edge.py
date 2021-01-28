@@ -181,7 +181,7 @@ class QuadEdge:
         self.opposite.splice(self.opposite.right_from_start)
 
     def orientation_of(self, point: Point) -> Orientation:
-        return orientation(self.end, self._start, point)
+        return orientation(self.start, self.end, point)
 
 
 def edge_to_neighbours(edge: QuadEdge) -> List[QuadEdge]:

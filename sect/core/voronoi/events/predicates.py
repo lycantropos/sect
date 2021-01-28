@@ -7,7 +7,7 @@ from .models import Site
 def point_point_point_circle_exists(first_point_site: Site,
                                     second_point_site: Site,
                                     third_point_site: Site) -> bool:
-    return orientation(second_point_site.start, first_point_site.start,
+    return orientation(first_point_site.start, second_point_site.start,
                        third_point_site.start) is Orientation.CLOCKWISE
 
 
@@ -19,11 +19,11 @@ def point_point_segment_circle_exists(first_point_site: Site,
         return (segment_site.start != first_point_site.start
                 or segment_site.end != second_point_site.start)
     else:
-        first_orientation = orientation(second_point_site.start,
-                                        first_point_site.start,
+        first_orientation = orientation(first_point_site.start,
+                                        second_point_site.start,
                                         segment_site.start)
-        second_orientation = orientation(second_point_site.start,
-                                         first_point_site.start,
+        second_orientation = orientation(first_point_site.start,
+                                         second_point_site.start,
                                          segment_site.end)
         first_site_start_x, _ = first_point_site.start
         second_site_start_x, _ = second_point_site.start
@@ -46,9 +46,8 @@ def point_segment_segment_circle_exists(point_site: Site,
                                       or not second_segment_site.is_inverse)
                  and (first_segment_site.is_inverse
                       is not second_segment_site.is_inverse
-                      or orientation(point_site.start,
-                                     first_segment_site.start,
-                                     second_segment_site.end)
+                      or orientation(first_segment_site.start,
+                                     point_site.start, second_segment_site.end)
                       is Orientation.CLOCKWISE)))
 
 

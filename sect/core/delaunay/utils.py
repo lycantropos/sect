@@ -42,7 +42,7 @@ def normalize_contour(contour: Contour) -> Contour:
     contour = contour[min_index:] + contour[:min_index]
     return (contour[:1] + contour[1:][::-1]
             if (orientation(contour[-1], contour[0], contour[1])
-                is Orientation.COUNTERCLOCKWISE)
+                is Orientation.CLOCKWISE)
             else contour)
 
 
@@ -108,7 +108,7 @@ def _to_sub_hull(points: Iterable[Point]) -> List[Point]:
     result = []
     for point in points:
         while len(result) >= 2:
-            if orientation(result[-1], result[-2],
+            if orientation(result[-2], result[-1],
                            point) is not Orientation.COUNTERCLOCKWISE:
                 del result[-1]
             else:

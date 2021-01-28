@@ -55,7 +55,7 @@ class Site:
             elif start_y != other_start_y:
                 return start_y < other_start_y
             else:
-                return (orientation(self.start, self.end, other.end)
+                return (orientation(self.end, self.start, other.end)
                         is Orientation.COUNTERCLOCKWISE)
         else:
             start_x, _ = self.start
