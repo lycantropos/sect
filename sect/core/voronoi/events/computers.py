@@ -1,6 +1,5 @@
-from robust import (parallelogram,
-                    projection)
-
+from sect.core.utils import (cross_product,
+                             dot_product)
 from sect.core.voronoi.utils import (robust_divide,
                                      robust_evenly_divide,
                                      robust_sqrt,
@@ -36,8 +35,8 @@ def to_point_point_point_circle(first_point_site: Site,
             * to_segment_squared_length(first_point, third_point))
     lower_x_numerator = (center_x_numerator
                          - robust_sqrt(squared_radius_numerator))
-    denominator = 2 * parallelogram.signed_area(first_point, second_point,
-                                                second_point, third_point)
+    denominator = 2 * cross_product(first_point, second_point, second_point,
+                                    third_point)
     inverted_denominator = robust_divide(1, denominator)
     center_x = center_x_numerator * inverted_denominator
     center_y = center_y_numerator * inverted_denominator
@@ -62,8 +61,8 @@ def to_point_point_segment_circle(first_point_site: Site,
     center_y = robust_evenly_divide(first_point_y + second_point_y
                                     - coefficient * points_dx, 2)
     radius = robust_divide(
-            abs(parallelogram.signed_area(segment_start, (center_x, center_y),
-                                          segment_start, segment_end)),
+            abs(cross_product(segment_start, (center_x, center_y),
+                              segment_start, segment_end)),
             robust_sqrt(to_segment_squared_length(segment_start, segment_end)))
     return Circle(center_x, center_y, center_x + radius)
 
@@ -79,15 +78,15 @@ def to_point_segment_segment_circle(point_site: Site,
     second_end_x, second_end_y = second_end = second_segment_site.end
     first_dx = first_end_x - first_start_x
     first_dy = first_end_y - first_start_y
-    segments_cross_product = parallelogram.signed_area(
+    segments_cross_product = cross_product(
             first_start, first_end, second_start, second_end)
     first_squared_length = to_segment_squared_length(first_start, first_end)
     if segments_cross_product:
         second_dx = second_end_x - second_start_x
         second_dy = second_end_y - second_start_y
-        point_first_cross_product = parallelogram.signed_area(
+        point_first_cross_product = cross_product(
                 first_start, first_end, point, first_end)
-        point_second_cross_product = parallelogram.signed_area(
+        point_second_cross_product = cross_product(
                 second_start, second_end, point, second_end)
         total_cross_product_x = (second_dx * point_first_cross_product
                                  - first_dx * point_second_cross_product)
@@ -97,8 +96,8 @@ def to_point_segment_segment_circle(point_site: Site,
             sign = -1 if point_index == 2 else 1
             second_squared_length = to_segment_squared_length(second_start,
                                                               second_end)
-            segments_dot_product = projection.signed_length(
-                    first_start, first_end, second_start, second_end)
+            segments_dot_product = dot_product(first_start, first_end,
+                                               second_start, second_end)
             common_right_coefficients = (first_squared_length,
                                          second_squared_length,
                                          -segments_dot_product,
@@ -154,10 +153,10 @@ def to_point_segment_segment_circle(point_site: Site,
             center_y = point_y
     else:
         sign = -1 if point_index == 2 else 1
-        point_first_dot_product = projection.signed_length(
-                (0, 0), point, first_start, first_end)
+        point_first_dot_product = dot_product((0, 0), point, first_start,
+                                              first_end)
         minus_second_start = (-second_start_x, -second_start_y)
-        minus_second_point_cross_product = parallelogram.signed_area(
+        minus_second_point_cross_product = cross_product(
                 first_start, first_end, minus_second_start, first_end)
         center_x_second_left_coefficient = (
                 2 * first_dx * point_first_dot_product
@@ -168,9 +167,8 @@ def to_point_segment_segment_circle(point_site: Site,
         center_x_left_coefficients = (2 * sign * first_dx,
                                       center_x_second_left_coefficient)
         common_right_coefficients = (
-            parallelogram.signed_area(first_start, first_end, point, first_end)
-            * parallelogram.signed_area(first_start, first_end, second_start,
-                                        point),
+            cross_product(first_start, first_end, point, first_end)
+            * cross_product(first_start, first_end, second_start, point),
             1)
         center_x_numerator = pairs_sum_expression(center_x_left_coefficients,
                                                   common_right_coefficients)
@@ -179,8 +177,8 @@ def to_point_segment_segment_circle(point_site: Site,
                 common_right_coefficients)
         lower_x_numerator = triplets_sum_expression(
                 center_x_left_coefficients
-                + (abs(parallelogram.signed_area(first_start, first_end,
-                                                 first_end, second_start)),),
+                + (abs(cross_product(first_start, first_end, first_end,
+                                     second_start)),),
                 common_right_coefficients + (first_squared_length,))
         denominator = 2 * first_squared_length
         center_x = robust_divide(center_x_numerator, denominator)
@@ -208,12 +206,10 @@ def to_segment_segment_segment_circle(first_site: Site,
     second_squared_length = to_segment_squared_length(second_start,
                                                       second_end)
     third_squared_length = to_segment_squared_length(third_start, third_end)
-    first_signed_area = parallelogram.signed_area((0, 0), first_start,
-                                                  (0, 0), first_end)
-    second_signed_area = parallelogram.signed_area((0, 0), second_start,
-                                                   (0, 0), second_end)
-    third_signed_area = parallelogram.signed_area((0, 0), third_start,
-                                                  (0, 0), third_end)
+    first_signed_area = cross_product((0, 0), first_start, (0, 0), first_end)
+    second_signed_area = cross_product((0, 0), second_start, (0, 0),
+                                       second_end)
+    third_signed_area = cross_product((0, 0), third_start, (0, 0), third_end)
     center_x_numerator = triplets_sum_expression(
             (second_dx * third_signed_area - third_dx * second_signed_area,
              third_dx * first_signed_area - first_dx * third_signed_area,
@@ -226,12 +222,12 @@ def to_segment_segment_segment_circle(first_site: Site,
              first_dy * second_signed_area - second_dy * first_signed_area),
             (first_squared_length, second_squared_length,
              third_squared_length))
-    first_second_signed_area = parallelogram.signed_area(
-            first_start, first_end, second_start, second_end)
-    second_third_signed_area = parallelogram.signed_area(
-            second_start, second_end, third_start, third_end)
-    third_first_signed_area = parallelogram.signed_area(
-            third_start, third_end, first_start, first_end)
+    first_second_signed_area = cross_product(first_start, first_end,
+                                             second_start, second_end)
+    second_third_signed_area = cross_product(second_start, second_end,
+                                             third_start, third_end)
+    third_first_signed_area = cross_product(third_start, third_end,
+                                            first_start, first_end)
     radius_numerator = (first_second_signed_area * third_signed_area
                         + second_third_signed_area * first_signed_area
                         + third_first_signed_area * second_signed_area)
@@ -252,15 +248,15 @@ def _to_point_point_segment_coefficient(first_point: Point,
                                         segment_start: Point,
                                         segment_end: Point,
                                         segment_index: int) -> Coordinate:
-    cross_product = parallelogram.signed_area(segment_start, segment_end,
-                                              first_point, second_point)
-    dot_product = projection.signed_length(segment_start, segment_end,
-                                           first_point, second_point)
-    first_point_cross_product = parallelogram.signed_area(
+    points_cross_product = cross_product(segment_start, segment_end,
+                                         first_point, second_point)
+    points_dot_product = dot_product(segment_start, segment_end, first_point,
+                                     second_point)
+    first_point_cross_product = cross_product(
             segment_start, segment_end, first_point, segment_end)
-    if cross_product:
+    if points_cross_product:
         sign = -1 if segment_index == 2 else 1
-        second_point_cross_product = parallelogram.signed_area(
+        second_point_cross_product = cross_product(
                 segment_start, segment_end, second_point, segment_end)
         determinant = robust_sqrt(
                 to_segment_squared_length(first_point, second_point)
@@ -268,9 +264,11 @@ def _to_point_point_segment_coefficient(first_point: Point,
                 * first_point_cross_product
                 * second_point_cross_product)
         return robust_divide(2 * sign * determinant
-                             + dot_product * (first_point_cross_product
-                                              + second_point_cross_product),
-                             cross_product * cross_product)
+                             + points_dot_product
+                             * (first_point_cross_product
+                                + second_point_cross_product),
+                             points_cross_product * points_cross_product)
     else:
-        return (robust_divide(dot_product, 4 * first_point_cross_product)
-                - robust_divide(first_point_cross_product, dot_product))
+        return (robust_divide(points_dot_product,
+                              4 * first_point_cross_product)
+                - robust_divide(first_point_cross_product, points_dot_product))

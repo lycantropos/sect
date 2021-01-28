@@ -1,6 +1,6 @@
 from reprit.base import generate_repr
-from robust.angular import Orientation
 
+from sect.core.utils import Orientation
 from sect.hints import Point
 from .edge import Edge
 from .location import Location

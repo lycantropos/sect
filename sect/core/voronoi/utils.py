@@ -4,8 +4,7 @@ from itertools import groupby
 from typing import (List,
                     TypeVar)
 
-from robust import projection
-
+from sect.core.utils import dot_product
 from sect.hints import (Coordinate,
                         Point)
 
@@ -39,7 +38,7 @@ def robust_sqrt(value: Coordinate) -> Coordinate:
 
 
 def to_segment_squared_length(start: Point, end: Point) -> Coordinate:
-    return projection.signed_length(start, end, start, end)
+    return dot_product(start, end, start, end)
 
 
 def to_unique_just_seen(iterable: List[Domain]) -> List[Domain]:

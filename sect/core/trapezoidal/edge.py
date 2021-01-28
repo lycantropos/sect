@@ -1,7 +1,7 @@
 from reprit.base import generate_repr
-from robust.angular import (Orientation,
-                            orientation)
 
+from sect.core.utils import (Orientation,
+                             orientation)
 from sect.hints import Point
 
 

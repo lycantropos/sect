@@ -3,12 +3,12 @@ from typing import (Iterable,
 
 from prioq.base import PriorityQueue
 from reprit.base import generate_repr
-from robust.angular import (Orientation,
-                            orientation)
-from robust.linear import (SegmentsRelationship,
-                           segments_intersection,
-                           segments_relationship)
 
+from sect.core.utils import (Orientation,
+                             SegmentsRelationship,
+                             orientation,
+                             segments_intersection,
+                             segments_relationship)
 from sect.hints import (Point,
                         Segment)
 from .event import Event

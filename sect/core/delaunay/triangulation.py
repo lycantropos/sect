@@ -11,12 +11,12 @@ from typing import (FrozenSet,
 
 from decision.partition import coin_change
 from reprit.base import generate_repr
-from robust.angular import (Orientation,
-                            orientation)
-from robust.linear import (SegmentsRelationship,
-                           segments_relationship)
 
-from sect.core.utils import (pairwise)
+from sect.core.utils import (Orientation,
+                             SegmentsRelationship,
+                             orientation,
+                             pairwise,
+                             segments_relationship)
 from sect.hints import (Contour,
                         Point,
                         Segment,

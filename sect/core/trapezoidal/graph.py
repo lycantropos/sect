@@ -2,9 +2,9 @@ from typing import (List,
                     Sequence)
 
 from reprit.base import generate_repr
-from robust.angular import Orientation
 
-from sect.core.utils import (flatten,
+from sect.core.utils import (Orientation,
+                             flatten,
                              to_contour_orientation)
 from sect.hints import (Contour,
                         Multisegment,

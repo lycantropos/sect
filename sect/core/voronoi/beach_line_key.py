@@ -2,10 +2,10 @@ from copy import copy
 from typing import Tuple
 
 from reprit.base import generate_repr
-from robust import parallelogram
 from robust.angular import (Orientation,
                             orientation)
 
+from sect.core.utils import cross_product
 from sect.hints import (Coordinate,
                         Point)
 from .events import Site
@@ -113,8 +113,7 @@ def distance_to_segment_arc(segment_site: Site, point: Point) -> Coordinate:
                                      segment_dx * segment_dx)
                        if segment_dy < 0
                        else robust_divide(1, segment_dy + segment_length))
-        return coefficient * parallelogram.signed_area(start, end, start,
-                                                       point)
+        return coefficient * cross_product(start, end, start, point)
 
 
 def horizontal_goes_through_right_arc_first(left_site: Site,
@@ -170,8 +169,8 @@ def point_segment_horizontal_goes_through_right_arc_first(
             return False
         elif y > point_site_y and reverse_order:
             return True
-    elif parallelogram.signed_area(segment_start, segment_end,
-                                   point_site.start, point) > 0:
+    elif cross_product(segment_start, segment_end, point_site.start,
+                       point) > 0:
         if not segment_site.is_inverse:
             if reverse_order:
                 return True

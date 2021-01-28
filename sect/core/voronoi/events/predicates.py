@@ -1,5 +1,5 @@
-from robust.angular import (Orientation,
-                            orientation)
+from sect.core.utils import (Orientation,
+                             orientation)
 
 from .models import Site
 

@@ -6,11 +6,10 @@ from typing import (Iterable,
                     Sequence,
                     Tuple)
 
-from robust.angular import (Orientation,
-                            orientation)
-
-from sect.core.utils import (arg_min,
+from sect.core.utils import (Orientation,
+                             arg_min,
                              flatten,
+                             orientation,
                              to_contour_orientation)
 from sect.hints import (Contour,
                         Point,
