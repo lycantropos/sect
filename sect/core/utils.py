@@ -11,18 +11,13 @@ from sect.hints import Contour
 
 Domain = TypeVar('Domain')
 
-flatten = chain.from_iterable
-
-
-def to_contour_orientation(contour: Contour) -> Orientation:
-    index = arg_min(contour)
-    return orientation(contour[index], contour[index - 1],
-                       contour[(index + 1) % len(contour)])
-
 
 def arg_min(sequence: Sequence[Domain]) -> int:
     return min(range(len(sequence)),
                key=sequence.__getitem__)
+
+
+flatten = chain.from_iterable
 
 
 def pairwise(iterable: Iterable[Domain]) -> Iterable[Tuple[Domain, Domain]]:
@@ -31,3 +26,9 @@ def pairwise(iterable: Iterable[Domain]) -> Iterable[Tuple[Domain, Domain]]:
     for next_element in iterator:
         yield element, next_element
         element = next_element
+
+
+def to_contour_orientation(contour: Contour) -> Orientation:
+    index = arg_min(contour)
+    return orientation(contour[index], contour[index - 1],
+                       contour[(index + 1) % len(contour)])
