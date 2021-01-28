@@ -363,13 +363,13 @@ def _triangulate_three_points(sorted_points: Sequence[Point]) -> Triangulation:
     first_edge, second_edge = (QuadEdge.factory(left_point, mid_point),
                                QuadEdge.factory(mid_point, right_point))
     first_edge.opposite.splice(second_edge)
-    angle_orientation = orientation(left_point, mid_point, right_point)
+    angle_orientation = first_edge.orientation_of(right_point)
     if angle_orientation is Orientation.COUNTERCLOCKWISE:
-        third_edge = second_edge.connect(first_edge)
-        return Triangulation(third_edge.opposite, third_edge)
-    elif angle_orientation is Orientation.CLOCKWISE:
         second_edge.connect(first_edge)
         return Triangulation(first_edge, second_edge.opposite)
+    elif angle_orientation is Orientation.CLOCKWISE:
+        third_edge = second_edge.connect(first_edge)
+        return Triangulation(third_edge.opposite, third_edge)
     else:
         return Triangulation(first_edge, second_edge.opposite)
 
