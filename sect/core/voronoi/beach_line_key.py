@@ -2,10 +2,10 @@ from copy import copy
 from typing import Tuple
 
 from reprit.base import generate_repr
-from robust.angular import (Orientation,
-                            orientation)
 
-from sect.core.utils import cross_product
+from sect.core.utils import (Orientation,
+                             cross_product,
+                             orientation)
 from sect.hints import (Coordinate,
                         Point)
 from .events import Site
