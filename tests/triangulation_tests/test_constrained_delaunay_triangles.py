@@ -2,7 +2,6 @@ from typing import (Sequence,
                     Tuple)
 
 from hypothesis import given
-from hypothesis_geometry.hints import Polygon
 
 from sect.core.delaunay.utils import (complete_vertices,
                                       contour_to_segments)
@@ -11,7 +10,8 @@ from sect.hints import (Contour,
                         Point)
 from sect.triangulation import (constrained_delaunay_triangles,
                                 delaunay_triangles)
-from tests.utils import (is_convex_contour,
+from tests.utils import (Polygon,
+                         is_convex_contour,
                          to_boundary_endpoints)
 from . import strategies
 
