@@ -41,7 +41,7 @@ from .utils import (ceil_log2,
                     complete_vertices,
                     normalize_contour_vertices,
                     to_clockwise_contour,
-                    to_unique_objects)
+                    to_distinct)
 
 
 def _triangulate_two_points(cls: Type[Triangulation],
@@ -177,7 +177,7 @@ def to_triangulation_cls(context: Context,
             :param points: 3 or more points to triangulate.
             :returns: triangulation of the points.
             """
-            points = sorted(to_unique_objects(points))
+            points = sorted(to_distinct(points))
             lengths = coin_change(len(points), _base_cases)
             result = [cls._initialize_triangulation(points[start:stop])
                       for start, stop in pairwise(accumulate((0,) + lengths))]
@@ -233,7 +233,7 @@ def to_triangulation_cls(context: Context,
             ...      Contour([Point(0, 0), Point(1, 0), Point(0, 1)])])
             True
             """
-            vertices_sets = to_unique_objects(
+            vertices_sets = to_distinct(
                     frozenset((edge.start, edge.end, edge.left_from_start.end))
                     for edge in to_edges(self)
                     if (edge.left_from_start.end

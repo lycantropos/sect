@@ -26,7 +26,7 @@ def ceil_log2(number: int) -> int:
 def complete_vertices(border: Contour, holes: Sequence[Contour],
                       candidates: Sequence[Point]
                       ) -> Tuple[Contour, Sequence[Contour], Sequence[Point]]:
-    candidates = sorted(to_unique_objects(candidates))
+    candidates = sorted(to_distinct(candidates))
     border, candidates = _complete_contour_vertices(border, candidates)
     completed_holes = []
     for hole in holes:
@@ -43,11 +43,6 @@ def normalize_contour_vertices(vertices: Sequence[Point]) -> Contour:
             else vertices)
 
 
-to_unique_objects = (OrderedDict
-                     if sys.version_info < (3, 6)
-                     else dict).fromkeys
-
-
 def to_clockwise_contour(contour: Contour) -> Contour:
     return (contour
             if to_contour_orientation(contour) is Orientation.CLOCKWISE
@@ -56,6 +51,9 @@ def to_clockwise_contour(contour: Contour) -> Contour:
 
 def to_convex_hull(points: Sequence[Point]) -> Sequence[Point]:
     return get_context().points_convex_hull(points)
+
+
+to_distinct = (OrderedDict if sys.version_info < (3, 6) else dict).fromkeys
 
 
 def _complete_contour_vertices(contour: Contour,

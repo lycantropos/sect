@@ -1,5 +1,8 @@
 from operator import getitem
-from typing import (FrozenSet,
+from typing import (AbstractSet,
+                    Callable,
+                    FrozenSet,
+                    Hashable,
                     Iterable,
                     List,
                     Sequence,
@@ -15,7 +18,7 @@ from orient.planar import point_in_segment
 
 from sect.core.delaunay.utils import (complete_vertices,
                                       normalize_contour_vertices,
-                                      to_unique_objects)
+                                      to_distinct)
 from sect.core.utils import contour_to_edges_endpoints
 from sect.core.voronoi.utils import robust_divide
 
@@ -64,7 +67,7 @@ def to_contours_border_endpoints(contours: Iterable[Contour]
 
 
 def to_max_convex_hull(points: Sequence[Point]) -> List[Point]:
-    points = sorted(to_unique_objects(points))
+    points = sorted(to_distinct(points))
     lower, upper = _to_sub_hull(points), _to_sub_hull(reversed(points))
     return lower[:-1] + upper[:-1] or points
 
@@ -147,6 +150,11 @@ contour_to_edges_endpoints = contour_to_edges_endpoints
 
 def segment_contains_point(segment: Segment, point: Point) -> bool:
     return context.segment_contains_point(segment.start, segment.end, point)
+
+
+_T = TypeVar('_T',
+             bound=Hashable)
+to_distinct = to_distinct  # type: Callable[[Iterable[_T]], AbstractSet[_T]]
 
 
 def to_max_convex_hull_border_endpoints(points: Sequence[Point]
