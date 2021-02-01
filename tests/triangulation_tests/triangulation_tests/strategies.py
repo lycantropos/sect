@@ -30,7 +30,8 @@ points_lists = (coordinates_strategies
 non_triangle_points_lists = (coordinates_strategies
                              .map(planar.points)
                              .flatmap(partial(to_points_lists,
-                                              min_size=4)))
+                                              min_size=4))
+                             .filter(points_do_not_lie_on_the_same_line))
 triangles = coordinates_strategies.flatmap(planar.triangular_contours)
 polygons = coordinates_strategies.flatmap(planar.polygons)
 whole_polygons = coordinates_strategies.flatmap(partial(planar.polygons,
