@@ -66,9 +66,9 @@ def to_point_point_segment_circle(first_point_site: Site,
     center_y = robust_evenly_divide(first_point_y + second_point_y
                                     - coefficient * points_dx, 2)
     context = get_context()
+    point_cls = context.point_cls
     radius = robust_divide(
-            abs(cross_product(segment_start,
-                              context.point_cls(center_x, center_y),
+            abs(cross_product(segment_start, point_cls(center_x, center_y),
                               segment_start, segment_end)),
             robust_sqrt(to_segment_squared_length(segment_start, segment_end)))
     return Circle(center_x, center_y, center_x + radius)
@@ -164,8 +164,10 @@ def to_point_segment_segment_circle(point_site: Site,
             center_y = point_y
     else:
         sign = -1 if point_index == 2 else 1
-        point_first_dot_product = dot_product((0, 0), point, first_start,
-                                              first_end)
+        context = get_context()
+        point_cls = context.point_cls
+        point_first_dot_product = dot_product(point_cls(0, 0), point,
+                                              first_start, first_end)
         minus_second_start = (-second_start_x, -second_start_y)
         minus_second_point_cross_product = cross_product(
                 first_start, first_end, minus_second_start, first_end)
@@ -219,10 +221,14 @@ def to_segment_segment_segment_circle(first_site: Site,
     first_squared_length = to_segment_squared_length(first_start, first_end)
     second_squared_length = to_segment_squared_length(second_start, second_end)
     third_squared_length = to_segment_squared_length(third_start, third_end)
-    first_signed_area = cross_product((0, 0), first_start, (0, 0), first_end)
-    second_signed_area = cross_product((0, 0), second_start, (0, 0),
-                                       second_end)
-    third_signed_area = cross_product((0, 0), third_start, (0, 0), third_end)
+    context = get_context()
+    point_cls = context.point_cls
+    first_signed_area = cross_product(point_cls(0, 0), first_start,
+                                      point_cls(0, 0), first_end)
+    second_signed_area = cross_product(point_cls(0, 0), second_start,
+                                       point_cls(0, 0), second_end)
+    third_signed_area = cross_product(point_cls(0, 0), third_start,
+                                      point_cls(0, 0), third_end)
     center_x_numerator = triplets_sum_expression(
             (second_dx * third_signed_area - third_dx * second_signed_area,
              third_dx * first_signed_area - first_dx * third_signed_area,
