@@ -5,10 +5,10 @@ from typing import (Sequence,
 from ground.hints import Point
 from hypothesis import given
 
-from sect.core.delaunay.utils import complete_vertices
 from sect.core.utils import flatten
 from sect.triangulation import Triangulation
 from tests.utils import (Polygon,
+                         complete_vertices,
                          contour_to_edges_endpoints,
                          is_contour,
                          is_contour_triangular,

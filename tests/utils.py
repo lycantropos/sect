@@ -13,7 +13,8 @@ from hypothesis import strategies
 from hypothesis.strategies import SearchStrategy
 from orient.planar import point_in_segment
 
-from sect.core.delaunay.utils import normalize_contour_vertices
+from sect.core.delaunay.utils import (complete_vertices,
+                                      normalize_contour_vertices)
 from sect.core.utils import contour_to_edges_endpoints
 from sect.core.voronoi.utils import robust_divide
 
@@ -29,6 +30,7 @@ Segment = context.segment_cls
 MAX_COORDINATE_EXPONENT = 15
 MAX_RATIONAL_COORDINATE_EXPONENT = 7
 
+complete_vertices = complete_vertices
 is_contour = Contour.__instancecheck__
 
 
