@@ -117,7 +117,7 @@ def polygon_trapezoidal(polygon: Polygon,
 
 
 def multipoint_voronoi(multipoint: Multipoint) -> Diagram:
-    return Diagram.from_sources(_raw.from_multipoint(multipoint), ())
+    return Diagram.from_sources(multipoint.points, ())
 
 
 def multisegment_voronoi(multisegment: Multisegment) -> Diagram:

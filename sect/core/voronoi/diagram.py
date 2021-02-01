@@ -2,6 +2,7 @@ from copy import copy
 from operator import itemgetter
 from typing import (List,
                     Optional,
+                    Sequence,
                     Tuple)
 
 from dendroid import red_black
@@ -9,8 +10,7 @@ from ground.hints import Point
 from prioq.base import PriorityQueue
 from reprit.base import generate_repr
 
-from sect.core.hints import (Multipoint,
-                             Multisegment,
+from sect.core.hints import (Multisegment,
                              Segment)
 from .beach_line_key import BeachLineKey
 from .beach_line_value import BeachLineValue
@@ -52,10 +52,10 @@ class Diagram:
 
     @classmethod
     def from_sources(cls,
-                     multipoint: Multipoint,
+                     points: Sequence[Point],
                      multisegment: Multisegment) -> 'Diagram':
         result = Diagram()
-        for point in multipoint:
+        for point in points:
             result._insert_point(point)
         for segment in multisegment:
             result._insert_segment(segment)
