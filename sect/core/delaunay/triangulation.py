@@ -1,5 +1,4 @@
-from collections import (OrderedDict,
-                         deque)
+from collections import deque
 from itertools import (accumulate,
                        chain,
                        repeat)
@@ -125,7 +124,7 @@ class Triangulation:
         ...      Contour([Point(0, 0), Point(1, 0), Point(0, 1)])])
         True
         """
-        vertices_sets = OrderedDict.fromkeys(
+        vertices_sets = to_unique_objects(
                 frozenset((edge.start, edge.end, edge.left_from_start.end))
                 for edge in self.edges()
                 if (edge.left_from_start.end
