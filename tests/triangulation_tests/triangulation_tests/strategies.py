@@ -3,9 +3,11 @@ from functools import partial
 from typing import (Sequence,
                     Tuple)
 
+from ground.base import get_context
 from hypothesis import strategies
 from hypothesis_geometry import planar
 
+from sect.triangulation import to_triangulation_cls
 from tests.strategies import coordinates_strategies
 from tests.strategies.base import MAX_COORDINATE
 from tests.utils import (Point,
@@ -17,6 +19,7 @@ from tests.utils import (Point,
                          segment_contains_point,
                          sub_lists)
 
+triangulation_classes = strategies.just(to_triangulation_cls(get_context()))
 to_points_lists = partial(strategies.lists,
                           unique=True)
 points_lists = (coordinates_strategies
