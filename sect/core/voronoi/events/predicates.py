@@ -25,11 +25,11 @@ def point_point_segment_circle_exists(first_point_site: Site,
         second_orientation = orientation(first_point_site.start,
                                          second_point_site.start,
                                          segment_site.end)
-        first_site_start_x, _ = first_point_site.start
-        second_site_start_x, _ = second_point_site.start
-        if segment_index == 1 and second_site_start_x <= first_site_start_x:
+        first_point, second_point = (first_point_site.start,
+                                     second_point_site.start)
+        if segment_index == 1 and second_point.x <= first_point.x:
             return first_orientation is Orientation.CLOCKWISE
-        elif segment_index == 3 and first_site_start_x <= second_site_start_x:
+        elif segment_index == 3 and first_point.x <= second_point.x:
             return second_orientation is Orientation.CLOCKWISE
         else:
             return (first_orientation is Orientation.CLOCKWISE

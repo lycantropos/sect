@@ -22,9 +22,12 @@ class Edge:
         """
         Checks if the edge is lower than the other.
 
-        >>> horizontal = Edge((0, 0), (2, 0), False)
-        >>> diagonal = Edge((1, 1), (2, 2), False)
-        >>> vertical = Edge((0, 0), (0, 2), False)
+        >>> from ground.base import get_context
+        >>> context = get_context()
+        >>> Point = context.point_cls
+        >>> horizontal = Edge(Point(0, 0), Point(2, 0), False)
+        >>> diagonal = Edge(Point(1, 1), Point(2, 2), False)
+        >>> vertical = Edge(Point(0, 0), Point(0, 2), False)
         >>> all(not (edge < edge) for edge in (horizontal, diagonal, vertical))
         True
         >>> horizontal < vertical

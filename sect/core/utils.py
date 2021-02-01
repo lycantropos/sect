@@ -9,10 +9,10 @@ from typing import (Iterable,
 from ground.base import (Orientation,
                          Relation,
                          get_context)
-from ground.hints import Coordinate
+from ground.hints import (Coordinate,
+                          Point)
 
 from sect.core.hints import (Contour,
-                             Point,
                              Segment)
 
 Domain = TypeVar('Domain')
@@ -45,11 +45,8 @@ def cross_product(first_start: Point,
                   second_start: Point,
                   second_end: Point) -> Coordinate:
     context = get_context()
-    point_cls = context.point_cls
-    return context.cross_product(point_cls(*first_start),
-                                 point_cls(*first_end),
-                                 point_cls(*second_start),
-                                 point_cls(*second_end))
+    return context.cross_product(first_start, first_end, second_start,
+                                 second_end)
 
 
 def dot_product(first_start: Point,
@@ -57,10 +54,8 @@ def dot_product(first_start: Point,
                 second_start: Point,
                 second_end: Point) -> Coordinate:
     context = get_context()
-    point_cls = context.point_cls
-    return context.dot_product(point_cls(*first_start), point_cls(*first_end),
-                               point_cls(*second_start),
-                               point_cls(*second_end))
+    return context.dot_product(first_start, first_end, second_start,
+                               second_end)
 
 
 flatten = chain.from_iterable
@@ -68,9 +63,7 @@ flatten = chain.from_iterable
 
 def orientation(vertex, first, second):
     context = get_context()
-    point_cls = context.point_cls
-    return context.angle_orientation(point_cls(*vertex), point_cls(*first),
-                                     point_cls(*second))
+    return context.angle_orientation(vertex, first, second)
 
 
 def pairwise(iterable: Iterable[Domain]) -> Iterable[Tuple[Domain, Domain]]:
@@ -86,23 +79,16 @@ def point_point_point_incircle_test(first_vertex: Point,
                                     third_vertex: Point,
                                     point: Point) -> Coordinate:
     context = get_context()
-    point_cls = context.point_cls
-    return context.point_point_point_incircle_test(point_cls(*first_vertex),
-                                                   point_cls(*second_vertex),
-                                                   point_cls(*third_vertex),
-                                                   point_cls(*point))
+    return context.point_point_point_incircle_test(first_vertex, second_vertex,
+                                                   third_vertex, point)
 
 
 def segments_intersection(first: Segment, second: Segment) -> Point:
     first_start, first_end = first
     second_start, second_end = second
     context = get_context()
-    point_cls = context.point_cls
-    result = context.segments_intersection(point_cls(*first_start),
-                                           point_cls(*first_end),
-                                           point_cls(*second_start),
-                                           point_cls(*second_end))
-    return result.x, result.y
+    return context.segments_intersection(first_start, first_end, second_start,
+                                         second_end)
 
 
 def segments_relationship(first: Segment,
@@ -110,11 +96,8 @@ def segments_relationship(first: Segment,
     first_start, first_end = first
     second_start, second_end = second
     context = get_context()
-    point_cls = context.point_cls
-    result = context.segments_relation(point_cls(*first_start),
-                                       point_cls(*first_end),
-                                       point_cls(*second_start),
-                                       point_cls(*second_end))
+    result = context.segments_relation(first_start, first_end, second_start,
+                                       second_end)
     return (SegmentsRelationship.NONE if result is Relation.DISJOINT
             else (SegmentsRelationship.TOUCH if result is Relation.TOUCH
                   else (SegmentsRelationship.CROSS if result is Relation.CROSS

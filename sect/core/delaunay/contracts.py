@@ -1,7 +1,8 @@
 from typing import Tuple
 
+from ground.hints import Point
+
 from sect.core.utils import point_point_point_incircle_test
-from sect.core.hints import Point
 from .utils import to_convex_hull
 
 

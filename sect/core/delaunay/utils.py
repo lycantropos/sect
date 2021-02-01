@@ -8,15 +8,15 @@ from typing import (Iterable,
 
 from ground.base import (Context,
                          get_context)
+from ground.hints import Point
 
+from sect.core.hints import (Contour,
+                             Segment)
 from sect.core.utils import (Orientation,
                              arg_min,
                              flatten,
                              orientation,
                              to_contour_orientation)
-from sect.core.hints import (Contour,
-                             Point,
-                             Segment)
 
 
 def ceil_log2(number: int) -> int:

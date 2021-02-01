@@ -1,6 +1,7 @@
 from typing import (List,
                     Sequence)
 
+from ground.base import get_context
 from ground.hints import Point
 from reprit.base import generate_repr
 
@@ -279,6 +280,10 @@ def bounding_box_to_node(bounding_box: BoundingBox) -> Leaf:
     delta_x, delta_y = delta_x or 1, delta_y or 1
     min_x, min_y, max_x, max_y = (min_x - delta_x, min_y - delta_y,
                                   max_x + delta_x, max_y + delta_y)
-    return Leaf(Trapezoid((min_x, min_y), (max_x, min_y),
-                          Edge((min_x, min_y), (max_x, min_y), False),
-                          Edge((min_x, max_y), (max_x, max_y), True)))
+    context = get_context()
+    point_cls = context.point_cls
+    return Leaf(Trapezoid(point_cls(min_x, min_y), point_cls(max_x, min_y),
+                          Edge(point_cls(min_x, min_y),
+                               point_cls(max_x, min_y), False),
+                          Edge(point_cls(min_x, max_y),
+                               point_cls(max_x, max_y), True)))

@@ -1,15 +1,13 @@
-from typing import Iterable
-
 from ground.hints import Contour, Multipoint, Multipolygon, Multisegment, \
     Point, Polygon, Segment
 
 
 def from_point(point: Point):
-    return point.x, point.y
+    return point
 
 
 def from_segment(segment: Segment):
-    return from_point(segment.start), from_point(segment.end)
+    return segment.start, segment.end
 
 
 def from_multisegment(multisegment: Multisegment):
@@ -17,7 +15,7 @@ def from_multisegment(multisegment: Multisegment):
 
 
 def from_contour(contour: Contour):
-    return [from_point(vertex) for vertex in contour.vertices]
+    return contour.vertices
 
 
 from_region = from_contour
@@ -36,8 +34,4 @@ def from_multipolygon(multipolygon: Multipolygon):
 
 
 def from_multipoint(multipoint: Multipoint):
-    return list(from_points(multipoint.points))
-
-
-def from_points(points: Iterable[Point]):
-    return map(from_point, points)
+    return multipoint.points

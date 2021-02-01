@@ -4,18 +4,16 @@ from itertools import groupby
 from typing import (List,
                     TypeVar)
 
-from ground.hints import Coordinate
+from ground.hints import (Coordinate,
+                          Point)
 
 from sect.core.utils import dot_product
-from sect.core.hints import Point
 
 Domain = TypeVar('Domain')
 
 
 def are_same_vertical_points(start: Point, end: Point) -> bool:
-    start_x, _ = start
-    end_x, _ = end
-    return start_x == end_x
+    return start.x == end.x
 
 
 def robust_evenly_divide(dividend: Coordinate,

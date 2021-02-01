@@ -1,8 +1,8 @@
 from typing import Optional
 
+from ground.hints import Point
 from reprit.base import generate_repr
 
-from sect.core.hints import Point
 from .edge import Edge
 
 

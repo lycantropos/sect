@@ -2,7 +2,8 @@ import ctypes
 import struct
 from typing import TypeVar
 
-from ground.hints import Coordinate
+from ground.hints import (Coordinate,
+                          Point)
 from reprit.base import generate_repr
 
 from sect.core.utils import (Orientation,
@@ -10,7 +11,6 @@ from sect.core.utils import (Orientation,
 from sect.core.voronoi.enums import SourceCategory
 from sect.core.voronoi.hints import Source
 from sect.core.voronoi.utils import are_same_vertical_points
-from sect.core.hints import Point
 
 
 class Site:
@@ -38,28 +38,28 @@ class Site:
 
     def __lt__(self, other: 'Event') -> bool:
         if isinstance(other, Site):
-            start_x, start_y = self.start
-            other_start_x, other_start_y = other.start
-            if start_x != other_start_x:
-                return start_x < other_start_x
+            start = self.start
+            other_start = other.start
+            if start.x != other_start.x:
+                return start.x < other_start.x
             elif not self.is_segment:
                 if not other.is_segment:
-                    return start_y < other_start_y
+                    return start.y < other_start.y
                 elif other.is_vertical:
-                    return start_y <= other_start_y
+                    return start.y <= other_start.y
                 return True
             elif other.is_vertical:
-                return self.is_vertical and start_y < other_start_y
+                return self.is_vertical and start.y < other_start.y
             elif self.is_vertical:
                 return True
-            elif start_y != other_start_y:
-                return start_y < other_start_y
+            elif start.y != other_start.y:
+                return start.y < other_start.y
             else:
                 return (orientation(self.end, self.start, other.end)
                         is Orientation.COUNTERCLOCKWISE)
         else:
-            start_x, _ = self.start
-            return (less_than(start_x, other.lower_x)
+            start = self.start
+            return (less_than(start.x, other.lower_x)
                     if isinstance(other, Circle)
                     else NotImplemented)
 
@@ -100,8 +100,7 @@ class Circle:
 
     def __lt__(self, other: 'Event') -> bool:
         if isinstance(other, Site):
-            other_start_x, _ = other.start
-            return less_than(self.lower_x, other_start_x)
+            return less_than(self.lower_x, other.start.x)
         return ((self.lower_x, self.center_y) < (other.lower_x, other.center_y)
                 if isinstance(other, Circle)
                 else NotImplemented)

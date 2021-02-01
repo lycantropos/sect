@@ -1,13 +1,13 @@
 from copy import copy
 from typing import Tuple
 
-from ground.hints import Coordinate
+from ground.hints import (Coordinate,
+                          Point)
 from reprit.base import generate_repr
 
 from sect.core.utils import (Orientation,
                              cross_product,
                              orientation)
-from sect.core.hints import Point
 from .events import Site
 from .utils import (robust_divide,
                     robust_evenly_divide,
@@ -26,13 +26,12 @@ class BeachLineKey:
 
     def __lt__(self, other: 'BeachLineKey') -> bool:
         site, other_site = self.comparison_site, other.comparison_site
-        x, _ = point = site.min_point
-        other_x, _ = other_point = other_site.min_point
-        if x < other_x:
+        point, other_point = site.min_point, other_site.min_point
+        if point.x < other_point.x:
             # second node contains a new site
             return horizontal_goes_through_right_arc_first(
                     self.left_site, self.right_site, other_point)
-        elif other_x < x:
+        elif other_point.x < point.x:
             # first node contains a new site
             return not horizontal_goes_through_right_arc_first(
                     other.left_site, other.right_site, point)
@@ -77,38 +76,33 @@ class BeachLineKey:
 
     def to_comparison_y(self, is_new_node: bool = True) -> Tuple[int, int]:
         if self.left_site.sorted_index == self.right_site.sorted_index:
-            _, left_site_start_y = self.left_site.start
-            return left_site_start_y, 0
+            return self.left_site.start.y, 0
         elif self.left_site.sorted_index > self.right_site.sorted_index:
-            _, comparison_point_y = (self.left_site.start
-                                     if (not is_new_node
-                                         and self.left_site.is_segment
-                                         and self.left_site.is_vertical)
-                                     else self.left_site.end)
-            return comparison_point_y, 1
+            comparison_point = (self.left_site.start
+                                if (not is_new_node
+                                    and self.left_site.is_segment
+                                    and self.left_site.is_vertical)
+                                else self.left_site.end)
+            return comparison_point.y, 1
         else:
-            _, right_site_start_y = self.right_site.start
-            return right_site_start_y, -1
+            return self.right_site.start.y, -1
 
 
 def distance_to_point_arc(point_site: Site, point: Point) -> Coordinate:
-    start_x, _ = site_point = point_site.start
-    x, _ = point
-    dx = start_x - x
-    return robust_divide(to_segment_squared_length(point, site_point), 2 * dx)
+    site_point = point_site.start
+    return robust_divide(to_segment_squared_length(point, site_point),
+                         2 * (site_point.x - point.x))
 
 
 def distance_to_segment_arc(segment_site: Site, point: Point) -> Coordinate:
     if segment_site.is_vertical:
-        start_x, _ = segment_site.start
-        x, _ = point
-        return robust_evenly_divide(start_x - x, 2)
+        return robust_evenly_divide(segment_site.start.x - point.x, 2)
     else:
-        start_x, start_y = start = segment_site.start
-        end_x, end_y = end = segment_site.end
+        start = segment_site.start
+        end = segment_site.end
         segment_length = robust_sqrt(to_segment_squared_length(start, end))
-        segment_dx = end_x - start_x
-        segment_dy = end_y - start_y
+        segment_dx = end.x - start.x
+        segment_dy = end.y - start.y
         coefficient = (robust_divide(segment_length - segment_dy,
                                      segment_dx * segment_dx)
                        if segment_dy < 0
@@ -134,23 +128,21 @@ def horizontal_goes_through_right_arc_first(left_site: Site,
                 left_site, right_site, point)
 
 
-def point_point_horizontal_goes_through_right_arc_first(
-        first_point_site: Site,
-        second_point_site: Site,
-        point: Point) -> bool:
-    first_point_site_x, first_point_site_y = first_point_site.start
-    second_point_site_x, second_point_site_y = second_point_site.start
-    _, y = point
-    if second_point_site_x < first_point_site_x:
-        if y <= first_point_site_y:
+def point_point_horizontal_goes_through_right_arc_first(first_site: Site,
+                                                        second_site: Site,
+                                                        point: Point) -> bool:
+    first_site_point, second_site_point = (first_site.start,
+                                           second_site.start)
+    if second_site_point.x < first_site_point.x:
+        if point.y <= first_site_point.y:
             return False
-    elif first_point_site_x < second_point_site_x:
-        if second_point_site_y <= y:
+    elif first_site_point.x < second_site_point.x:
+        if second_site_point.y <= point.y:
             return True
     else:
-        return first_point_site_y + second_point_site_y < 2 * y
-    return (distance_to_point_arc(first_point_site, point)
-            < distance_to_point_arc(second_point_site, point))
+        return first_site_point.y + second_site_point.y < 2 * point.y
+    return (distance_to_point_arc(first_site, point)
+            < distance_to_point_arc(second_site, point))
 
 
 def point_segment_horizontal_goes_through_right_arc_first(
@@ -163,11 +155,10 @@ def point_segment_horizontal_goes_through_right_arc_first(
             is not Orientation.CLOCKWISE):
         return not segment_site.is_inverse
     elif segment_site.is_vertical:
-        _, point_site_y = point_site.start
-        _, y = point
-        if y < point_site_y and not reverse_order:
+        site_point = point_site.start
+        if point.y < site_point.y and not reverse_order:
             return False
-        elif y > point_site_y and reverse_order:
+        elif point.y > site_point.y and reverse_order:
             return True
     elif cross_product(segment_start, segment_end, point_site.start,
                        point) > 0:
@@ -177,14 +168,11 @@ def point_segment_horizontal_goes_through_right_arc_first(
         elif not reverse_order:
             return False
     else:
-        point_x, point_y = point
-        point_site_x, point_site_y = point_site.start
-        points_dx, points_dy = (point_x - point_site_x,
-                                point_y - point_site_y)
-        segment_start_x, segment_start_y = segment_start
-        segment_end_x, segment_end_y = segment_end
-        segment_dx, segment_dy = (segment_end_x - segment_start_x,
-                                  segment_end_y - segment_start_y)
+        site_point = point_site.start
+        points_dx, points_dy = (point.x - site_point.x,
+                                point.y - site_point.y)
+        segment_dx, segment_dy = (segment_end.x - segment_start.x,
+                                  segment_end.y - segment_start.y)
         fast_left_expr = (segment_dx * (points_dy + points_dx)
                           * (points_dy - points_dx))
         fast_right_expr = 2 * segment_dy * points_dx * points_dy

@@ -1,4 +1,5 @@
-from ground.hints import Coordinate
+from ground.hints import (Coordinate,
+                          Point)
 
 from sect.core.utils import (cross_product,
                              dot_product)
@@ -6,7 +7,6 @@ from sect.core.voronoi.utils import (robust_divide,
                                      robust_evenly_divide,
                                      robust_sqrt,
                                      to_segment_squared_length)
-from sect.core.hints import Point
 from .models import (Circle,
                      Site)
 from .utils import (
@@ -15,12 +15,14 @@ from .utils import (
     to_point_segment_segment_mixed_expression as to_mixed_expression)
 
 
-def to_point_point_point_circle(first_point_site: Site,
-                                second_point_site: Site,
-                                third_point_site: Site) -> Circle:
-    first_x, first_y = first_point = first_point_site.start
-    second_x, second_y = second_point = second_point_site.start
-    third_x, third_y = third_point = third_point_site.start
+def to_point_point_point_circle(first_site: Site,
+                                second_site: Site,
+                                third_site: Site) -> Circle:
+    first_point, second_point, third_point = (
+        first_site.start, second_site.start, third_site.start)
+    first_x, first_y = first_point.x, first_point.y
+    second_x, second_y = second_point.x, second_point.y
+    third_x, third_y = third_point.x, third_point.y
     first_squared_norm = first_x * first_x + first_y * first_y
     second_squared_norm = second_x * second_x + second_y * second_y
     third_squared_norm = third_x * third_x + third_y * third_y
@@ -49,9 +51,10 @@ def to_point_point_segment_circle(first_point_site: Site,
                                   second_point_site: Site,
                                   segment_site: Site,
                                   segment_index: int) -> Circle:
-    first_point_x, first_point_y = first_point = first_point_site.start
-    second_point_x, second_point_y = second_point = second_point_site.start
+    first_point, second_point = first_point_site.start, second_point_site.start
     segment_start, segment_end = segment_site.start, segment_site.end
+    first_point_x, first_point_y = first_point.x, first_point.y
+    second_point_x, second_point_y = second_point.x, second_point.y
     points_dx = second_point_x - first_point_x
     points_dy = second_point_y - first_point_y
     coefficient = _to_point_point_segment_coefficient(
@@ -72,15 +75,19 @@ def to_point_segment_segment_circle(point_site: Site,
                                     first_segment_site: Site,
                                     second_segment_site: Site,
                                     point_index: int) -> Circle:
-    point_x, point_y = point = point_site.start
-    first_start_x, first_start_y = first_start = first_segment_site.start
-    first_end_x, first_end_y = first_end = first_segment_site.end
-    second_start_x, second_start_y = second_start = second_segment_site.start
-    second_end_x, second_end_y = second_end = second_segment_site.end
-    first_dx = first_end_x - first_start_x
-    first_dy = first_end_y - first_start_y
-    segments_cross_product = cross_product(
-            first_start, first_end, second_start, second_end)
+    point = point_site.start
+    first_start, first_end = first_segment_site.start, first_segment_site.end
+    second_start, second_end = (second_segment_site.start,
+                                second_segment_site.end)
+    point_x, point_y = point.x, point.y
+    first_start_x, first_start_y = first_start.x, first_start.y
+    first_end_x, first_end_y = first_end.x, first_end.y
+    second_start_x, second_start_y = second_start.x, second_start.y
+    second_end_x, second_end_y = second_end.x, second_end.y
+    first_dx, first_dy = (first_end_x - first_start_x,
+                          first_end_y - first_start_y)
+    segments_cross_product = cross_product(first_start, first_end,
+                                           second_start, second_end)
     first_squared_length = to_segment_squared_length(first_start, first_end)
     if segments_cross_product:
         second_dx = second_end_x - second_start_x
@@ -191,12 +198,15 @@ def to_point_segment_segment_circle(point_site: Site,
 def to_segment_segment_segment_circle(first_site: Site,
                                       second_site: Site,
                                       third_site: Site) -> Circle:
-    first_start_x, first_start_y = first_start = first_site.start
-    first_end_x, first_end_y = first_end = first_site.end
-    second_start_x, second_start_y = second_start = second_site.start
-    second_end_x, second_end_y = second_end = second_site.end
-    third_start_x, third_start_y = third_start = third_site.start
-    third_end_x, third_end_y = third_end = third_site.end
+    first_start, first_end = first_site.start, first_site.end
+    second_start, second_end = second_site.start, second_site.end
+    third_start, third_end = third_site.start, third_site.end
+    first_start_x, first_start_y = first_start.x, first_start.y
+    first_end_x, first_end_y = first_end.x, first_end.y
+    second_start_x, second_start_y = second_start.x, second_start.y
+    second_end_x, second_end_y = second_end.x, second_end.y
+    third_start_x, third_start_y = third_start.x, third_start.y
+    third_end_x, third_end_y = third_end.x, third_end.y
     first_dx = first_end_x - first_start_x
     first_dy = first_end_y - first_start_y
     second_dx = second_end_x - second_start_x
@@ -204,8 +214,7 @@ def to_segment_segment_segment_circle(first_site: Site,
     third_dx = third_end_x - third_start_x
     third_dy = third_end_y - third_start_y
     first_squared_length = to_segment_squared_length(first_start, first_end)
-    second_squared_length = to_segment_squared_length(second_start,
-                                                      second_end)
+    second_squared_length = to_segment_squared_length(second_start, second_end)
     third_squared_length = to_segment_squared_length(third_start, third_end)
     first_signed_area = cross_product((0, 0), first_start, (0, 0), first_end)
     second_signed_area = cross_product((0, 0), second_start, (0, 0),

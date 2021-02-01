@@ -12,16 +12,15 @@ from typing import (FrozenSet,
 
 from decision.partition import coin_change
 from ground.base import get_context
+from ground.hints import Point
 from reprit.base import generate_repr
 
-from sect.core import raw
+from sect.core.hints import (Contour,
+                             Segment)
 from sect.core.utils import (Orientation,
                              SegmentsRelationship,
                              pairwise,
                              segments_relationship)
-from sect.core.hints import (Contour,
-                             Point,
-                             Segment)
 from .contracts import (is_point_inside_circumcircle,
                         points_form_convex_quadrilateral)
 from .events_queue import EventsQueue
@@ -49,7 +48,6 @@ class Triangulation:
 
     @classmethod
     def from_points(cls, points: Iterable[Point]) -> 'Triangulation':
-        points = raw.from_points(points)
         points = sorted(to_unique_objects(points))
         lengths = coin_change(len(points), _initializers)
         result = [_initialize_triangulation(points[start:stop])
@@ -134,10 +132,8 @@ class Triangulation:
                     == edge.opposite.right_from_start.end
                     and (edge.orientation_of(edge.left_from_start.end)
                          is Orientation.COUNTERCLOCKWISE)))
-        contour_cls, point_cls = (self._context.contour_cls,
-                                  self._context.point_cls)
-        return [contour_cls([point_cls(x, y)
-                             for x, y in normalize_contour(list(vertices))])
+        contour_cls = self._context.contour_cls
+        return [contour_cls(normalize_contour(list(vertices)))
                 for vertices in vertices_sets
                 if vertices not in self._triangular_holes_vertices]
 
@@ -195,10 +191,10 @@ class Triangulation:
         >>> points = [Point(0, 0), Point(0, 1), Point(1, 0), Point(1, 1)]
         >>> triangulation = Triangulation.from_points(points)
         >>> ([edge.segment for edge in triangulation.boundary_edges()]
-        ...  == [((0, 0), (1, 0)), ((1, 0), (0, 0)),
-        ...      ((1, 0), (1, 1)), ((1, 1), (1, 0)),
-        ...      ((1, 1), (0, 1)), ((0, 1), (1, 1)),
-        ...      ((0, 1), (0, 0)), ((0, 0), (0, 1))])
+        ...  == [(Point(0, 0), Point(1, 0)), (Point(1, 0), Point(0, 0)),
+        ...      (Point(1, 0), Point(1, 1)), (Point(1, 1), Point(1, 0)),
+        ...      (Point(1, 1), Point(0, 1)), (Point(0, 1), Point(1, 1)),
+        ...      (Point(0, 1), Point(0, 0)), (Point(0, 0), Point(0, 1))])
         True
         """
         return edges_with_opposites(self.unique_boundary_edges())
@@ -213,11 +209,11 @@ class Triangulation:
         >>> points = [Point(0, 0), Point(0, 1), Point(1, 0), Point(1, 1)]
         >>> triangulation = Triangulation.from_points(points)
         >>> ([edge.segment for edge in triangulation.edges()]
-        ...  == [((1, 1), (1, 0)), ((1, 0), (1, 1)),
-        ...      ((1, 0), (0, 1)), ((0, 1), (1, 0)),
-        ...      ((0, 1), (1, 1)), ((1, 1), (0, 1)),
-        ...      ((0, 1), (0, 0)), ((0, 0), (0, 1)),
-        ...      ((0, 0), (1, 0)), ((1, 0), (0, 0))])
+        ...  == [(Point(1, 1), Point(1, 0)), (Point(1, 0), Point(1, 1)),
+        ...      (Point(1, 0), Point(0, 1)), (Point(0, 1), Point(1, 0)),
+        ...      (Point(0, 1), Point(1, 1)), (Point(1, 1), Point(0, 1)),
+        ...      (Point(0, 1), Point(0, 0)), (Point(0, 0), Point(0, 1)),
+        ...      (Point(0, 0), Point(1, 0)), (Point(1, 0), Point(0, 0))])
         True
         """
         return edges_with_opposites(self.unique_edges())
@@ -232,8 +228,8 @@ class Triangulation:
         >>> points = [Point(0, 0), Point(0, 1), Point(1, 0), Point(1, 1)]
         >>> triangulation = Triangulation.from_points(points)
         >>> ([edge.segment for edge in triangulation.unique_boundary_edges()]
-        ...  == [((0, 0), (1, 0)), ((1, 0), (1, 1)),
-        ...      ((1, 1), (0, 1)), ((0, 1), (0, 0))])
+        ...  == [(Point(0, 0), Point(1, 0)), (Point(1, 0), Point(1, 1)),
+        ...      (Point(1, 1), Point(0, 1)), (Point(0, 1), Point(0, 0))])
         True
         """
         start = self.left_edge
@@ -254,8 +250,9 @@ class Triangulation:
         >>> points = [Point(0, 0), Point(0, 1), Point(1, 0), Point(1, 1)]
         >>> triangulation = Triangulation.from_points(points)
         >>> ([edge.segment for edge in triangulation.unique_edges()]
-        ...  == [((1, 1), (1, 0)), ((1, 0), (0, 1)), ((0, 1), (1, 1)),
-        ...      ((0, 1), (0, 0)), ((0, 0), (1, 0))])
+        ...  == [(Point(1, 1), Point(1, 0)), (Point(1, 0), Point(0, 1)),
+        ...      (Point(0, 1), Point(1, 1)), (Point(0, 1), Point(0, 0)),
+        ...      (Point(0, 0), Point(1, 0))])
         True
         """
         visited_edges = set()

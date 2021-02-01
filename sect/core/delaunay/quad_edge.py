@@ -3,12 +3,12 @@ from typing import (Iterable,
                     Optional,
                     Set)
 
+from ground.hints import Point
 from reprit.base import generate_repr
 
+from sect.core.hints import Segment
 from sect.core.utils import (Orientation,
                              orientation)
-from sect.core.hints import (Point,
-                             Segment)
 from .hints import Endpoints
 
 

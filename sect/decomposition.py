@@ -5,10 +5,10 @@ from ground.hints import (Multipoint,
                           Polygon)
 
 from .core import raw as _raw
-from .hints import Shuffler as _Shuffler
 from .core.trapezoidal.graph import Graph
 from .core.trapezoidal.location import Location
 from .core.voronoi.diagram import Diagram
+from .hints import Shuffler as _Shuffler
 
 Diagram = Diagram
 Graph = Graph

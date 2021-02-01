@@ -1,6 +1,7 @@
 from typing import Union
 
-from sect.core.hints import (Point,
-                             Segment)
+from ground.hints import Point
+
+from sect.core.hints import Segment
 
 Source = Union[Point, Segment]

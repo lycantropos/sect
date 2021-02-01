@@ -1,10 +1,10 @@
 from reprlib import recursive_repr
 from typing import Optional
 
+from ground.hints import Point
 from reprit.base import generate_repr
 
-from sect.core.hints import (Point,
-                             Segment)
+from sect.core.hints import Segment
 from .quad_edge import QuadEdge
 
 

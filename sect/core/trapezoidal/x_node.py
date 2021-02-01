@@ -1,7 +1,6 @@
 from ground.hints import Point
 from reprit.base import generate_repr
 
-from sect.core.raw import from_point
 from .edge import Edge
 from .location import Location
 from .node import Node
@@ -27,9 +26,9 @@ class XNode(Node):
 
     def locate(self, point: Point) -> Location:
         return (self.left.locate(point)
-                if from_point(point) < self.point
+                if point < self.point
                 else (self.right.locate(point)
-                      if self.point < from_point(point)
+                      if self.point < point
                       else Location.BOUNDARY))
 
     def search_edge(self, edge: Edge) -> Trapezoid:

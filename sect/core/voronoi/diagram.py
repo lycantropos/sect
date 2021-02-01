@@ -5,12 +5,12 @@ from typing import (List,
                     Tuple)
 
 from dendroid import red_black
+from ground.hints import Point
 from prioq.base import PriorityQueue
 from reprit.base import generate_repr
 
 from sect.core.hints import (Multipoint,
                              Multisegment,
-                             Point,
                              Segment)
 from .beach_line_key import BeachLineKey
 from .beach_line_value import BeachLineValue

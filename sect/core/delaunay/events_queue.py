@@ -1,16 +1,16 @@
 from typing import (Iterable,
                     Optional)
 
+from ground.hints import Point
 from prioq.base import PriorityQueue
 from reprit.base import generate_repr
 
+from sect.core.hints import Segment
 from sect.core.utils import (Orientation,
                              SegmentsRelationship,
                              orientation,
                              segments_intersection,
                              segments_relationship)
-from sect.core.hints import (Point,
-                             Segment)
 from .event import Event
 from .quad_edge import QuadEdge
 from .sweep_line import SweepLine
@@ -26,16 +26,15 @@ class EventsQueueKey:
 
     def __lt__(self, other: 'EventsQueueKey') -> bool:
         event, other_event = self.event, other.event
-        start_x, start_y = event.start
-        other_start_x, other_start_y = other_event.start
-        if start_x != other_start_x:
+        start, other_start = event.start, other_event.start
+        if start.x != other_start.x:
             # different x-coordinate,
             # the event with lower x-coordinate is processed first
-            return start_x < other_start_x
-        elif start_y != other_start_y:
+            return start.x < other_start.x
+        elif start.y != other_start.y:
             # different points, but same x-coordinate,
             # the event with lower y-coordinate is processed first
-            return start_y < other_start_y
+            return start.y < other_start.y
         elif event.is_left_endpoint is not other_event.is_left_endpoint:
             # same start, but one is a left endpoint
             # and the other a right endpoint,
