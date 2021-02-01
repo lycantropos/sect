@@ -5,13 +5,13 @@ from ground.hints import Point
 from prioq.base import PriorityQueue
 from reprit.base import generate_repr
 
-from sect.core.hints import Segment
 from sect.core.utils import (Orientation,
                              SegmentsRelationship,
                              orientation,
                              segments_intersection,
                              segments_relationship)
 from .event import Event
+from .hints import SegmentEndpoints
 from .quad_edge import QuadEdge
 from .sweep_line import SweepLine
 
@@ -72,8 +72,8 @@ class EventsQueue:
         Populates events queue with intersection events.
         Checks if events' segments overlap and have the same start.
         """
-        below_segment, segment = below_event.segment, event.segment
-        relationship = segments_relationship(below_segment, segment)
+        relationship = segments_relationship(
+                below_event.start, below_event.end, event.start, event.end)
         if relationship is SegmentsRelationship.OVERLAP:
             # segments overlap
             if below_event.from_left is event.from_left:
@@ -116,7 +116,8 @@ class EventsQueue:
               and below_event.start != event.start
               and below_event.end != event.end):
             # segments do not intersect at endpoints
-            point = segments_intersection(below_segment, segment)
+            point = segments_intersection(below_event.start, below_event.end,
+                                          event.start, event.end)
             if point != below_event.start and point != below_event.end:
                 self.divide_segment(below_event, point)
             if point != event.start and point != event.end:
@@ -132,7 +133,8 @@ class EventsQueue:
         self._queue.push(left_event)
         self._queue.push(right_event)
 
-    def register_edge(self, edge: QuadEdge,
+    def register_edge(self,
+                      edge: QuadEdge,
                       *,
                       from_left: bool,
                       is_counterclockwise_contour: bool) -> None:
@@ -149,11 +151,12 @@ class EventsQueue:
         self._queue.push(start_event)
         self._queue.push(end_event)
 
-    def register_segment(self, segment: Segment,
+    def register_segment(self,
+                         endpoints: SegmentEndpoints,
                          *,
                          from_left: bool,
                          is_counterclockwise_contour: bool) -> None:
-        start, end = segment
+        start, end = endpoints
         interior_to_left = is_counterclockwise_contour
         if start > end:
             start, end = end, start

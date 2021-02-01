@@ -1,7 +1,5 @@
-from typing import (Sequence,
-                    Tuple)
+from typing import Sequence
 
-from ground.hints import Point as _Point
+from ground.hints import Segment as _Segment
 
-Segment = Tuple[_Point, _Point]
-Multisegment = Sequence[Segment]
+Multisegment = Sequence[_Segment]

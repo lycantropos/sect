@@ -1,13 +1,8 @@
-from ground.hints import Multipoint, Multipolygon, Multisegment, Polygon, \
-    Segment
-
-
-def from_segment(segment: Segment):
-    return segment.start, segment.end
+from ground.hints import Multipoint, Multipolygon, Multisegment, Polygon
 
 
 def from_multisegment(multisegment: Multisegment):
-    return [from_segment(segment) for segment in multisegment.segments]
+    return multisegment.segments
 
 
 def from_polygon(polygon: Polygon):

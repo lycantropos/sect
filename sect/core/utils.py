@@ -14,8 +14,6 @@ from ground.hints import (Contour,
                           Coordinate,
                           Point)
 
-from sect.core.hints import Segment
-
 Domain = TypeVar('Domain')
 
 Orientation = Orientation
@@ -41,7 +39,7 @@ def arg_min(sequence: Sequence[Domain]) -> int:
                key=sequence.__getitem__)
 
 
-def contour_to_edges(contour: Contour) -> List[Segment]:
+def contour_to_edges_endpoints(contour: Contour) -> List[Tuple[Point, Point]]:
     vertices = contour.vertices
     return [(vertices[index - 1], vertices[index])
             for index in range(len(vertices))]
@@ -97,21 +95,22 @@ def rotate_sequence(sequence: Sequence[Domain],
             else sequence)
 
 
-def segments_intersection(first: Segment, second: Segment) -> Point:
-    first_start, first_end = first
-    second_start, second_end = second
+def segments_intersection(first_start: Point,
+                          first_end: Point,
+                          second_start: Point,
+                          second_end: Point) -> Point:
     context = get_context()
     return context.segments_intersection(first_start, first_end, second_start,
                                          second_end)
 
 
-def segments_relationship(first: Segment,
-                          second: Segment) -> SegmentsRelationship:
-    first_start, first_end = first
-    second_start, second_end = second
+def segments_relationship(test_start: Point,
+                          test_end: Point,
+                          goal_start: Point,
+                          goal_end: Point) -> SegmentsRelationship:
     context = get_context()
-    result = context.segments_relation(first_start, first_end, second_start,
-                                       second_end)
+    result = context.segments_relation(test_start, test_end, goal_start,
+                                       goal_end)
     return (SegmentsRelationship.NONE if result is Relation.DISJOINT
             else (SegmentsRelationship.TOUCH if result is Relation.TOUCH
                   else (SegmentsRelationship.CROSS if result is Relation.CROSS

@@ -1,4 +1,3 @@
-from itertools import chain
 from typing import (Iterable,
                     Sequence)
 
@@ -8,9 +7,6 @@ from ground.hints import (Point,
 
 from .core.delaunay.quad_edge import QuadEdge
 from .core.delaunay.triangulation import Triangulation
-from .core.delaunay.utils import complete_vertices as _complete_vertices
-from .core.utils import (contour_to_edges as _contour_to_edges,
-                         flatten as _flatten)
 
 QuadEdge = QuadEdge
 Triangulation = Triangulation
@@ -38,7 +34,7 @@ def delaunay(points: Iterable[Point]) -> Triangulation:
 def constrained_delaunay(polygon: Polygon,
                          *,
                          extra_points: Sequence[Point] = (),
-                         extra_constraints: Iterable[Segment] = ()
+                         extra_constraints: Sequence[Segment] = ()
                          ) -> Triangulation:
     """
     Returns constrained Delaunay triangulation of the polygon
@@ -79,17 +75,6 @@ def constrained_delaunay(polygon: Polygon,
         triangulation of the border, holes & extra points
         considering constraints.
     """
-    border, holes = polygon.border, polygon.holes
-    if extra_points:
-        border, holes, extra_points = _complete_vertices(border, holes,
-                                                         extra_points)
-    result = delaunay(chain(border.vertices,
-                            _flatten(hole.vertices for hole in holes),
-                            extra_points))
-    border_segments = _contour_to_edges(border)
-    result.constrain(chain(border_segments,
-                           _flatten(map(_contour_to_edges, holes)),
-                           extra_constraints))
-    result.bound(border_segments)
-    result.cut(holes)
-    return result
+    return Triangulation.from_polygon(polygon,
+                                      extra_points=extra_points,
+                                      extra_constraints=extra_constraints)

@@ -12,23 +12,28 @@ from typing import (FrozenSet,
 from decision.partition import coin_change
 from ground.base import get_context
 from ground.hints import (Contour,
-                          Point)
+                          Point,
+                          Polygon,
+                          Segment)
 from reprit.base import generate_repr
 
-from sect.core.hints import Segment
 from sect.core.utils import (Orientation,
                              SegmentsRelationship,
-                             contour_to_edges,
+                             contour_to_edges_endpoints,
+                             flatten,
                              pairwise,
                              segments_relationship)
 from .contracts import (is_point_inside_circumcircle,
                         points_form_convex_quadrilateral)
 from .events_queue import EventsQueue
+from .hints import SegmentEndpoints
 from .quad_edge import (QuadEdge,
+                        edge_to_endpoints,
                         edge_to_neighbours,
                         edge_to_non_adjacent_vertices,
                         edges_with_opposites)
 from .utils import (ceil_log2,
+                    complete_vertices,
                     normalize_contour_vertices,
                     to_clockwise_contour,
                     to_unique_objects)
@@ -59,56 +64,90 @@ class Triangulation:
                       + result[parts_to_merge_count:])
         return result[0]
 
-    def constrain(self, constraints: Iterable[Segment]) -> None:
-        endpoints = {edge.endpoints for edge in self.edges()}
-        inner_edges = self._to_unique_inner_edges()
-        for constraint in constraints:
-            constraint_endpoints = frozenset(constraint)
-            if constraint_endpoints in endpoints:
-                continue
-            crossings = _detect_crossings(inner_edges, constraint)
-            inner_edges.difference_update(crossings)
-            endpoints.difference_update(edge.endpoints for edge in crossings)
-            new_edges = _resolve_crossings(crossings, constraint)
-            _set_criterion(edge
-                           for edge in new_edges
-                           if edge.endpoints != constraint_endpoints)
-            endpoints.update(edge.endpoints for edge in new_edges)
-            inner_edges.update(new_edges)
+    @classmethod
+    def from_polygon(cls,
+                     polygon: Polygon,
+                     *,
+                     extra_constraints: Sequence[Segment],
+                     extra_points: Sequence[Point]) -> 'Triangulation':
+        border, holes = polygon.border, polygon.holes
+        if extra_points:
+            border, holes, extra_points = complete_vertices(border, holes,
+                                                            extra_points)
+        result = cls.from_points(chain(border.vertices,
+                                       flatten(hole.vertices
+                                               for hole in holes),
+                                       extra_points))
+        border_endpoints = contour_to_edges_endpoints(border)
+        result._constrain(chain(border_endpoints,
+                                flatten(map(contour_to_edges_endpoints,
+                                            holes)),
+                                [(segment.start, segment.end)
+                                 for segment in extra_constraints]))
+        result._bound(border_endpoints)
+        result._cut(holes)
+        return result
 
-    def bound(self, border_segments: Sequence[Segment]) -> None:
-        border_endpoints = {frozenset(segment) for segment in border_segments}
-        non_boundary = {edge
-                        for edge in self.unique_boundary_edges()
-                        if edge.endpoints not in border_endpoints}
-        while non_boundary:
-            edge = non_boundary.pop()
-            candidates = edge_to_neighbours(edge)
-            self.delete(edge)
-            non_boundary.update(candidate
-                                for candidate in candidates
-                                if candidate.endpoints not in border_endpoints)
+    def boundary_edges(self) -> Iterable[QuadEdge]:
+        """
+        Returns boundary edges of the triangulation in counterclockwise order.
 
-    def cut(self, holes: Sequence[Contour]) -> None:
-        if not holes:
-            return
-        events_queue = EventsQueue()
-        for edge in self._to_unique_inner_edges():
-            events_queue.register_edge(edge,
-                                       from_left=True,
-                                       is_counterclockwise_contour=True)
-        for hole in holes:
-            for segment in contour_to_edges(to_clockwise_contour(hole)):
-                events_queue.register_segment(
-                        segment,
-                        from_left=False,
-                        is_counterclockwise_contour=False)
-        for event in events_queue.sweep():
-            if event.from_left and event.inside:
-                self.delete(event.edge)
-        self._triangular_holes_vertices.update(frozenset(hole.vertices)
-                                               for hole in holes
-                                               if len(hole.vertices) == 3)
+        >>> from ground.base import get_context
+        >>> context = get_context()
+        >>> Point = context.point_cls
+        >>> points = [Point(0, 0), Point(0, 1), Point(1, 0), Point(1, 1)]
+        >>> triangulation = Triangulation.from_points(points)
+        >>> ([(edge.start, edge.end)
+        ...   for edge in triangulation.boundary_edges()]
+        ...  == [(Point(0, 0), Point(1, 0)), (Point(1, 0), Point(0, 0)),
+        ...      (Point(1, 0), Point(1, 1)), (Point(1, 1), Point(1, 0)),
+        ...      (Point(1, 1), Point(0, 1)), (Point(0, 1), Point(1, 1)),
+        ...      (Point(0, 1), Point(0, 0)), (Point(0, 0), Point(0, 1))])
+        True
+        """
+        return edges_with_opposites(self.unique_boundary_edges())
+
+    def delete(self, edge: QuadEdge) -> None:
+        """
+        Deletes the edge from the triangulation.
+
+        >>> from ground.base import get_context
+        >>> context = get_context()
+        >>> Point = context.point_cls
+        >>> points = [Point(0, 0), Point(0, 1), Point(1, 0), Point(1, 1)]
+        >>> triangulation = Triangulation.from_points(points)
+        >>> edges = [triangulation.left_edge, triangulation.right_edge]
+        >>> all(edge in triangulation.edges() for edge in edges)
+        True
+        >>> for edge in edges:
+        ...     triangulation.delete(edge)
+        >>> any(edge in triangulation.edges() for edge in edges)
+        False
+        """
+        if edge is self.right_edge or edge.opposite is self.right_edge:
+            self.right_edge = self.right_edge.right_from_end.opposite
+        if edge is self.left_edge or edge.opposite is self.left_edge:
+            self.left_edge = self.left_edge.left_from_start
+        edge.disconnect()
+
+    def edges(self) -> Iterable[QuadEdge]:
+        """
+        Returns edges of the triangulation.
+
+        >>> from ground.base import get_context
+        >>> context = get_context()
+        >>> Point = context.point_cls
+        >>> points = [Point(0, 0), Point(0, 1), Point(1, 0), Point(1, 1)]
+        >>> triangulation = Triangulation.from_points(points)
+        >>> ([(edge.start, edge.end) for edge in triangulation.edges()]
+        ...  == [(Point(1, 1), Point(1, 0)), (Point(1, 0), Point(1, 1)),
+        ...      (Point(1, 0), Point(0, 1)), (Point(0, 1), Point(1, 0)),
+        ...      (Point(0, 1), Point(1, 1)), (Point(1, 1), Point(0, 1)),
+        ...      (Point(0, 1), Point(0, 0)), (Point(0, 0), Point(0, 1)),
+        ...      (Point(0, 0), Point(1, 0)), (Point(1, 0), Point(0, 0))])
+        True
+        """
+        return edges_with_opposites(self.unique_edges())
 
     def triangles(self) -> List[Contour]:
         """
@@ -136,87 +175,6 @@ class Triangulation:
                 for vertices in vertices_sets
                 if vertices not in self._triangular_holes_vertices]
 
-    def _merge_with(self, other: 'Triangulation') -> 'Triangulation':
-        _merge(self._find_base_edge(other))
-        return Triangulation(self.left_edge, other.right_edge)
-
-    def _find_base_edge(self, other: 'Triangulation') -> QuadEdge:
-        while True:
-            if (self.right_edge.orientation_of(other.left_edge.start)
-                    is Orientation.COUNTERCLOCKWISE):
-                self.right_edge = self.right_edge.left_from_end
-            elif (other.left_edge.orientation_of(self.right_edge.start)
-                  is Orientation.CLOCKWISE):
-                other.left_edge = other.left_edge.right_from_end
-            else:
-                break
-        base_edge = other.left_edge.opposite.connect(self.right_edge)
-        if self.right_edge.start == self.left_edge.start:
-            self.left_edge = base_edge.opposite
-        if other.left_edge.start == other.right_edge.start:
-            other.right_edge = base_edge
-        return base_edge
-
-    def delete(self, edge: QuadEdge) -> None:
-        """
-        Deletes the edge from the triangulation.
-
-        >>> from ground.base import get_context
-        >>> context = get_context()
-        >>> Point = context.point_cls
-        >>> points = [Point(0, 0), Point(0, 1), Point(1, 0), Point(1, 1)]
-        >>> triangulation = Triangulation.from_points(points)
-        >>> edges = [triangulation.left_edge, triangulation.right_edge]
-        >>> all(edge in triangulation.edges() for edge in edges)
-        True
-        >>> for edge in edges:
-        ...     triangulation.delete(edge)
-        >>> any(edge in triangulation.edges() for edge in edges)
-        False
-        """
-        if edge is self.right_edge or edge.opposite is self.right_edge:
-            self.right_edge = self.right_edge.right_from_end.opposite
-        if edge is self.left_edge or edge.opposite is self.left_edge:
-            self.left_edge = self.left_edge.left_from_start
-        edge.disconnect()
-
-    def boundary_edges(self) -> Iterable[QuadEdge]:
-        """
-        Returns boundary edges of the triangulation in counterclockwise order.
-
-        >>> from ground.base import get_context
-        >>> context = get_context()
-        >>> Point = context.point_cls
-        >>> points = [Point(0, 0), Point(0, 1), Point(1, 0), Point(1, 1)]
-        >>> triangulation = Triangulation.from_points(points)
-        >>> ([edge.segment for edge in triangulation.boundary_edges()]
-        ...  == [(Point(0, 0), Point(1, 0)), (Point(1, 0), Point(0, 0)),
-        ...      (Point(1, 0), Point(1, 1)), (Point(1, 1), Point(1, 0)),
-        ...      (Point(1, 1), Point(0, 1)), (Point(0, 1), Point(1, 1)),
-        ...      (Point(0, 1), Point(0, 0)), (Point(0, 0), Point(0, 1))])
-        True
-        """
-        return edges_with_opposites(self.unique_boundary_edges())
-
-    def edges(self) -> Iterable[QuadEdge]:
-        """
-        Returns edges of the triangulation.
-
-        >>> from ground.base import get_context
-        >>> context = get_context()
-        >>> Point = context.point_cls
-        >>> points = [Point(0, 0), Point(0, 1), Point(1, 0), Point(1, 1)]
-        >>> triangulation = Triangulation.from_points(points)
-        >>> ([edge.segment for edge in triangulation.edges()]
-        ...  == [(Point(1, 1), Point(1, 0)), (Point(1, 0), Point(1, 1)),
-        ...      (Point(1, 0), Point(0, 1)), (Point(0, 1), Point(1, 0)),
-        ...      (Point(0, 1), Point(1, 1)), (Point(1, 1), Point(0, 1)),
-        ...      (Point(0, 1), Point(0, 0)), (Point(0, 0), Point(0, 1)),
-        ...      (Point(0, 0), Point(1, 0)), (Point(1, 0), Point(0, 0))])
-        True
-        """
-        return edges_with_opposites(self.unique_edges())
-
     def unique_boundary_edges(self) -> Iterable[QuadEdge]:
         """
         Returns boundary edges of the triangulation in counterclockwise order.
@@ -226,7 +184,8 @@ class Triangulation:
         >>> Point = context.point_cls
         >>> points = [Point(0, 0), Point(0, 1), Point(1, 0), Point(1, 1)]
         >>> triangulation = Triangulation.from_points(points)
-        >>> ([edge.segment for edge in triangulation.unique_boundary_edges()]
+        >>> ([(edge.start, edge.end)
+        ...   for edge in triangulation.unique_boundary_edges()]
         ...  == [(Point(0, 0), Point(1, 0)), (Point(1, 0), Point(1, 1)),
         ...      (Point(1, 1), Point(0, 1)), (Point(0, 1), Point(0, 0))])
         True
@@ -248,7 +207,7 @@ class Triangulation:
         >>> Point = context.point_cls
         >>> points = [Point(0, 0), Point(0, 1), Point(1, 0), Point(1, 1)]
         >>> triangulation = Triangulation.from_points(points)
-        >>> ([edge.segment for edge in triangulation.unique_edges()]
+        >>> ([(edge.start, edge.end) for edge in triangulation.unique_edges()]
         ...  == [(Point(1, 1), Point(1, 0)), (Point(1, 0), Point(0, 1)),
         ...      (Point(0, 1), Point(1, 1)), (Point(0, 1), Point(0, 0)),
         ...      (Point(0, 0), Point(1, 0))])
@@ -267,12 +226,92 @@ class Triangulation:
             queue.extend((edge.left_from_start, edge.left_from_end,
                           edge.right_from_start, edge.right_from_end))
 
+    def _bound(self, border_endpoints: Sequence[SegmentEndpoints]) -> None:
+        border_endpoints = {frozenset(endpoints)
+                            for endpoints in border_endpoints}
+        non_boundary = {edge
+                        for edge in self.unique_boundary_edges()
+                        if edge_to_endpoints(edge) not in border_endpoints}
+        while non_boundary:
+            edge = non_boundary.pop()
+            candidates = edge_to_neighbours(edge)
+            self.delete(edge)
+            non_boundary.update(
+                    candidate
+                    for candidate in candidates
+                    if edge_to_endpoints(candidate) not in border_endpoints)
+
+    def _constrain(self, constraints: Iterable[SegmentEndpoints]) -> None:
+        endpoints = {edge_to_endpoints(edge) for edge in self.edges()}
+        inner_edges = self._to_unique_inner_edges()
+        for constraint in constraints:
+            constraint_endpoints = frozenset(constraint)
+            if constraint_endpoints in endpoints:
+                continue
+            constraint_start, constraint_end = constraint
+            crossings = _detect_crossings(inner_edges, constraint_start,
+                                          constraint_end)
+            inner_edges.difference_update(crossings)
+            endpoints.difference_update(edge_to_endpoints(edge)
+                                        for edge in crossings)
+            new_edges = _resolve_crossings(crossings, constraint_start,
+                                           constraint_end)
+            _set_criterion(edge
+                           for edge in new_edges
+                           if edge_to_endpoints(edge) != constraint_endpoints)
+            endpoints.update(edge_to_endpoints(edge) for edge in new_edges)
+            inner_edges.update(new_edges)
+
+    def _cut(self, holes: Sequence[Contour]) -> None:
+        if not holes:
+            return
+        events_queue = EventsQueue()
+        for edge in self._to_unique_inner_edges():
+            events_queue.register_edge(edge,
+                                       from_left=True,
+                                       is_counterclockwise_contour=True)
+        for hole in holes:
+            for endpoints in contour_to_edges_endpoints(
+                    to_clockwise_contour(hole)):
+                events_queue.register_segment(
+                        endpoints,
+                        from_left=False,
+                        is_counterclockwise_contour=False)
+        for event in events_queue.sweep():
+            if event.from_left and event.inside:
+                self.delete(event.edge)
+        self._triangular_holes_vertices.update(frozenset(hole.vertices)
+                                               for hole in holes
+                                               if len(hole.vertices) == 3)
+
+    def _find_base_edge(self, other: 'Triangulation') -> QuadEdge:
+        while True:
+            if (self.right_edge.orientation_of(other.left_edge.start)
+                    is Orientation.COUNTERCLOCKWISE):
+                self.right_edge = self.right_edge.left_from_end
+            elif (other.left_edge.orientation_of(self.right_edge.start)
+                  is Orientation.CLOCKWISE):
+                other.left_edge = other.left_edge.right_from_end
+            else:
+                break
+        base_edge = other.left_edge.opposite.connect(self.right_edge)
+        if self.right_edge.start == self.left_edge.start:
+            self.left_edge = base_edge.opposite
+        if other.left_edge.start == other.right_edge.start:
+            other.right_edge = base_edge
+        return base_edge
+
+    def _merge_with(self, other: 'Triangulation') -> 'Triangulation':
+        _merge(self._find_base_edge(other))
+        return Triangulation(self.left_edge, other.right_edge)
+
     def _to_unique_inner_edges(self) -> Set[QuadEdge]:
         return set(self.unique_edges()).difference(self.boundary_edges())
 
 
 def _resolve_crossings(crossings: List[QuadEdge],
-                       constraint: Segment) -> List[QuadEdge]:
+                       constraint_start: Point,
+                       constraint_end: Point) -> List[QuadEdge]:
     result = []
     crossings = deque(crossings,
                       maxlen=len(crossings))
@@ -284,7 +323,8 @@ def _resolve_crossings(crossings: List[QuadEdge],
                                              first_non_edge_vertex,
                                              second_non_edge_vertex)):
             edge.swap()
-            if (segments_relationship(edge.segment, constraint)
+            if (segments_relationship(edge.start, edge.end, constraint_start,
+                                      constraint_end)
                     is SegmentsRelationship.CROSS):
                 crossings.append(edge)
             else:
@@ -295,10 +335,12 @@ def _resolve_crossings(crossings: List[QuadEdge],
 
 
 def _detect_crossings(inner_edges: Iterable[QuadEdge],
-                      constraint: Segment) -> List[QuadEdge]:
+                      constraint_start: Point,
+                      constraint_end: Point) -> List[QuadEdge]:
     return [edge
             for edge in inner_edges
-            if (segments_relationship(edge.segment, constraint)
+            if (segments_relationship(edge.start, edge.end, constraint_start,
+                                      constraint_end)
                 is SegmentsRelationship.CROSS)]
 
 

@@ -7,7 +7,7 @@ from reprit.base import generate_repr
 
 from sect.core.hints import Multisegment
 from sect.core.utils import (Orientation,
-                             contour_to_edges,
+                             contour_to_edges_endpoints,
                              flatten,
                              to_contour_orientation)
 from sect.hints import Shuffler
@@ -71,12 +71,14 @@ class Graph:
     def from_multisegment(cls,
                           multisegment: Multisegment,
                           shuffler: Shuffler) -> 'Graph':
-        edges = [Edge(start, end, False)
-                 if start < end
-                 else Edge(end, start, False)
-                 for start, end in multisegment]
+        edges = [Edge(segment.start, segment.end, False)
+                 if segment.start < segment.end
+                 else Edge(segment.end, segment.start, False)
+                 for segment in multisegment]
         shuffler(edges)
-        bounding_box = points_to_bounding_box(flatten(multisegment))
+        bounding_box = points_to_bounding_box(
+                flatten((segment.start, segment.end)
+                        for segment in multisegment))
         result = cls(bounding_box_to_node(bounding_box))
         for edge in edges:
             result.add_edge(edge)
@@ -91,7 +93,7 @@ class Graph:
                  if start < end
                  else Edge(end, start,
                            not is_border_positively_oriented)
-                 for start, end in contour_to_edges(border)]
+                 for start, end in contour_to_edges_endpoints(border)]
         for hole in polygon.holes:
             is_hole_negatively_oriented = (to_contour_orientation(hole)
                                            is Orientation.CLOCKWISE)
@@ -99,7 +101,7 @@ class Graph:
                          if start < end
                          else Edge(end, start,
                                    not is_hole_negatively_oriented)
-                         for start, end in contour_to_edges(hole))
+                         for start, end in contour_to_edges_endpoints(hole))
         shuffler(edges)
         bounding_box = points_to_bounding_box(border.vertices)
         result = cls(bounding_box_to_node(bounding_box))

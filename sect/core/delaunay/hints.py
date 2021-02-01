@@ -1,5 +1,5 @@
-from typing import FrozenSet
+from typing import Tuple
 
 from ground.hints import Point
 
-Endpoints = FrozenSet[Point]
+SegmentEndpoints = Tuple[Point, Point]

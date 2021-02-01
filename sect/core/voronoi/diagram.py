@@ -6,12 +6,12 @@ from typing import (List,
                     Tuple)
 
 from dendroid import red_black
-from ground.hints import Point
+from ground.hints import (Point,
+                          Segment)
 from prioq.base import PriorityQueue
 from reprit.base import generate_repr
 
-from sect.core.hints import (Multisegment,
-                             Segment)
+from sect.core.hints import Multisegment
 from .beach_line_key import BeachLineKey
 from .beach_line_value import BeachLineValue
 from .enums import SourceCategory
@@ -298,7 +298,7 @@ class Diagram:
 
     def _insert_segment(self, segment: Segment) -> None:
         sites = self._sites
-        start, end = segment
+        start, end = segment.start, segment.end
         sites.append(Site(start, start, segment,
                           SourceCategory.SEGMENT_START_POINT))
         sites.append(Site(end, end, segment,

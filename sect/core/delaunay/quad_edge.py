@@ -1,4 +1,5 @@
-from typing import (Iterable,
+from typing import (FrozenSet,
+                    Iterable,
                     List,
                     Optional,
                     Set)
@@ -6,10 +7,8 @@ from typing import (Iterable,
 from ground.hints import Point
 from reprit.base import generate_repr
 
-from sect.core.hints import Segment
 from sect.core.utils import (Orientation,
                              orientation)
-from .hints import Endpoints
 
 
 class QuadEdge:
@@ -101,28 +100,6 @@ class QuadEdge:
         """
         return self.opposite._left_from_start
 
-    @property
-    def segment(self) -> Segment:
-        """
-        Returns segment from the edge.
-
-        >>> edge = QuadEdge.factory((0, 0), (1, 1))
-        >>> edge.segment == ((0, 0), (1, 1))
-        True
-        """
-        return self.start, self.end
-
-    @property
-    def endpoints(self) -> Endpoints:
-        """
-        Returns endpoints of the edge.
-
-        >>> edge = QuadEdge.factory((0, 0), (1, 1))
-        >>> edge.endpoints == frozenset(((0, 0), (1, 1)))
-        True
-        """
-        return frozenset((self.start, self.end))
-
     @classmethod
     def factory(cls, start: Point, end: Point) -> 'QuadEdge':
         result, opposite = cls(start), cls(end)
@@ -184,14 +161,17 @@ class QuadEdge:
         return orientation(self.start, self.end, point)
 
 
+def edge_to_endpoints(edge: QuadEdge) -> FrozenSet[Point]:
+    return frozenset((edge.start, edge.end))
+
+
 def edge_to_neighbours(edge: QuadEdge) -> List[QuadEdge]:
     return (list(_edge_to_incidents(edge))
             + list(_edge_to_incidents(edge.opposite)))
 
 
 def edge_to_non_adjacent_vertices(edge: QuadEdge) -> Set[Point]:
-    return {neighbour.end
-            for neighbour in _edge_to_incidents(edge)}
+    return {neighbour.end for neighbour in _edge_to_incidents(edge)}
 
 
 def _edge_to_incidents(edge: QuadEdge) -> Iterable[QuadEdge]:
