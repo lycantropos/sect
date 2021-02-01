@@ -1,10 +1,12 @@
 from functools import partial
 from typing import Tuple
 
+from ground.base import get_context
 from ground.hints import Coordinate
 from hypothesis import strategies
 from hypothesis_geometry import planar
 
+from sect.triangulation import to_triangulation_cls
 from tests.strategies import (coordinates_strategies,
                               rational_coordinates_strategies)
 from tests.utils import (Multisegment,
@@ -12,6 +14,7 @@ from tests.utils import (Multisegment,
                          Polygon,
                          Strategy)
 
+triangulation_classes = strategies.just(to_triangulation_cls(get_context()))
 multipoints = coordinates_strategies.flatmap(planar.multipoints)
 rational_contours = (rational_coordinates_strategies
                      .flatmap(planar.contours))
