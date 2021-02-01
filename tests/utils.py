@@ -1,5 +1,6 @@
 from operator import getitem
-from typing import (Iterable,
+from typing import (FrozenSet,
+                    Iterable,
                     List,
                     Sequence,
                     Set,
@@ -13,7 +14,6 @@ from hypothesis import strategies
 from hypothesis.strategies import SearchStrategy
 from orient.planar import point_in_segment
 
-from sect.core.delaunay.hints import Endpoints
 from sect.core.utils import arg_min
 from sect.core.voronoi.utils import robust_divide
 
@@ -52,7 +52,7 @@ def points_do_not_lie_on_the_same_line(points: Sequence[Point]) -> bool:
 
 
 def to_contours_border_endpoints(contours: Iterable[Contour]
-                                 ) -> Set[Endpoints]:
+                                 ) -> Set[FrozenSet[Point]]:
     result = set()
     for contour in contours:
         result.symmetric_difference_update(
@@ -156,6 +156,6 @@ def segment_contains_point(segment: Segment, point: Point) -> bool:
 
 
 def to_convex_hull_border_endpoints(points: Sequence[Point]
-                                    ) -> Set[Endpoints]:
+                                    ) -> Set[FrozenSet[Point]]:
     convex_hull_border = Contour(to_convex_hull(points))
     return set(map(frozenset, contour_to_edges_endpoints(convex_hull_border)))
