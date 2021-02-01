@@ -47,37 +47,42 @@ Usage
 -----
 ```python
 >>> from ground.base import get_context
+>>> from sect.triangulation import to_triangulation_cls
 >>> context = get_context()
 >>> Contour, Point = context.contour_cls, context.point_cls
->>> from sect.triangulation import delaunay
->>> (delaunay([Point(0, 0), Point(1, 0), Point(0, 1)]).triangles()
+>>> Triangulation = to_triangulation_cls(context)
+>>> (Triangulation.delaunay(
+...      [Point(0, 0), Point(1, 0), Point(0, 1)]).triangles()
 ...  == [Contour([Point(0, 0), Point(1, 0), Point(0, 1)])])
 True
->>> (delaunay([Point(0, 0), Point(3, 0), Point(1, 1), Point(0, 3)]).triangles()
+>>> (Triangulation.delaunay(
+...      [Point(0, 0), Point(3, 0), Point(1, 1), Point(0, 3)]).triangles()
 ...  == [Contour([Point(0, 0), Point(3, 0), Point(1, 1)]),
 ...      Contour([Point(0, 0), Point(1, 1), Point(0, 3)]),
 ...      Contour([Point(0, 3), Point(1, 1), Point(3, 0)])])
 True
->>> (delaunay([Point(0, 0), Point(1, 0), Point(1, 1), Point(0, 1)]).triangles()
+>>> (Triangulation.delaunay(
+...      [Point(0, 0), Point(1, 0), Point(1, 1), Point(0, 1)]).triangles()
 ...  == [Contour([Point(0, 1), Point(1, 0), Point(1, 1)]),
 ...      Contour([Point(0, 0), Point(1, 0), Point(0, 1)])])
 True
 >>> Polygon = context.polygon_cls
->>> from sect.triangulation import constrained_delaunay
->>> (constrained_delaunay(Polygon(Contour([Point(0, 0), Point(1, 0),
-...                                        Point(0, 1)]), [])).triangles()
+>>> constrained_delaunay = Triangulation.constrained_delaunay
+>>> (Triangulation.constrained_delaunay(
+...      Polygon(Contour([Point(0, 0), Point(1, 0), Point(0, 1)]),
+...              [])).triangles()
 ...  == [Contour([Point(0, 0), Point(1, 0), Point(0, 1)])])
 True
->>> (constrained_delaunay(Polygon(Contour([Point(0, 0), Point(3, 0),
-...                                        Point(1, 1), Point(0, 3)]), []))
-...  .triangles()
+>>> (Triangulation.constrained_delaunay(
+...      Polygon(Contour([Point(0, 0), Point(3, 0), Point(1, 1), Point(0, 3)]),
+...              [])).triangles()
 ...  == [Contour([Point(0, 0), Point(3, 0), Point(1, 1)]),
 ...      Contour([Point(0, 0), Point(1, 1), Point(0, 3)])])
 True
->>> (constrained_delaunay(Polygon(Contour([Point(0, 0), Point(4, 0),
-...                                        Point(0, 4)]),
-...                               [Contour([Point(0, 0), Point(1, 2),
-...                                         Point(2, 1)])])).triangles()
+>>> (Triangulation.constrained_delaunay(
+...      Polygon(Contour([Point(0, 0), Point(4, 0), Point(0, 4)]),
+...              [Contour([Point(0, 0), Point(1, 2),
+...                        Point(2, 1)])])).triangles()
 ...  == [Contour([Point(0, 0), Point(4, 0), Point(2, 1)]),
 ...      Contour([Point(1, 2), Point(2, 1), Point(4, 0)]),
 ...      Contour([Point(0, 4), Point(1, 2), Point(4, 0)]),
