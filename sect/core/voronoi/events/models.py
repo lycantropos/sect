@@ -111,11 +111,9 @@ class Circle:
     def lies_outside_vertical_segment(self, site: Site) -> bool:
         if not site.is_segment or not site.is_vertical:
             return False
-        _, site_start_y = site.start
-        _, site_end_y = site.end
-        start_y, end_y = ((site_end_y, site_start_y)
+        start_y, end_y = ((site.end.y, site.start.y)
                           if site.is_inverse
-                          else (site_start_y, site_end_y))
+                          else (site.start.y, site.end.y))
         return (less_than(self.center_y, start_y)
                 or less_than(end_y, self.center_y))
 
