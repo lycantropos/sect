@@ -1,9 +1,8 @@
-from typing import (List,
-                    Sequence)
+from typing import List
 
 from ground.base import get_context
-from ground.hints import (Contour,
-                          Point)
+from ground.hints import (Point,
+                          Polygon)
 from reprit.base import generate_repr
 
 from sect.core.hints import Multisegment
@@ -84,10 +83,8 @@ class Graph:
         return result
 
     @classmethod
-    def from_polygon(cls,
-                     border: Contour,
-                     holes: Sequence[Contour],
-                     shuffler: Shuffler) -> 'Graph':
+    def from_polygon(cls, polygon: Polygon, shuffler: Shuffler) -> 'Graph':
+        border = polygon.border
         is_border_positively_oriented = (to_contour_orientation(border)
                                          is Orientation.COUNTERCLOCKWISE)
         edges = [Edge(start, end, is_border_positively_oriented)
@@ -95,7 +92,7 @@ class Graph:
                  else Edge(end, start,
                            not is_border_positively_oriented)
                  for start, end in contour_to_edges(border)]
-        for hole in holes:
+        for hole in polygon.holes:
             is_hole_negatively_oriented = (to_contour_orientation(hole)
                                            is Orientation.CLOCKWISE)
             edges.extend(Edge(start, end, is_hole_negatively_oriented)
