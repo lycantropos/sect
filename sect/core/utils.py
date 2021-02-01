@@ -79,15 +79,6 @@ def pairwise(iterable: Iterable[Domain]) -> Iterable[Tuple[Domain, Domain]]:
         element = next_element
 
 
-def point_point_point_incircle_test(first_vertex: Point,
-                                    second_vertex: Point,
-                                    third_vertex: Point,
-                                    point: Point) -> Coordinate:
-    context = get_context()
-    return context.point_point_point_incircle_test(first_vertex, second_vertex,
-                                                   third_vertex, point)
-
-
 def rotate_sequence(sequence: Sequence[Domain],
                     index: int) -> Sequence[Domain]:
     return (sequence[index:] + sequence[:index]

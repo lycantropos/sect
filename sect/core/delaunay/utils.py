@@ -54,11 +54,8 @@ def to_clockwise_contour(contour: Contour) -> Contour:
             else contour[:1] + contour[1:][::-1])
 
 
-def to_convex_hull(points: Sequence[Point]) -> List[Point]:
-    points = sorted(points)
-    lower = _to_sub_hull(points)
-    upper = _to_sub_hull(reversed(points))
-    return lower[:-1] + upper[:-1]
+def to_convex_hull(points: Sequence[Point]) -> Sequence[Point]:
+    return get_context().points_convex_hull(points)
 
 
 def _complete_contour_vertices(contour: Contour,
