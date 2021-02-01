@@ -1,3 +1,4 @@
+from ground.base import get_context
 from ground.hints import (Coordinate,
                           Point)
 
@@ -64,8 +65,10 @@ def to_point_point_segment_circle(first_point_site: Site,
                                     + coefficient * points_dy, 2)
     center_y = robust_evenly_divide(first_point_y + second_point_y
                                     - coefficient * points_dx, 2)
+    context = get_context()
     radius = robust_divide(
-            abs(cross_product(segment_start, (center_x, center_y),
+            abs(cross_product(segment_start,
+                              context.point_cls(center_x, center_y),
                               segment_start, segment_end)),
             robust_sqrt(to_segment_squared_length(segment_start, segment_end)))
     return Circle(center_x, center_y, center_x + radius)
