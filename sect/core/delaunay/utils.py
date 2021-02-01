@@ -66,15 +66,15 @@ def _complete_contour_vertices(contour: Contour,
     vertices = contour.vertices
     start = vertices[-1]
     for index, end in enumerate(vertices):
-        start_index = bisect(candidates, start)
-        end_index = bisect(candidates, end)
+        start_index, end_index = (bisect(candidates, start),
+                                  bisect(candidates, end))
         if start_index > end_index:
             start_index, end_index = end_index, start_index
-        extra_vertices_indices = []
-        for candidate_index in range(start_index, end_index):
-            extra_point = candidates[candidate_index]
-            if _is_inner_segment_point(start, end, extra_point, context):
-                extra_vertices_indices.append(candidate_index)
+        extra_vertices_indices = [
+            candidate_index
+            for candidate_index in range(start_index, end_index)
+            if _is_inner_segment_point(start, end, candidates[candidate_index],
+                                       context)]
         if extra_vertices_indices:
             extra_vertices[index] = [candidates[index]
                                      for index in extra_vertices_indices]
