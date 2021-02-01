@@ -13,6 +13,7 @@ from hypothesis import strategies
 from hypothesis.strategies import SearchStrategy
 from orient.planar import point_in_segment
 
+from sect.core.delaunay.contracts import is_point_inside_circumcircle
 from sect.core.delaunay.utils import normalize_contour_vertices
 from sect.core.utils import contour_to_edges_endpoints
 from sect.core.voronoi.utils import robust_divide
@@ -61,14 +62,7 @@ def to_contours_border_endpoints(contours: Iterable[Contour]
 
 
 to_convex_hull = context.points_convex_hull
-
-
-def is_point_inside_circumcircle(first: Point,
-                                 second: Point,
-                                 third: Point,
-                                 fourth: Point) -> bool:
-    return context.point_point_point_incircle_test(first, second, third,
-                                                   fourth) > 0
+is_point_inside_circumcircle = is_point_inside_circumcircle
 
 
 def is_convex_contour(contour: Contour) -> bool:
