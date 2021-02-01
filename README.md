@@ -46,40 +46,64 @@ python setup.py install
 Usage
 -----
 ```python
->>> from sect.triangulation import delaunay_triangles
->>> delaunay_triangles([(0, 0), (1, 0), (0, 1)])
-[((0, 0), (1, 0), (0, 1))]
->>> delaunay_triangles([(0, 0), (3, 0), (1, 1), (0, 3)])
-[((0, 0), (3, 0), (1, 1)), ((0, 0), (1, 1), (0, 3)), ((0, 3), (1, 1), (3, 0))]
->>> delaunay_triangles([(0, 0), (1, 0), (1, 1), (0, 1)])
-[((0, 1), (1, 0), (1, 1)), ((0, 0), (1, 0), (0, 1))]
->>> from sect.triangulation import constrained_delaunay_triangles
->>> constrained_delaunay_triangles([(0, 0), (1, 0), (0, 1)])
-[((0, 0), (1, 0), (0, 1))]
->>> constrained_delaunay_triangles([(0, 0), (3, 0), (1, 1), (0, 3)])
-[((0, 0), (3, 0), (1, 1)), ((0, 0), (1, 1), (0, 3))]
->>> constrained_delaunay_triangles([(0, 0), (4, 0), (0, 4)],
-...                                [[(0, 0), (1, 2), (2, 1)]])
-[((0, 0), (4, 0), (2, 1)), ((1, 2), (2, 1), (4, 0)), ((0, 4), (1, 2), (4, 0)), ((0, 0), (1, 2), (0, 4))]
+>>> from ground.base import get_context
+>>> context = get_context()
+>>> Contour, Point = context.contour_cls, context.point_cls
+>>> from sect.triangulation import delaunay
+>>> (delaunay([Point(0, 0), Point(1, 0), Point(0, 1)]).triangles()
+...  == [Contour([Point(0, 0), Point(1, 0), Point(0, 1)])])
+True
+>>> (delaunay([Point(0, 0), Point(3, 0), Point(1, 1), Point(0, 3)]).triangles()
+...  == [Contour([Point(0, 0), Point(3, 0), Point(1, 1)]),
+...      Contour([Point(0, 0), Point(1, 1), Point(0, 3)]),
+...      Contour([Point(0, 3), Point(1, 1), Point(3, 0)])])
+True
+>>> (delaunay([Point(0, 0), Point(1, 0), Point(1, 1), Point(0, 1)]).triangles()
+...  == [Contour([Point(0, 1), Point(1, 0), Point(1, 1)]),
+...      Contour([Point(0, 0), Point(1, 0), Point(0, 1)])])
+True
+>>> Polygon = context.polygon_cls
+>>> from sect.triangulation import constrained_delaunay
+>>> (constrained_delaunay(Polygon(Contour([Point(0, 0), Point(1, 0),
+...                                        Point(0, 1)]), [])).triangles()
+...  == [Contour([Point(0, 0), Point(1, 0), Point(0, 1)])])
+True
+>>> (constrained_delaunay(Polygon(Contour([Point(0, 0), Point(3, 0),
+...                                        Point(1, 1), Point(0, 3)]), []))
+...  .triangles()
+...  == [Contour([Point(0, 0), Point(3, 0), Point(1, 1)]),
+...      Contour([Point(0, 0), Point(1, 1), Point(0, 3)])])
+True
+>>> (constrained_delaunay(Polygon(Contour([Point(0, 0), Point(4, 0),
+...                                        Point(0, 4)]),
+...                               [Contour([Point(0, 0), Point(1, 2),
+...                                         Point(2, 1)])])).triangles()
+...  == [Contour([Point(0, 0), Point(4, 0), Point(2, 1)]),
+...      Contour([Point(1, 2), Point(2, 1), Point(4, 0)]),
+...      Contour([Point(0, 4), Point(1, 2), Point(4, 0)]),
+...      Contour([Point(0, 0), Point(1, 2), Point(0, 4)])])
+True
 >>> from sect.decomposition import polygon_trapezoidal
->>> graph = polygon_trapezoidal([(0, 0), (6, 0), (6, 6), (0, 6)],
-...                             [[(2, 2), (2, 4), (4, 4), (4, 2)]])
->>> (0, 0) in graph
+>>> graph = polygon_trapezoidal(Polygon(Contour([Point(0, 0), Point(6, 0),
+...                                              Point(6, 6), Point(0, 6)]),
+...                             [Contour([Point(2, 2), Point(2, 4),
+...                                       Point(4, 4), Point(4, 2)])]))
+>>> Point(0, 0) in graph
 True
->>> (1, 1) in graph
+>>> Point(1, 1) in graph
 True
->>> (2, 2) in graph
+>>> Point(2, 2) in graph
 True
->>> (3, 3) in graph
+>>> Point(3, 3) in graph
 False
 >>> from sect.decomposition import Location
->>> graph.locate((0, 0)) is Location.BOUNDARY
+>>> graph.locate(Point(0, 0)) is Location.BOUNDARY
 True
->>> graph.locate((1, 1)) is Location.INTERIOR
+>>> graph.locate(Point(1, 1)) is Location.INTERIOR
 True
->>> graph.locate((2, 2)) is Location.BOUNDARY
+>>> graph.locate(Point(2, 2)) is Location.BOUNDARY
 True
->>> graph.locate((3, 3)) is Location.EXTERIOR
+>>> graph.locate(Point(3, 3)) is Location.EXTERIOR
 True
 
 ```
