@@ -1,4 +1,5 @@
-from abc import abstractmethod
+from abc import (ABC,
+                 abstractmethod)
 from typing import (Callable,
                     Sequence,
                     Tuple,
@@ -12,16 +13,11 @@ from ground.hints import (Contour,
 
 from sect.core.utils import Domain
 
-try:
-    from typing import Protocol
-except ImportError:
-    from typing_extensions import Protocol
-
 Orienteer = Callable[[Point, Point, Point], Orientation]
 QuaternaryPointPredicate = Callable[[Point, Point, Point, Point], bool]
 
 
-class QuadEdge(Protocol):
+class QuadEdge(ABC):
     """
     Based on:
         quad-edge data structure.
@@ -30,6 +26,7 @@ class QuadEdge(Protocol):
         https://en.wikipedia.org/wiki/Quad-edge
         http://www.sccg.sk/~samuelcik/dgs/quad_edge.pdf
     """
+    __slots__ = ()
 
     @classmethod
     @abstractmethod
@@ -116,7 +113,9 @@ class QuadEdge(Protocol):
         """
 
 
-class Triangulation(Protocol):
+class Triangulation(ABC):
+    __slots__ = ()
+
     edge_cls = ...  # type: Type[QuadEdge]
 
     @classmethod
