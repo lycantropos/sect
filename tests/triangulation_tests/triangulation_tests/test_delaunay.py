@@ -10,8 +10,8 @@ from tests.utils import (is_contour_triangular,
                          is_point_inside_circumcircle,
                          normalize_contour,
                          to_contours_border_endpoints,
-                         to_convex_hull,
-                         to_convex_hull_border_endpoints)
+                         to_max_convex_hull,
+                         to_max_convex_hull_border_endpoints)
 from . import strategies
 
 
@@ -30,7 +30,7 @@ def test_sizes(triangulation_cls: Type[Triangulation],
 
     triangles = result.triangles()
     assert 0 < len(triangles) <= (2 * (len(points) - 1)
-                                  - len(to_convex_hull(points)))
+                                  - len(to_max_convex_hull(points)))
     assert all(is_contour_triangular(triangle) for triangle in triangles)
 
 
@@ -50,7 +50,7 @@ def test_boundary(triangulation_cls: Type[Triangulation],
     result = triangulation_cls.delaunay(points)
 
     assert (to_contours_border_endpoints(result.triangles())
-            == to_convex_hull_border_endpoints(points))
+            == to_max_convex_hull_border_endpoints(points))
 
 
 @given(strategies.triangulation_classes, strategies.triangles)

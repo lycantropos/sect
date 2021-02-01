@@ -62,7 +62,23 @@ def to_contours_border_endpoints(contours: Iterable[Contour]
     return result
 
 
-to_convex_hull = context.points_convex_hull
+def to_max_convex_hull(points: Sequence[Point]) -> List[Point]:
+    points = sorted(points)
+    lower, upper = _to_sub_hull(points), _to_sub_hull(reversed(points))
+    return lower[:-1] + upper[:-1] or points
+
+
+def _to_sub_hull(points: Iterable[Point]) -> List[Point]:
+    result = []
+    for point in points:
+        while len(result) >= 2:
+            if (context.angle_orientation(result[-2], result[-1], point)
+                    is Orientation.CLOCKWISE):
+                del result[-1]
+            else:
+                break
+        result.append(point)
+    return result
 
 
 def is_point_inside_circumcircle(first_vertex: Point,
@@ -133,7 +149,8 @@ def segment_contains_point(segment: Segment, point: Point) -> bool:
     return context.segment_contains_point(segment.start, segment.end, point)
 
 
-def to_convex_hull_border_endpoints(points: Sequence[Point]
-                                    ) -> Set[FrozenSet[Point]]:
-    convex_hull_border = Contour(to_convex_hull(points))
-    return set(map(frozenset, contour_to_edges_endpoints(convex_hull_border)))
+def to_max_convex_hull_border_endpoints(points: Sequence[Point]
+                                        ) -> Set[FrozenSet[Point]]:
+    max_convex_hull = to_max_convex_hull(points)
+    return set(map(frozenset,
+                   contour_to_edges_endpoints(Contour(max_convex_hull))))
