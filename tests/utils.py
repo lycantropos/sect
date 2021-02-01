@@ -4,7 +4,6 @@ from typing import (FrozenSet,
                     List,
                     Sequence,
                     Set,
-                    Tuple,
                     TypeVar)
 
 from ground.base import (Orientation,
@@ -14,7 +13,8 @@ from hypothesis import strategies
 from hypothesis.strategies import SearchStrategy
 from orient.planar import point_in_segment
 
-from sect.core.utils import arg_min
+from sect.core.delaunay.utils import normalize_contour_vertices
+from sect.core.utils import contour_to_edges_endpoints
 from sect.core.voronoi.utils import robust_divide
 
 Strategy = SearchStrategy
@@ -71,13 +71,6 @@ def is_point_inside_circumcircle(first: Point,
                                                    fourth) > 0
 
 
-def replace_segment(segments: Set[Segment],
-                    source: Segment,
-                    target: Segment) -> None:
-    segments.remove(source)
-    segments.add(target)
-
-
 def is_convex_contour(contour: Contour) -> bool:
     contour = normalize_contour(contour)
     vertices = contour.vertices
@@ -88,20 +81,7 @@ def is_convex_contour(contour: Contour) -> bool:
 
 
 def normalize_contour(contour: Contour) -> Contour:
-    vertices = contour.vertices
-    min_index = arg_min(vertices)
-    vertices = rotate_sequence(vertices, min_index)
-    return Contour(vertices[:1] + vertices[1:][::-1]
-                   if (context.angle_orientation(vertices[-1], vertices[0],
-                                                 vertices[1])
-                       is Orientation.CLOCKWISE)
-                   else vertices)
-
-
-def rotate_sequence(sequence, index):
-    return (sequence[index:] + sequence[:index]
-            if index
-            else sequence)
+    return Contour(normalize_contour_vertices(contour.vertices))
 
 
 Element = TypeVar('Element')
@@ -144,11 +124,7 @@ def contour_to_edges(contour: Contour) -> Sequence[Segment]:
             for index in range(len(vertices))]
 
 
-def contour_to_edges_endpoints(contour: Contour
-                               ) -> Sequence[Tuple[Point, Point]]:
-    vertices = contour.vertices
-    return [(vertices[index - 1], vertices[index])
-            for index in range(len(vertices))]
+contour_to_edges_endpoints = contour_to_edges_endpoints
 
 
 def segment_contains_point(segment: Segment, point: Point) -> bool:
