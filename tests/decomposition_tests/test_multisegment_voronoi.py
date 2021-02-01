@@ -1,8 +1,8 @@
+from ground.hints import Multisegment
 from hypothesis import given
 
 from sect.decomposition import (Diagram,
                                 multisegment_voronoi)
-from sect.hints import Multisegment
 from . import strategies
 
 

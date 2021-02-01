@@ -1,25 +1,23 @@
 from functools import partial
 from typing import Tuple
 
-from clipping.planar import segments_to_multisegment
+from ground.hints import Coordinate
 from hypothesis import strategies
 from hypothesis_geometry import planar
 
-from sect.hints import (Contour,
-                        Coordinate,
-                        Multisegment,
-                        Point)
 from tests.strategies import (coordinates_strategies,
                               rational_coordinates_strategies)
-from tests.utils import Strategy
+from tests.utils import (Multisegment,
+                         Point,
+                         Polygon,
+                         Strategy)
 
-multipoints = coordinates_strategies.flatmap(planar.contours)
-rational_multipoints = rational_coordinates_strategies.flatmap(planar.contours)
-empty_multisegments = strategies.builds(list)
+multipoints = coordinates_strategies.flatmap(planar.multipoints)
+rational_contours = (rational_coordinates_strategies
+                     .flatmap(planar.contours))
+empty_multisegments = strategies.builds(Multisegment, strategies.builds(list))
 rational_multisegments = (rational_coordinates_strategies
-                          .flatmap(planar.multisegments)
-                          .map(partial(segments_to_multisegment,
-                                       accurate=False)))
+                          .flatmap(planar.multisegments))
 to_non_empty_multisegments = partial(planar.multisegments,
                                      min_size=1)
 non_empty_multisegments = (coordinates_strategies
@@ -39,7 +37,7 @@ polygons = coordinates_strategies.flatmap(planar.polygons)
 
 
 def to_polygons_with_points(coordinates: Strategy[Coordinate]
-                            ) -> Strategy[Tuple[Contour, Point]]:
+                            ) -> Strategy[Tuple[Polygon, Point]]:
     return strategies.tuples(planar.polygons(coordinates),
                              planar.points(coordinates))
 

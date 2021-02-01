@@ -2,9 +2,9 @@ import sys
 from decimal import Decimal
 from functools import partial
 
+from ground.hints import Coordinate
 from hypothesis import strategies
 
-from sect.hints import Coordinate
 from tests.utils import (MAX_COORDINATE_EXPONENT,
                          MAX_RATIONAL_COORDINATE_EXPONENT,
                          Strategy)
