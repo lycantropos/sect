@@ -2,13 +2,13 @@ from typing import (Sequence,
                     Tuple,
                     Type)
 
-from ground.hints import Point
+from ground.hints import (Point,
+                          Polygon)
 from hypothesis import given
 
 from sect.core.utils import flatten
 from sect.triangulation import Triangulation
-from tests.utils import (Polygon,
-                         complete_vertices,
+from tests.utils import (complete_vertices,
                          contour_to_edges_endpoints,
                          is_contour,
                          is_contour_triangular,
