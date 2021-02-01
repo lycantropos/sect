@@ -51,7 +51,8 @@ def points_do_not_lie_on_the_same_line(points: Sequence[Point]) -> bool:
                for index in range(len(points)))
 
 
-def to_boundary_endpoints(contours: Iterable[Contour]) -> Set[Endpoints]:
+def to_contours_border_endpoints(contours: Iterable[Contour]
+                                 ) -> Set[Endpoints]:
     result = set()
     for contour in contours:
         result.symmetric_difference_update(
@@ -154,5 +155,7 @@ def segment_contains_point(segment: Segment, point: Point) -> bool:
     return context.segment_contains_point(segment.start, segment.end, point)
 
 
-def to_convex_hull_boundary_endpoints(points):
-    return contour_to_edges_endpoints(Contour(to_convex_hull(points)))
+def to_convex_hull_border_endpoints(points: Sequence[Point]
+                                    ) -> Set[Endpoints]:
+    convex_hull_border = Contour(to_convex_hull(points))
+    return set(map(frozenset, contour_to_edges_endpoints(convex_hull_border)))

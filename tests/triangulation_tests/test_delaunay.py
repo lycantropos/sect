@@ -9,9 +9,9 @@ from sect.triangulation import (Triangulation,
 from tests.utils import (is_contour_triangular,
                          is_point_inside_circumcircle,
                          normalize_contour,
-                         to_boundary_endpoints,
+                         to_contours_border_endpoints,
                          to_convex_hull,
-                         to_convex_hull_boundary_endpoints)
+                         to_convex_hull_border_endpoints)
 from . import strategies
 
 
@@ -45,9 +45,8 @@ def test_delaunay_criterion(points: Sequence[Point]) -> None:
 def test_boundary(points: Sequence[Point]) -> None:
     result = delaunay(points)
 
-    assert (to_boundary_endpoints(result.triangles())
-            == set(map(frozenset,
-                       to_convex_hull_boundary_endpoints(points))))
+    assert (to_contours_border_endpoints(result.triangles())
+            == to_convex_hull_border_endpoints(points))
 
 
 @given(strategies.triangles)

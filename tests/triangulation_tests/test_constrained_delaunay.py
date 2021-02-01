@@ -14,7 +14,7 @@ from tests.utils import (Polygon,
                          is_contour,
                          is_contour_triangular,
                          is_convex_contour,
-                         to_boundary_endpoints)
+                         to_contours_border_endpoints)
 from . import strategies
 
 
@@ -80,7 +80,7 @@ def test_boundary(polygon_with_extra_points: Tuple[Polygon, Sequence[Point]]
 
     border, holes, _ = complete_vertices(polygon.border, polygon.holes,
                                          extra_points)
-    assert (to_boundary_endpoints(result.triangles())
+    assert (to_contours_border_endpoints(result.triangles())
             == set(map(frozenset, sum(map(contour_to_edges_endpoints, holes),
                                       contour_to_edges_endpoints(border)))))
 
