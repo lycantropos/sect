@@ -66,16 +66,15 @@ def test_base_case(triangulation_cls: Type[Triangulation],
 
 @given(strategies.triangulation_classes, strategies.non_triangle_points_lists)
 def test_step(triangulation_cls: Type[Triangulation],
-              next_points: Sequence[Point]) -> None:
-    points = next_points[:-1]
-    next_point = next_points[-1]
+              points: Sequence[Point]) -> None:
+    rest_points, last_point = points[:-1], points[-1]
 
-    result = triangulation_cls.delaunay(points)
-    next_result = triangulation_cls.delaunay(next_points)
+    result = triangulation_cls.delaunay(rest_points)
+    next_result = triangulation_cls.delaunay(points)
 
     triangles = result.triangles()
     next_triangles = next_result.triangles()
     assert len(triangles) <= len(next_triangles) + 2
     assert all(triangle not in next_triangles
                for triangle in triangles
-               if is_point_inside_circumcircle(*triangle.vertices, next_point))
+               if is_point_inside_circumcircle(*triangle.vertices, last_point))
