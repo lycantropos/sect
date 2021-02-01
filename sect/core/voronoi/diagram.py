@@ -11,7 +11,6 @@ from ground.hints import (Point,
 from prioq.base import PriorityQueue
 from reprit.base import generate_repr
 
-from sect.core.hints import Multisegment
 from .beach_line_key import BeachLineKey
 from .beach_line_value import BeachLineValue
 from .enums import SourceCategory
@@ -53,11 +52,11 @@ class Diagram:
     @classmethod
     def from_sources(cls,
                      points: Sequence[Point],
-                     multisegment: Multisegment) -> 'Diagram':
+                     segments: Sequence[Segment]) -> 'Diagram':
         result = Diagram()
         for point in points:
             result._insert_point(point)
-        for segment in multisegment:
+        for segment in segments:
             result._insert_segment(segment)
         result._construct()
         return result

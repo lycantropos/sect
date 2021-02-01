@@ -1,11 +1,11 @@
 from typing import List
 
 from ground.base import get_context
-from ground.hints import (Point,
+from ground.hints import (Multisegment,
+                          Point,
                           Polygon)
 from reprit.base import generate_repr
 
-from sect.core.hints import Multisegment
 from sect.core.utils import (Orientation,
                              contour_to_edges_endpoints,
                              flatten,
@@ -74,11 +74,11 @@ class Graph:
         edges = [Edge(segment.start, segment.end, False)
                  if segment.start < segment.end
                  else Edge(segment.end, segment.start, False)
-                 for segment in multisegment]
+                 for segment in multisegment.segments]
         shuffler(edges)
         bounding_box = points_to_bounding_box(
                 flatten((segment.start, segment.end)
-                        for segment in multisegment))
+                        for segment in multisegment.segments))
         result = cls(bounding_box_to_node(bounding_box))
         for edge in edges:
             result.add_edge(edge)

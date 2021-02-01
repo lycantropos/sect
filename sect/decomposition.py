@@ -4,7 +4,6 @@ from ground.hints import (Multipoint,
                           Multisegment,
                           Polygon)
 
-from .core import raw as _raw
 from .core.trapezoidal.graph import Graph
 from .core.trapezoidal.location import Location
 from .core.voronoi.diagram import Diagram
@@ -61,8 +60,7 @@ def multisegment_trapezoidal(multisegment: Multisegment,
     >>> graph.locate(Point(1, 1)) is Location.EXTERIOR
     True
     """
-    return Graph.from_multisegment(_raw.from_multisegment(multisegment),
-                                   shuffler)
+    return Graph.from_multisegment(multisegment, shuffler)
 
 
 def polygon_trapezoidal(polygon: Polygon,
@@ -121,4 +119,4 @@ def multipoint_voronoi(multipoint: Multipoint) -> Diagram:
 
 
 def multisegment_voronoi(multisegment: Multisegment) -> Diagram:
-    return Diagram.from_sources((), _raw.from_multisegment(multisegment))
+    return Diagram.from_sources((), multisegment.segments)
