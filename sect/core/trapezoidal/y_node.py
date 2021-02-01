@@ -1,7 +1,8 @@
+from ground.hints import Point
 from reprit.base import generate_repr
 
+from sect.core.raw import from_point
 from sect.core.utils import Orientation
-from sect.hints import Point
 from .edge import Edge
 from .location import Location
 from .node import Node
@@ -26,7 +27,7 @@ class YNode(Node):
         return max(self.below.height, self.above.height) + 1
 
     def locate(self, point: Point) -> Location:
-        point_orientation = self.edge.orientation_of(point)
+        point_orientation = self.edge.orientation_of(from_point(point))
         return (self.above.locate(point)
                 if point_orientation is Orientation.COUNTERCLOCKWISE
                 else (self.below.locate(point)

@@ -1,10 +1,10 @@
 from reprlib import recursive_repr
 from typing import Optional
 
+from ground.hints import Coordinate
 from reprit import seekers
 from reprit.base import generate_repr
 
-from sect.hints import Coordinate
 from .enums import (GeometryCategory,
                     SourceCategory)
 from .hints import Source

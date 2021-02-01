@@ -1,15 +1,15 @@
 from typing import (List,
                     Sequence)
 
+from ground.hints import Point
 from reprit.base import generate_repr
 
+from sect.core.hints import (Contour,
+                             Multisegment)
 from sect.core.utils import (Orientation,
                              flatten,
                              to_contour_orientation)
-from sect.hints import (Contour,
-                        Multisegment,
-                        Point,
-                        Shuffler)
+from sect.hints import Shuffler
 from .edge import Edge
 from .hints import BoundingBox
 from .leaf import Leaf
@@ -67,7 +67,8 @@ class Graph:
         return self.root.locate(point)
 
     @classmethod
-    def from_multisegment(cls, multisegment: Multisegment,
+    def from_multisegment(cls,
+                          multisegment: Multisegment,
                           shuffler: Shuffler) -> 'Graph':
         edges = [Edge(start, end, False)
                  if start < end
@@ -81,7 +82,9 @@ class Graph:
         return result
 
     @classmethod
-    def from_polygon(cls, border: Contour, holes: Sequence[Contour],
+    def from_polygon(cls,
+                     border: Contour,
+                     holes: Sequence[Contour],
                      shuffler: Shuffler) -> 'Graph':
         edges = []  # type: List[Edge]
         is_border_positively_oriented = (to_contour_orientation(border)

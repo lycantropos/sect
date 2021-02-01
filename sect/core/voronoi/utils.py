@@ -4,9 +4,10 @@ from itertools import groupby
 from typing import (List,
                     TypeVar)
 
+from ground.hints import Coordinate
+
 from sect.core.utils import dot_product
-from sect.hints import (Coordinate,
-                        Point)
+from sect.core.hints import Point
 
 Domain = TypeVar('Domain')
 

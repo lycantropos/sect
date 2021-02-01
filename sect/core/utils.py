@@ -9,11 +9,11 @@ from typing import (Iterable,
 from ground.base import (Orientation,
                          Relation,
                          get_context)
+from ground.hints import Coordinate
 
-from sect.hints import (Contour,
-                        Coordinate,
-                        Point,
-                        Segment)
+from sect.core.hints import (Contour,
+                             Point,
+                             Segment)
 
 Domain = TypeVar('Domain')
 

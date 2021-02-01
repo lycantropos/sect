@@ -9,8 +9,8 @@ from sect.core.utils import (Orientation,
                              orientation,
                              segments_intersection,
                              segments_relationship)
-from sect.hints import (Point,
-                        Segment)
+from sect.core.hints import (Point,
+                             Segment)
 from .event import Event
 from .quad_edge import QuadEdge
 from .sweep_line import SweepLine

@@ -1,5 +1,5 @@
 from typing import FrozenSet
 
-from sect.hints import Point
+from sect.core.hints import Point
 
 Endpoints = FrozenSet[Point]

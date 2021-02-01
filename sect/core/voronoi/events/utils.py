@@ -6,10 +6,10 @@ from ground.core.shewchuk import (scale_expansion,
                                   two_mul,
                                   two_two_sub,
                                   two_two_sum)
+from ground.hints import Coordinate
 
 from sect.core.voronoi.utils import (robust_divide,
                                      robust_sqrt)
-from sect.hints import Coordinate
 
 
 def robust_sum_of_products_with_sqrt_pairs(

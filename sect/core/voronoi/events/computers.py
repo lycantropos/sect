@@ -1,11 +1,12 @@
+from ground.hints import Coordinate
+
 from sect.core.utils import (cross_product,
                              dot_product)
 from sect.core.voronoi.utils import (robust_divide,
                                      robust_evenly_divide,
                                      robust_sqrt,
                                      to_segment_squared_length)
-from sect.hints import (Coordinate,
-                        Point)
+from sect.core.hints import Point
 from .models import (Circle,
                      Site)
 from .utils import (

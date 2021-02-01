@@ -1,13 +1,14 @@
 import random
-from typing import Sequence
 
+from ground.hints import (Multipoint,
+                          Multisegment,
+                          Polygon)
+
+from .core import raw as _raw
+from .hints import Shuffler as _Shuffler
 from .core.trapezoidal.graph import Graph
 from .core.trapezoidal.location import Location
 from .core.voronoi.diagram import Diagram
-from .hints import (Contour,
-                    Multipoint,
-                    Multisegment,
-                    Shuffler)
 
 Diagram = Diagram
 Graph = Graph
@@ -16,7 +17,7 @@ Location = Location
 
 def multisegment_trapezoidal(multisegment: Multisegment,
                              *,
-                             shuffler: Shuffler = random.shuffle) -> Graph:
+                             shuffler: _Shuffler = random.shuffle) -> Graph:
     """
     Returns trapezoidal decomposition graph of the multisegment.
 
@@ -33,33 +34,40 @@ def multisegment_trapezoidal(multisegment: Multisegment,
         https://doi.org/10.1016%2F0925-7721%2891%2990012-4
         https://www.cs.princeton.edu/courses/archive/fall05/cos528/handouts/A%20Simple%20and%20fast.pdf
 
-    :param multisegment:
-        non-empty sequence of non-crossing & non-overlapping segments.
+    :param multisegment: target multisegment.
     :param shuffler:
         function which mutates sequence by shuffling its elements,
         required for randomization.
     :returns: trapezoidal decomposition graph of the multisegment.
 
-    >>> graph = multisegment_trapezoidal([((0, 0), (1, 0)), ((0, 0), (0, 1))])
-    >>> (1, 0) in graph
+    >>> from ground.base import get_context
+    >>> context = get_context()
+    >>> Multisegment, Point, Segment = (context.multisegment_cls,
+    ...                                 context.point_cls,
+    ...                                 context.segment_cls)
+    >>> graph = multisegment_trapezoidal(
+    ...     Multisegment([Segment(Point(0, 0), Point(1, 0)),
+    ...                   Segment(Point(0, 0), Point(0, 1))]))
+    >>> Point(1, 0) in graph
     True
-    >>> (0, 1) in graph
+    >>> Point(0, 1) in graph
     True
-    >>> (1, 1) in graph
+    >>> Point(1, 1) in graph
     False
-    >>> graph.locate((1, 0)) is Location.BOUNDARY
+    >>> graph.locate(Point(1, 0)) is Location.BOUNDARY
     True
-    >>> graph.locate((0, 1)) is Location.BOUNDARY
+    >>> graph.locate(Point(0, 1)) is Location.BOUNDARY
     True
-    >>> graph.locate((1, 1)) is Location.EXTERIOR
+    >>> graph.locate(Point(1, 1)) is Location.EXTERIOR
     True
     """
-    return Graph.from_multisegment(multisegment, shuffler)
+    return Graph.from_multisegment(_raw.from_multisegment(multisegment),
+                                   shuffler)
 
 
-def polygon_trapezoidal(border: Contour, holes: Sequence[Contour] = (),
+def polygon_trapezoidal(polygon: Polygon,
                         *,
-                        shuffler: Shuffler = random.shuffle) -> Graph:
+                        shuffler: _Shuffler = random.shuffle) -> Graph:
     """
     Returns trapezoidal decomposition graph of the polygon
     given by border and holes.
@@ -77,34 +85,42 @@ def polygon_trapezoidal(border: Contour, holes: Sequence[Contour] = (),
         https://doi.org/10.1016%2F0925-7721%2891%2990012-4
         https://www.cs.princeton.edu/courses/archive/fall05/cos528/handouts/A%20Simple%20and%20fast.pdf
 
-    :param border: border of the polygon.
-    :param holes: holes of the polygon.
+    :param polygon: target polygon.
     :param shuffler:
         function which mutates sequence by shuffling its elements,
         required for randomization.
     :returns: trapezoidal decomposition graph of the border and holes.
 
-    >>> graph = polygon_trapezoidal([(0, 0), (6, 0), (6, 6), (0, 6)],
-    ...                             [[(2, 2), (2, 4), (4, 4), (4, 2)]])
-    >>> (1, 1) in graph
+    >>> from ground.base import get_context
+    >>> context = get_context()
+    >>> Contour, Point, Polygon = (context.contour_cls, context.point_cls,
+    ...                            context.polygon_cls)
+    >>> graph = polygon_trapezoidal(
+    ...     Polygon(Contour([Point(0, 0), Point(6, 0), Point(6, 6),
+    ...                      Point(0, 6)]),
+    ...             [Contour([Point(2, 2), Point(2, 4), Point(4, 4),
+    ...                       Point(4, 2)])]))
+    >>> Point(1, 1) in graph
     True
-    >>> (2, 2) in graph
+    >>> Point(2, 2) in graph
     True
-    >>> (3, 3) in graph
+    >>> Point(3, 3) in graph
     False
-    >>> graph.locate((1, 1)) is Location.INTERIOR
+    >>> graph.locate(Point(1, 1)) is Location.INTERIOR
     True
-    >>> graph.locate((2, 2)) is Location.BOUNDARY
+    >>> graph.locate(Point(2, 2)) is Location.BOUNDARY
     True
-    >>> graph.locate((3, 3)) is Location.EXTERIOR
+    >>> graph.locate(Point(3, 3)) is Location.EXTERIOR
     True
     """
-    return Graph.from_polygon(border, holes, shuffler)
+    return Graph.from_polygon(_raw.from_contour(polygon.border),
+                              _raw.from_multiregion(polygon.holes),
+                              shuffler)
 
 
 def multipoint_voronoi(multipoint: Multipoint) -> Diagram:
-    return Diagram.from_sources(multipoint, ())
+    return Diagram.from_sources(_raw.from_multipoint(multipoint), ())
 
 
 def multisegment_voronoi(multisegment: Multisegment) -> Diagram:
-    return Diagram.from_sources((), multisegment)
+    return Diagram.from_sources((), _raw.from_multisegment(multisegment))

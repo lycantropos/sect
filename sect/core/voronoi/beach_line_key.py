@@ -1,13 +1,13 @@
 from copy import copy
 from typing import Tuple
 
+from ground.hints import Coordinate
 from reprit.base import generate_repr
 
 from sect.core.utils import (Orientation,
                              cross_product,
                              orientation)
-from sect.hints import (Coordinate,
-                        Point)
+from sect.core.hints import Point
 from .events import Site
 from .utils import (robust_divide,
                     robust_evenly_divide,

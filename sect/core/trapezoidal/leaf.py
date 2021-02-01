@@ -1,6 +1,6 @@
+from ground.hints import Point
 from reprit.base import generate_repr
 
-from sect.hints import Point
 from .edge import Edge
 from .location import Location
 from .node import Node

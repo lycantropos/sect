@@ -7,8 +7,8 @@ from reprit.base import generate_repr
 
 from sect.core.utils import (Orientation,
                              orientation)
-from sect.hints import (Point,
-                        Segment)
+from sect.core.hints import (Point,
+                             Segment)
 from .hints import Endpoints
 
 

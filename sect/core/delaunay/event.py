@@ -3,8 +3,8 @@ from typing import Optional
 
 from reprit.base import generate_repr
 
-from sect.hints import (Point,
-                        Segment)
+from sect.core.hints import (Point,
+                             Segment)
 from .quad_edge import QuadEdge
 
 

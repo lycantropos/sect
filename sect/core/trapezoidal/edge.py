@@ -1,8 +1,8 @@
+from ground.hints import Point
 from reprit.base import generate_repr
 
 from sect.core.utils import (Orientation,
                              orientation)
-from sect.hints import Point
 
 
 class Edge:

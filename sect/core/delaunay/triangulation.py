@@ -1,4 +1,5 @@
-from collections import deque
+from collections import (OrderedDict,
+                         deque)
 from itertools import (accumulate,
                        chain,
                        repeat)
@@ -10,17 +11,17 @@ from typing import (FrozenSet,
                     Set)
 
 from decision.partition import coin_change
+from ground.base import get_context
 from reprit.base import generate_repr
 
+from sect.core import raw
 from sect.core.utils import (Orientation,
                              SegmentsRelationship,
-                             orientation,
                              pairwise,
                              segments_relationship)
-from sect.hints import (Contour,
-                        Point,
-                        Segment,
-                        Triangle)
+from sect.core.hints import (Contour,
+                             Point,
+                             Segment)
 from .contracts import (is_point_inside_circumcircle,
                         points_form_convex_quadrilateral)
 from .events_queue import EventsQueue
@@ -29,22 +30,26 @@ from .quad_edge import (QuadEdge,
                         edge_to_non_adjacent_vertices,
                         edges_with_opposites)
 from .utils import (ceil_log2,
-                    contour_to_segments, normalize_contour,
+                    contour_to_segments,
+                    normalize_contour,
                     to_clockwise_contour,
                     to_unique_objects)
 
 
 class Triangulation:
-    __slots__ = 'left_edge', 'right_edge', '_triangular_holes_vertices'
+    __slots__ = ('left_edge', 'right_edge', '_context',
+                 '_triangular_holes_vertices')
 
     def __init__(self, left_edge: QuadEdge, right_edge: QuadEdge) -> None:
         self.left_edge, self.right_edge = left_edge, right_edge
         self._triangular_holes_vertices = set()  # type: Set[FrozenSet[Point]]
+        self._context = get_context()
 
     __repr__ = generate_repr(__init__)
 
     @classmethod
     def from_points(cls, points: Iterable[Point]) -> 'Triangulation':
+        points = raw.from_points(points)
         points = sorted(to_unique_objects(points))
         lengths = coin_change(len(points), _initializers)
         result = [_initialize_triangulation(points[start:stop])
@@ -108,29 +113,33 @@ class Triangulation:
                                                for hole in holes
                                                if len(hole) == 3)
 
-    def triangles(self) -> List[Triangle]:
+    def triangles(self) -> List[Contour]:
         """
         Returns triangles of the triangulation.
 
-        >>> points = [(0, 0), (0, 1), (1, 0), (1, 1)]
+        >>> from ground.base import get_context
+        >>> context = get_context()
+        >>> Contour, Point = context.contour_cls, context.point_cls,
+        >>> points = [Point(0, 0), Point(0, 1), Point(1, 0), Point(1, 1)]
         >>> triangulation = Triangulation.from_points(points)
         >>> (triangulation.triangles()
-        ...  == [((0, 1), (1, 0), (1, 1)), ((0, 0), (1, 0), (0, 1))])
+        ...  == [Contour([Point(0, 1), Point(1, 0), Point(1, 1)]),
+        ...      Contour([Point(0, 0), Point(1, 0), Point(0, 1)])])
         True
         """
-        return list(self._triangles())
-
-    def _triangles(self) -> Iterable[Triangle]:
-        visited_vertices = set(self._triangular_holes_vertices)
-        for edge in self.edges():
-            if (edge.left_from_start.end == edge.opposite.right_from_start.end
+        vertices_sets = OrderedDict.fromkeys(
+                frozenset((edge.start, edge.end, edge.left_from_start.end))
+                for edge in self.edges()
+                if (edge.left_from_start.end
+                    == edge.opposite.right_from_start.end
                     and (edge.orientation_of(edge.left_from_start.end)
-                         is Orientation.COUNTERCLOCKWISE)):
-                triangle = edge.start, edge.end, edge.left_from_start.end
-                vertices = frozenset(triangle)
-                if vertices not in visited_vertices:
-                    visited_vertices.add(vertices)
-                    yield normalize_contour(triangle)
+                         is Orientation.COUNTERCLOCKWISE)))
+        contour_cls, point_cls = (self._context.contour_cls,
+                                  self._context.point_cls)
+        return [contour_cls([point_cls(x, y)
+                             for x, y in normalize_contour(list(vertices))])
+                for vertices in vertices_sets
+                if vertices not in self._triangular_holes_vertices]
 
     def _merge_with(self, other: 'Triangulation') -> 'Triangulation':
         _merge(self._find_base_edge(other))
@@ -157,7 +166,10 @@ class Triangulation:
         """
         Deletes the edge from the triangulation.
 
-        >>> points = [(0, 0), (0, 1), (1, 0), (1, 1)]
+        >>> from ground.base import get_context
+        >>> context = get_context()
+        >>> Point = context.point_cls
+        >>> points = [Point(0, 0), Point(0, 1), Point(1, 0), Point(1, 1)]
         >>> triangulation = Triangulation.from_points(points)
         >>> edges = [triangulation.left_edge, triangulation.right_edge]
         >>> all(edge in triangulation.edges() for edge in edges)
@@ -177,7 +189,10 @@ class Triangulation:
         """
         Returns boundary edges of the triangulation in counterclockwise order.
 
-        >>> points = [(0, 0), (0, 1), (1, 0), (1, 1)]
+        >>> from ground.base import get_context
+        >>> context = get_context()
+        >>> Point = context.point_cls
+        >>> points = [Point(0, 0), Point(0, 1), Point(1, 0), Point(1, 1)]
         >>> triangulation = Triangulation.from_points(points)
         >>> ([edge.segment for edge in triangulation.boundary_edges()]
         ...  == [((0, 0), (1, 0)), ((1, 0), (0, 0)),
@@ -192,7 +207,10 @@ class Triangulation:
         """
         Returns edges of the triangulation.
 
-        >>> points = [(0, 0), (0, 1), (1, 0), (1, 1)]
+        >>> from ground.base import get_context
+        >>> context = get_context()
+        >>> Point = context.point_cls
+        >>> points = [Point(0, 0), Point(0, 1), Point(1, 0), Point(1, 1)]
         >>> triangulation = Triangulation.from_points(points)
         >>> ([edge.segment for edge in triangulation.edges()]
         ...  == [((1, 1), (1, 0)), ((1, 0), (1, 1)),
@@ -208,7 +226,10 @@ class Triangulation:
         """
         Returns boundary edges of the triangulation in counterclockwise order.
 
-        >>> points = [(0, 0), (0, 1), (1, 0), (1, 1)]
+        >>> from ground.base import get_context
+        >>> context = get_context()
+        >>> Point = context.point_cls
+        >>> points = [Point(0, 0), Point(0, 1), Point(1, 0), Point(1, 1)]
         >>> triangulation = Triangulation.from_points(points)
         >>> ([edge.segment for edge in triangulation.unique_boundary_edges()]
         ...  == [((0, 0), (1, 0)), ((1, 0), (1, 1)),
@@ -227,7 +248,10 @@ class Triangulation:
         """
         Returns edges of the triangulation with unique endpoints.
 
-        >>> points = [(0, 0), (0, 1), (1, 0), (1, 1)]
+        >>> from ground.base import get_context
+        >>> context = get_context()
+        >>> Point = context.point_cls
+        >>> points = [Point(0, 0), Point(0, 1), Point(1, 0), Point(1, 1)]
         >>> triangulation = Triangulation.from_points(points)
         >>> ([edge.segment for edge in triangulation.unique_edges()]
         ...  == [((1, 1), (1, 0)), ((1, 0), (0, 1)), ((0, 1), (1, 1)),

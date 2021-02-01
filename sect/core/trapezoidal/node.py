@@ -2,7 +2,8 @@ from abc import (ABC,
                  abstractmethod)
 from typing import List
 
-from sect.hints import Point
+from ground.hints import Point
+
 from .edge import Edge
 from .location import Location
 from .trapezoid import Trapezoid

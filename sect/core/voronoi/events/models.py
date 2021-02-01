@@ -2,6 +2,7 @@ import ctypes
 import struct
 from typing import TypeVar
 
+from ground.hints import Coordinate
 from reprit.base import generate_repr
 
 from sect.core.utils import (Orientation,
@@ -9,8 +10,7 @@ from sect.core.utils import (Orientation,
 from sect.core.voronoi.enums import SourceCategory
 from sect.core.voronoi.hints import Source
 from sect.core.voronoi.utils import are_same_vertical_points
-from sect.hints import (Coordinate,
-                        Point)
+from sect.core.hints import Point
 
 
 class Site:

@@ -1,6 +1,6 @@
 from typing import Iterable
 
-from sect.hints import Point
+from sect.core.hints import Point
 from .hints import BoundingBox
 
 

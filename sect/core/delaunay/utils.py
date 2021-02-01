@@ -6,14 +6,17 @@ from typing import (Iterable,
                     Sequence,
                     Tuple)
 
+from ground.base import (Context,
+                         get_context)
+
 from sect.core.utils import (Orientation,
                              arg_min,
                              flatten,
                              orientation,
                              to_contour_orientation)
-from sect.hints import (Contour,
-                        Point,
-                        Segment)
+from sect.core.hints import (Contour,
+                             Point,
+                             Segment)
 
 
 def ceil_log2(number: int) -> int:
@@ -67,9 +70,11 @@ def to_convex_hull(points: Sequence[Point]) -> List[Point]:
 def _complete_contour_vertices(contour: Contour,
                                candidates: Sequence[Point]
                                ) -> Tuple[Contour, Sequence[Point]]:
+    context = get_context()
     extra_vertices = {}
-    start = contour[-1]
-    for index, end in enumerate(contour):
+    vertices = contour.vertices
+    start = vertices[-1]
+    for index, end in enumerate(vertices):
         start_index = bisect(candidates, start)
         end_index = bisect(candidates, end)
         if start_index > end_index:
@@ -77,7 +82,7 @@ def _complete_contour_vertices(contour: Contour,
         extra_vertices_indices = []
         for candidate_index in range(start_index, end_index):
             extra_point = candidates[candidate_index]
-            if _is_inner_segment_point(start, end, extra_point):
+            if _is_inner_segment_point(start, end, extra_point, context):
                 extra_vertices_indices.append(candidate_index)
         if extra_vertices_indices:
             extra_vertices[index] = [candidates[index]
@@ -90,18 +95,21 @@ def _complete_contour_vertices(contour: Contour,
                 break
         start = end
     if extra_vertices:
-        contour = list(flatten((extra_vertices[index]
-                                if contour[index - 1] < vertex
-                                else extra_vertices[index][::-1]) + [vertex]
-                               if index in extra_vertices
-                               else [vertex]
-                               for index, vertex in enumerate(contour)))
+        contour_cls = context.contour_cls
+        contour = contour_cls(
+                list(flatten((extra_vertices[index]
+                              if vertices[index - 1] < vertex
+                              else extra_vertices[index][::-1]) + [vertex]
+                             if index in extra_vertices
+                             else [vertex]
+                             for index, vertex in enumerate(vertices))))
     return contour, candidates
 
 
-def _is_inner_segment_point(start: Point, end: Point, point: Point) -> bool:
-    return ((start < point < end if start < end else end < point < start)
-            and orientation(start, end, point) is Orientation.COLLINEAR)
+def _is_inner_segment_point(start: Point, end: Point, point: Point,
+                            context: Context) -> bool:
+    return (point != start and point != end
+            and context.segment_contains_point(start, end, point))
 
 
 def _to_sub_hull(points: Iterable[Point]) -> List[Point]:
