@@ -14,7 +14,8 @@ from hypothesis.strategies import SearchStrategy
 from orient.planar import point_in_segment
 
 from sect.core.delaunay.utils import (complete_vertices,
-                                      normalize_contour_vertices)
+                                      normalize_contour_vertices,
+                                      to_unique_objects)
 from sect.core.utils import contour_to_edges_endpoints
 from sect.core.voronoi.utils import robust_divide
 
@@ -63,7 +64,7 @@ def to_contours_border_endpoints(contours: Iterable[Contour]
 
 
 def to_max_convex_hull(points: Sequence[Point]) -> List[Point]:
-    points = sorted(points)
+    points = sorted(to_unique_objects(points))
     lower, upper = _to_sub_hull(points), _to_sub_hull(reversed(points))
     return lower[:-1] + upper[:-1] or points
 
@@ -137,9 +138,8 @@ def contour_to_multipoint(contour: Contour) -> Multipoint:
 
 
 def contour_to_edges(contour: Contour) -> Sequence[Segment]:
-    vertices = contour.vertices
-    return [Segment(vertices[index - 1], vertices[index])
-            for index in range(len(vertices))]
+    return [Segment(start, end)
+            for start, end in contour_to_edges_endpoints(contour)]
 
 
 contour_to_edges_endpoints = contour_to_edges_endpoints
