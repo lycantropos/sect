@@ -8,14 +8,14 @@ from typing import (Iterable,
 
 from ground.base import (Context,
                          get_context)
-from ground.hints import Point
+from ground.hints import (Contour,
+                          Point)
 
-from sect.core.hints import (Contour,
-                             Segment)
 from sect.core.utils import (Orientation,
                              arg_min,
                              flatten,
                              orientation,
+                             rotate_sequence,
                              to_contour_orientation)
 
 
@@ -35,18 +35,12 @@ def complete_vertices(border: Contour, holes: Sequence[Contour],
     return border, completed_holes, candidates
 
 
-def contour_to_segments(contour: Contour) -> List[Segment]:
-    return [(contour[index - 1], contour[index])
-            for index in range(len(contour))]
-
-
-def normalize_contour(contour: Contour) -> Contour:
-    min_index = arg_min(contour)
-    contour = contour[min_index:] + contour[:min_index]
-    return (contour[:1] + contour[1:][::-1]
-            if (orientation(contour[-1], contour[0], contour[1])
+def normalize_contour_vertices(vertices: Sequence[Point]) -> Contour:
+    vertices = rotate_sequence(vertices, arg_min(vertices))
+    return (vertices[:1] + vertices[1:][::-1]
+            if (orientation(vertices[-1], vertices[0], vertices[1])
                 is Orientation.CLOCKWISE)
-            else contour)
+            else vertices)
 
 
 to_unique_objects = (OrderedDict

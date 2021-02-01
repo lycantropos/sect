@@ -6,12 +6,11 @@ from ground.hints import (Point,
                           Polygon,
                           Segment)
 
-from .core import raw as _raw
 from .core.delaunay.quad_edge import QuadEdge
 from .core.delaunay.triangulation import Triangulation
-from .core.delaunay.utils import (complete_vertices as _complete_vertices,
-                                  contour_to_segments as _contour_to_segments)
-from .core.utils import flatten as _flatten
+from .core.delaunay.utils import complete_vertices as _complete_vertices
+from .core.utils import (contour_to_edges as _contour_to_edges,
+                         flatten as _flatten)
 
 QuadEdge = QuadEdge
 Triangulation = Triangulation
@@ -87,11 +86,10 @@ def constrained_delaunay(polygon: Polygon,
     result = delaunay(chain(border.vertices,
                             _flatten(hole.vertices for hole in holes),
                             extra_points))
-    border_segments = _contour_to_segments(_raw.from_contour(border))
+    border_segments = _contour_to_edges(border)
     result.constrain(chain(border_segments,
-                           _flatten(map(_contour_to_segments,
-                                        _raw.from_multiregion(holes))),
+                           _flatten(map(_contour_to_edges, holes)),
                            extra_constraints))
     result.bound(border_segments)
-    result.cut(_raw.from_multiregion(holes))
+    result.cut(holes)
     return result

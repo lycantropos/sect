@@ -2,6 +2,7 @@ from enum import (IntEnum,
                   unique)
 from itertools import chain
 from typing import (Iterable,
+                    List,
                     Sequence,
                     Tuple,
                     TypeVar)
@@ -9,11 +10,11 @@ from typing import (Iterable,
 from ground.base import (Orientation,
                          Relation,
                          get_context)
-from ground.hints import (Coordinate,
+from ground.hints import (Contour,
+                          Coordinate,
                           Point)
 
-from sect.core.hints import (Contour,
-                             Segment)
+from sect.core.hints import Segment
 
 Domain = TypeVar('Domain')
 
@@ -38,6 +39,12 @@ class SegmentsRelationship(IntEnum):
 def arg_min(sequence: Sequence[Domain]) -> int:
     return min(range(len(sequence)),
                key=sequence.__getitem__)
+
+
+def contour_to_edges(contour: Contour) -> List[Segment]:
+    vertices = contour.vertices
+    return [(vertices[index - 1], vertices[index])
+            for index in range(len(vertices))]
 
 
 def cross_product(first_start: Point,
@@ -83,6 +90,13 @@ def point_point_point_incircle_test(first_vertex: Point,
                                                    third_vertex, point)
 
 
+def rotate_sequence(sequence: Sequence[Domain],
+                    index: int) -> Sequence[Domain]:
+    return (sequence[index:] + sequence[:index]
+            if index
+            else sequence)
+
+
 def segments_intersection(first: Segment, second: Segment) -> Point:
     first_start, first_end = first
     second_start, second_end = second
@@ -105,6 +119,7 @@ def segments_relationship(first: Segment,
 
 
 def to_contour_orientation(contour: Contour) -> Orientation:
-    index = arg_min(contour)
-    return orientation(contour[index - 1], contour[index],
-                       contour[(index + 1) % len(contour)])
+    vertices = contour.vertices
+    index = arg_min(vertices)
+    return orientation(vertices[index - 1], vertices[index],
+                       vertices[(index + 1) % len(vertices)])

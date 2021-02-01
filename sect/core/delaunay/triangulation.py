@@ -11,13 +11,14 @@ from typing import (FrozenSet,
 
 from decision.partition import coin_change
 from ground.base import get_context
-from ground.hints import Point
+from ground.hints import (Contour,
+                          Point)
 from reprit.base import generate_repr
 
-from sect.core.hints import (Contour,
-                             Segment)
+from sect.core.hints import Segment
 from sect.core.utils import (Orientation,
                              SegmentsRelationship,
+                             contour_to_edges,
                              pairwise,
                              segments_relationship)
 from .contracts import (is_point_inside_circumcircle,
@@ -28,8 +29,7 @@ from .quad_edge import (QuadEdge,
                         edge_to_non_adjacent_vertices,
                         edges_with_opposites)
 from .utils import (ceil_log2,
-                    contour_to_segments,
-                    normalize_contour,
+                    normalize_contour_vertices,
                     to_clockwise_contour,
                     to_unique_objects)
 
@@ -98,7 +98,7 @@ class Triangulation:
                                        from_left=True,
                                        is_counterclockwise_contour=True)
         for hole in holes:
-            for segment in contour_to_segments(to_clockwise_contour(hole)):
+            for segment in contour_to_edges(to_clockwise_contour(hole)):
                 events_queue.register_segment(
                         segment,
                         from_left=False,
@@ -106,9 +106,9 @@ class Triangulation:
         for event in events_queue.sweep():
             if event.from_left and event.inside:
                 self.delete(event.edge)
-        self._triangular_holes_vertices.update(frozenset(hole)
+        self._triangular_holes_vertices.update(frozenset(hole.vertices)
                                                for hole in holes
-                                               if len(hole) == 3)
+                                               if len(hole.vertices) == 3)
 
     def triangles(self) -> List[Contour]:
         """
@@ -132,7 +132,7 @@ class Triangulation:
                     and (edge.orientation_of(edge.left_from_start.end)
                          is Orientation.COUNTERCLOCKWISE)))
         contour_cls = self._context.contour_cls
-        return [contour_cls(normalize_contour(list(vertices)))
+        return [contour_cls(normalize_contour_vertices(list(vertices)))
                 for vertices in vertices_sets
                 if vertices not in self._triangular_holes_vertices]
 

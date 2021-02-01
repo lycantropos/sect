@@ -113,9 +113,7 @@ def polygon_trapezoidal(polygon: Polygon,
     >>> graph.locate(Point(3, 3)) is Location.EXTERIOR
     True
     """
-    return Graph.from_polygon(_raw.from_contour(polygon.border),
-                              _raw.from_multiregion(polygon.holes),
-                              shuffler)
+    return Graph.from_polygon(polygon.border, polygon.holes, shuffler)
 
 
 def multipoint_voronoi(multipoint: Multipoint) -> Diagram:

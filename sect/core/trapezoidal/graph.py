@@ -2,12 +2,13 @@ from typing import (List,
                     Sequence)
 
 from ground.base import get_context
-from ground.hints import Point
+from ground.hints import (Contour,
+                          Point)
 from reprit.base import generate_repr
 
-from sect.core.hints import (Contour,
-                             Multisegment)
+from sect.core.hints import Multisegment
 from sect.core.utils import (Orientation,
+                             contour_to_edges,
                              flatten,
                              to_contour_orientation)
 from sect.hints import Shuffler
@@ -87,26 +88,23 @@ class Graph:
                      border: Contour,
                      holes: Sequence[Contour],
                      shuffler: Shuffler) -> 'Graph':
-        edges = []  # type: List[Edge]
         is_border_positively_oriented = (to_contour_orientation(border)
                                          is Orientation.COUNTERCLOCKWISE)
-        for index in range(len(border)):
-            start, end = border[index - 1], border[index]
-            edges.append(Edge(start, end, is_border_positively_oriented)
-                         if start < end
-                         else Edge(end, start,
-                                   not is_border_positively_oriented))
+        edges = [Edge(start, end, is_border_positively_oriented)
+                 if start < end
+                 else Edge(end, start,
+                           not is_border_positively_oriented)
+                 for start, end in contour_to_edges(border)]
         for hole in holes:
             is_hole_negatively_oriented = (to_contour_orientation(hole)
                                            is Orientation.CLOCKWISE)
-            for index in range(len(hole)):
-                start, end = hole[index - 1], hole[index]
-                edges.append(Edge(start, end, is_hole_negatively_oriented)
-                             if start < end
-                             else Edge(end, start,
-                                       not is_hole_negatively_oriented))
+            edges.extend(Edge(start, end, is_hole_negatively_oriented)
+                         if start < end
+                         else Edge(end, start,
+                                   not is_hole_negatively_oriented)
+                         for start, end in contour_to_edges(hole))
         shuffler(edges)
-        bounding_box = points_to_bounding_box(border)
+        bounding_box = points_to_bounding_box(border.vertices)
         result = cls(bounding_box_to_node(bounding_box))
         for edge in edges:
             result.add_edge(edge)
