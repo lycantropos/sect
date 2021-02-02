@@ -88,7 +88,8 @@ True
 ...      Contour([Point(0, 4), Point(1, 2), Point(4, 0)]),
 ...      Contour([Point(0, 0), Point(1, 2), Point(0, 4)])])
 True
->>> from sect.decomposition import Graph
+>>> from sect.decomposition import to_graph_cls
+>>> Graph = to_graph_cls(context)
 >>> graph = Graph.from_polygon(Polygon(Contour([Point(0, 0), Point(6, 0),
 ...                                             Point(6, 6), Point(0, 6)]),
 ...                                    [Contour([Point(2, 2), Point(2, 4),
