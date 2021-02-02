@@ -364,8 +364,8 @@ class Graph:
         return result
 
 
-def box_to_node(bounding_box: Box) -> Leaf:
-    min_x, min_y, max_x, max_y = bounding_box
+def box_to_node(box: Box) -> Leaf:
+    min_x, min_y, max_x, max_y = box
     delta_x, delta_y = max_x - min_x, max_y - min_y
     # handle horizontal/vertical cases
     delta_x, delta_y = delta_x or 1, delta_y or 1
