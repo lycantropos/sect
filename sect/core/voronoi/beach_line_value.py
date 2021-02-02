@@ -7,13 +7,12 @@ from .faces import Edge
 
 
 class BeachLineValue:
-    __slots__ = 'edge', 'circle'
+    __slots__ = 'circle', 'edge'
 
     def __init__(self,
                  edge: Optional[Edge],
                  circle: Optional[Circle] = None) -> None:
-        self.edge = edge
-        self.circle = circle
+        self.edge, self.circle = edge, circle
 
     __repr__ = generate_repr(__init__)
 

@@ -7,7 +7,7 @@ from typing import (List,
 from ground.hints import (Coordinate,
                           Point)
 
-from sect.core.utils import dot_product
+from .hints import DotProducer
 
 Domain = TypeVar('Domain')
 
@@ -36,8 +36,10 @@ def robust_sqrt(value: Coordinate) -> Coordinate:
                                  .sqrt())
 
 
-def to_segment_squared_length(start: Point, end: Point) -> Coordinate:
-    return dot_product(start, end, start, end)
+def to_segment_squared_length(start: Point,
+                              end: Point,
+                              dot_producer: DotProducer) -> Coordinate:
+    return dot_producer(start, end, start, end)
 
 
 def to_unique_just_seen(iterable: List[Domain]) -> List[Domain]:

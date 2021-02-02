@@ -7,23 +7,25 @@ from ground.hints import (Coordinate,
                           Point)
 from reprit.base import generate_repr
 
-from sect.core.utils import orientation
+from sect.core.hints import Orienteer
 from sect.core.voronoi.enums import SourceCategory
 from sect.core.voronoi.hints import Source
 from sect.core.voronoi.utils import are_same_vertical_points
 
 
 class Site:
-    __slots__ = ('start', 'end', 'source', 'source_category', 'sorted_index',
-                 'is_inverse')
+    __slots__ = ('end', 'is_inverse', 'orienteer', 'sorted_index', 'source',
+                 'source_category', 'start')
 
     def __init__(self,
+                 orienteer: Orienteer,
                  start: Point,
                  end: Point,
                  source: Source,
                  source_category: SourceCategory,
                  sorted_index: int = 0,
                  is_inverse: bool = False) -> None:
+        self.orienteer = orienteer
         self.start, self.end = start, end
         self.source, self.source_category = source, source_category
         self.sorted_index = sorted_index
@@ -55,7 +57,7 @@ class Site:
             elif start.y != other_start.y:
                 return start.y < other_start.y
             else:
-                return (orientation(self.end, self.start, other.end)
+                return (self.orienteer(self.end, self.start, other.end)
                         is Orientation.COUNTERCLOCKWISE)
         else:
             start = self.start
