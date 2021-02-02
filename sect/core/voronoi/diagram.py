@@ -2,11 +2,12 @@ from copy import copy
 from operator import itemgetter
 from typing import (List,
                     Optional,
-                    Sequence,
                     Tuple)
 
 from dendroid import red_black
-from ground.hints import (Point,
+from ground.hints import (Multipoint,
+                          Multisegment,
+                          Point,
                           Segment)
 from prioq.base import PriorityQueue
 from reprit.base import generate_repr
@@ -50,13 +51,17 @@ class Diagram:
     __repr__ = generate_repr(__init__)
 
     @classmethod
-    def from_sources(cls,
-                     points: Sequence[Point],
-                     segments: Sequence[Segment]) -> 'Diagram':
-        result = Diagram()
-        for point in points:
+    def from_multipoint(cls, multipoint: Multipoint) -> 'Diagram':
+        result = cls()
+        for point in multipoint.points:
             result._insert_point(point)
-        for segment in segments:
+        result._construct()
+        return result
+
+    @classmethod
+    def from_multisegment(cls, multisegment: Multisegment) -> 'Diagram':
+        result = cls()
+        for segment in multisegment.segments:
             result._insert_segment(segment)
         result._construct()
         return result

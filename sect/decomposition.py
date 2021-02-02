@@ -16,8 +16,8 @@ to_graph_cls = to_graph_cls
 
 
 def multipoint_voronoi(multipoint: Multipoint) -> Diagram:
-    return Diagram.from_sources(multipoint.points, ())
+    return Diagram.from_multipoint(multipoint)
 
 
 def multisegment_voronoi(multisegment: Multisegment) -> Diagram:
-    return Diagram.from_sources((), multisegment.segments)
+    return Diagram.from_multisegment(multisegment)
