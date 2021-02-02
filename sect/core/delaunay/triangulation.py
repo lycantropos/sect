@@ -197,22 +197,6 @@ def to_triangulation_cls(context: Context,
             return cls(left_side, right_side)
 
         def delete(self, edge: QuadEdge) -> None:
-            """
-            Deletes the edge from the triangulation.
-
-            >>> from ground.base import get_context
-            >>> context = get_context()
-            >>> Point = context.point_cls
-            >>> points = [Point(0, 0), Point(0, 1), Point(1, 0), Point(1, 1)]
-            >>> triangulation = Triangulation.from_points(points)
-            >>> edges = [triangulation.left_side, triangulation.right_side]
-            >>> all(edge in triangulation.edges() for edge in edges)
-            True
-            >>> for edge in edges:
-            ...     triangulation.delete(edge)
-            >>> any(edge in triangulation.edges() for edge in edges)
-            False
-            """
             if edge is self.right_side or edge.opposite is self.right_side:
                 self.right_side = self.right_side.right_from_end.opposite
             if edge is self.left_side or edge.opposite is self.left_side:
@@ -220,19 +204,6 @@ def to_triangulation_cls(context: Context,
             edge.delete()
 
         def triangles(self) -> List[Contour]:
-            """
-            Returns triangles of the triangulation.
-
-            >>> from ground.base import get_context
-            >>> context = get_context()
-            >>> Contour, Point = context.contour_cls, context.point_cls,
-            >>> points = [Point(0, 0), Point(0, 1), Point(1, 0), Point(1, 1)]
-            >>> triangulation = Triangulation.from_points(points)
-            >>> (triangulation.triangles()
-            ...  == [Contour([Point(0, 1), Point(1, 0), Point(1, 1)]),
-            ...      Contour([Point(0, 0), Point(1, 0), Point(0, 1)])])
-            True
-            """
             vertices_sets = to_distinct(
                     frozenset((edge.start, edge.end, edge.left_from_start.end))
                     for edge in to_edges(self)
