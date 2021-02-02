@@ -4,11 +4,11 @@ from typing import (FrozenSet,
                     Optional,
                     Type)
 
-from ground.base import Context
+from ground.base import (Context,
+                         Orientation)
 from ground.hints import Point
 from reprit.base import generate_repr
 
-from sect.core.utils import Orientation
 from .hints import QuadEdge
 
 

@@ -1,13 +1,13 @@
 from typing import List
 
-from ground.base import get_context
+from ground.base import (Orientation,
+                         get_context)
 from ground.hints import (Multisegment,
                           Point,
                           Polygon)
 from reprit.base import generate_repr
 
-from sect.core.utils import (Orientation,
-                             contour_to_edges_endpoints,
+from sect.core.utils import (contour_to_edges_endpoints,
                              flatten,
                              to_contour_orientation)
 from sect.hints import Shuffler
@@ -87,7 +87,10 @@ class Graph:
     @classmethod
     def from_polygon(cls, polygon: Polygon, shuffler: Shuffler) -> 'Graph':
         border = polygon.border
-        is_border_positively_oriented = (to_contour_orientation(border)
+        context = get_context()
+        orienteer = context.angle_orientation
+        is_border_positively_oriented = (to_contour_orientation(border,
+                                                                orienteer)
                                          is Orientation.COUNTERCLOCKWISE)
         edges = [Edge(start, end, is_border_positively_oriented)
                  if start < end
@@ -95,7 +98,8 @@ class Graph:
                            not is_border_positively_oriented)
                  for start, end in contour_to_edges_endpoints(border)]
         for hole in polygon.holes:
-            is_hole_negatively_oriented = (to_contour_orientation(hole)
+            is_hole_negatively_oriented = (to_contour_orientation(hole,
+                                                                  orienteer)
                                            is Orientation.CLOCKWISE)
             edges.extend(Edge(start, end, is_hole_negatively_oriented)
                          if start < end

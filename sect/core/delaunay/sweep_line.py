@@ -1,18 +1,21 @@
+from functools import partial
 from typing import Optional
 
 from dendroid import red_black
+from ground.base import (Context,
+                         Orientation)
 from reprit.base import generate_repr
 
-from sect.core.utils import (Orientation,
-                             orientation)
+from sect.core.hints import Orienteer
 from .event import Event
 
 
 class SweepLine:
-    __slots__ = '_tree',
+    __slots__ = 'context', '_tree'
 
-    def __init__(self) -> None:
-        self._tree = red_black.set_(key=SweepLineKey)
+    def __init__(self, context: Context) -> None:
+        self._tree = red_black.set_(key=partial(SweepLineKey,
+                                                context.angle_orientation))
 
     __repr__ = generate_repr(__init__)
 
@@ -39,10 +42,10 @@ class SweepLine:
 
 
 class SweepLineKey:
-    __slots__ = 'event',
+    __slots__ = 'event', 'orienteer'
 
-    def __init__(self, event: Event) -> None:
-        self.event = event
+    def __init__(self, orienteer: Orienteer, event: Event) -> None:
+        self.orienteer, self.event = orienteer, event
 
     __repr__ = generate_repr(__init__)
 
@@ -56,15 +59,15 @@ class SweepLineKey:
             return False
         start, end = event.start, event.end
         other_start, other_end = other_event.start, other_event.end
-        other_start_orientation = orientation(start, end, other_start)
-        other_end_orientation = orientation(start, end, other_end)
+        other_start_orientation = self.orienteer(start, end, other_start)
+        other_end_orientation = self.orienteer(start, end, other_end)
         if other_start_orientation is other_end_orientation:
             return (other_event.from_left
                     if other_start_orientation is Orientation.COLLINEAR
                     else (other_start_orientation
                           is Orientation.COUNTERCLOCKWISE))
-        start_orientation = orientation(other_start, other_end, start)
-        end_orientation = orientation(other_start, other_end, end)
+        start_orientation = self.orienteer(other_start, other_end, start)
+        end_orientation = self.orienteer(other_start, other_end, end)
         if start_orientation is end_orientation:
             return start_orientation is Orientation.CLOCKWISE
         elif other_start_orientation is Orientation.COLLINEAR:

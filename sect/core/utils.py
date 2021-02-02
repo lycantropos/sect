@@ -1,5 +1,3 @@
-from enum import (IntEnum,
-                  unique)
 from itertools import chain
 from typing import (Iterable,
                     List,
@@ -8,30 +6,14 @@ from typing import (Iterable,
                     TypeVar)
 
 from ground.base import (Orientation,
-                         Relation,
                          get_context)
 from ground.hints import (Contour,
                           Coordinate,
                           Point)
 
+from .hints import Orienteer
+
 Domain = TypeVar('Domain')
-
-Orientation = Orientation
-
-
-@unique
-class SegmentsRelationship(IntEnum):
-    """
-    Represents relationship between segments based on their intersection.
-    """
-    #: intersection is empty
-    NONE = 0
-    #: intersection is an endpoint of one of segments
-    TOUCH = 1
-    #: intersection is a point which is not an endpoint of any of segments
-    CROSS = 2
-    #: intersection is a segment itself
-    OVERLAP = 3
 
 
 def arg_min(sequence: Sequence[Domain]) -> int:
@@ -86,30 +68,9 @@ def rotate_sequence(sequence: Sequence[Domain],
             else sequence)
 
 
-def segments_intersection(first_start: Point,
-                          first_end: Point,
-                          second_start: Point,
-                          second_end: Point) -> Point:
-    context = get_context()
-    return context.segments_intersection(first_start, first_end, second_start,
-                                         second_end)
-
-
-def segments_relationship(test_start: Point,
-                          test_end: Point,
-                          goal_start: Point,
-                          goal_end: Point) -> SegmentsRelationship:
-    context = get_context()
-    result = context.segments_relation(test_start, test_end, goal_start,
-                                       goal_end)
-    return (SegmentsRelationship.NONE if result is Relation.DISJOINT
-            else (SegmentsRelationship.TOUCH if result is Relation.TOUCH
-                  else (SegmentsRelationship.CROSS if result is Relation.CROSS
-                        else SegmentsRelationship.OVERLAP)))
-
-
-def to_contour_orientation(contour: Contour) -> Orientation:
+def to_contour_orientation(contour: Contour,
+                           orienteer: Orienteer) -> Orientation:
     vertices = contour.vertices
     index = arg_min(vertices)
-    return orientation(vertices[index - 1], vertices[index],
-                       vertices[(index + 1) % len(vertices)])
+    return orienteer(vertices[index - 1], vertices[index],
+                     vertices[(index + 1) % len(vertices)])

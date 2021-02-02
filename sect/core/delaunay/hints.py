@@ -5,7 +5,8 @@ from typing import (Callable,
                     Tuple,
                     Type)
 
-from ground.base import Orientation
+from ground.base import (Orientation,
+                         Relation)
 from ground.hints import (Contour,
                           Point,
                           Polygon,
@@ -13,8 +14,9 @@ from ground.hints import (Contour,
 
 from sect.core.utils import Domain
 
-Orienteer = Callable[[Point, Point, Point], Orientation]
 QuaternaryPointPredicate = Callable[[Point, Point, Point, Point], bool]
+SegmentPointRelater = Callable[[Point, Point, Point], bool]
+SegmentsRelater = Callable[[Point, Point, Point, Point], Relation]
 
 
 class QuadEdge(ABC):

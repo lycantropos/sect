@@ -1,7 +1,7 @@
+from ground.base import Orientation
 from ground.hints import Point
 from reprit.base import generate_repr
 
-from sect.core.utils import Orientation
 from .edge import Edge
 from .location import Location
 from .node import Node

@@ -13,22 +13,22 @@ from typing import (Callable,
                     Type)
 
 from decision.partition import coin_change
-from ground.base import Context
+from ground.base import (Context,
+                         Orientation,
+                         Relation)
 from ground.hints import (Contour,
                           Point,
                           Polygon,
                           Segment)
 from reprit.base import generate_repr
 
-from sect.core.utils import (Orientation,
-                             SegmentsRelationship,
-                             contour_to_edges_endpoints,
+from sect.core.utils import (contour_to_edges_endpoints,
                              flatten,
-                             pairwise,
-                             segments_relationship)
+                             pairwise)
 from .events_queue import EventsQueue
 from .hints import (QuaternaryPointPredicate,
                     SegmentEndpoints,
+                    SegmentsRelater,
                     Triangulation)
 from .quad_edge import (QuadEdge,
                         edge_to_endpoints,
@@ -137,21 +137,23 @@ def to_triangulation_cls(context: Context,
             """
             border, holes = polygon.border, polygon.holes
             if extra_points:
-                border, holes, extra_points = complete_vertices(border, holes,
-                                                                extra_points)
+                border, holes, extra_points = complete_vertices(
+                        border, holes, extra_points,
+                        context=context)
             result = cls.delaunay(list(chain(border.vertices,
                                              flatten(hole.vertices
                                                      for hole in holes),
                                              extra_points)))
             border_endpoints = contour_to_edges_endpoints(border)
-            constrain(result,
-                      chain(border_endpoints,
-                            flatten(map(contour_to_edges_endpoints, holes)),
-                            [(segment.start, segment.end)
-                             for segment in extra_constraints]),
-                      context.point_point_point_incircle_test)
+            constrain(result, chain(border_endpoints,
+                                    flatten(map(contour_to_edges_endpoints,
+                                                holes)),
+                                    [(segment.start, segment.end)
+                                     for segment in extra_constraints]),
+                      context=context)
             bound(result, border_endpoints)
-            cut(result, holes)
+            cut(result, holes,
+                context=context)
             result._triangular_holes_vertices.update(
                     frozenset(hole.vertices)
                     for hole in holes
@@ -238,8 +240,10 @@ def to_triangulation_cls(context: Context,
                         == edge.opposite.right_from_start.end
                         and (edge.orientation_of(edge.left_from_start.end)
                              is Orientation.COUNTERCLOCKWISE)))
-            contour_cls = context.contour_cls
-            return [contour_cls(normalize_contour_vertices(list(vertices)))
+            contour_cls, orienteer = (context.contour_cls,
+                                      context.angle_orientation)
+            return [contour_cls(normalize_contour_vertices(list(vertices),
+                                                           orienteer))
                     for vertices in vertices_sets
                     if vertices not in self._triangular_holes_vertices]
 
@@ -288,21 +292,24 @@ def connect(base_edge: QuadEdge,
 
 def constrain(triangulation: Triangulation,
               constraints: Iterable[SegmentEndpoints],
-              incircle_test: QuaternaryPointPredicate) -> None:
+              *,
+              context: Context) -> None:
     endpoints = {edge_to_endpoints(edge) for edge in to_edges(triangulation)}
     inner_edges = to_unique_inner_edges(triangulation)
+    incircle_test, segments_relater = (context.point_point_point_incircle_test,
+                                       context.segments_relation)
     for constraint in constraints:
         constraint_endpoints = frozenset(constraint)
         if constraint_endpoints in endpoints:
             continue
         constraint_start, constraint_end = constraint
         crossings = detect_crossings(inner_edges, constraint_start,
-                                     constraint_end)
+                                     constraint_end, segments_relater)
         inner_edges.difference_update(crossings)
         endpoints.difference_update(edge_to_endpoints(edge)
                                     for edge in crossings)
         new_edges = resolve_crossings(crossings, constraint_start,
-                                      constraint_end)
+                                      constraint_end, segments_relater)
         set_criterion({edge
                        for edge in new_edges
                        if edge_to_endpoints(edge) != constraint_endpoints},
@@ -311,17 +318,22 @@ def constrain(triangulation: Triangulation,
         inner_edges.update(new_edges)
 
 
-def cut(triangulation: Triangulation, holes: Sequence[Contour]) -> None:
+def cut(triangulation: Triangulation,
+        holes: Sequence[Contour],
+        *,
+        context: Context) -> None:
     if not holes:
         return
-    events_queue = EventsQueue()
+    events_queue = EventsQueue(context)
     for edge in to_unique_inner_edges(triangulation):
         events_queue.register_edge(edge,
                                    from_left=True,
                                    is_counterclockwise_contour=True)
     for hole in holes:
-        for endpoints in contour_to_oriented_edges_endpoints(hole,
-                                                             clockwise=True):
+        for endpoints in contour_to_oriented_edges_endpoints(
+                hole,
+                clockwise=True,
+                orienteer=context.angle_orientation):
             events_queue.register_segment(endpoints,
                                           from_left=False,
                                           is_counterclockwise_contour=False)
@@ -332,12 +344,13 @@ def cut(triangulation: Triangulation, holes: Sequence[Contour]) -> None:
 
 def detect_crossings(inner_edges: Iterable[QuadEdge],
                      constraint_start: Point,
-                     constraint_end: Point) -> List[QuadEdge]:
+                     constraint_end: Point,
+                     segments_relater: SegmentsRelater) -> List[QuadEdge]:
     return [edge
             for edge in inner_edges
-            if (segments_relationship(edge.start, edge.end, constraint_start,
-                                      constraint_end)
-                is SegmentsRelationship.CROSS)]
+            if (segments_relater(edge.start, edge.end, constraint_start,
+                                 constraint_end)
+                is Relation.CROSS)]
 
 
 def edge_should_be_swapped(edge: QuadEdge,
@@ -387,7 +400,8 @@ def merge(left: Triangulation,
 
 def resolve_crossings(crossings: List[QuadEdge],
                       constraint_start: Point,
-                      constraint_end: Point) -> List[QuadEdge]:
+                      constraint_end: Point,
+                      segments_relater: SegmentsRelater) -> List[QuadEdge]:
     result = []
     crossings = deque(crossings,
                       maxlen=len(crossings))
@@ -395,9 +409,8 @@ def resolve_crossings(crossings: List[QuadEdge],
         edge = crossings.popleft()
         if is_convex_quadrilateral_diagonal(edge):
             edge.swap()
-            if (segments_relationship(edge.start, edge.end, constraint_start,
-                                      constraint_end)
-                    is SegmentsRelationship.CROSS):
+            if segments_relater(edge.start, edge.end, constraint_start,
+                                constraint_end) is Relation.CROSS:
                 crossings.append(edge)
             else:
                 result.append(edge)

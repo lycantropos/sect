@@ -1,5 +1,6 @@
-from sect.core.utils import (Orientation,
-                             orientation)
+from ground.base import Orientation
+
+from sect.core.utils import orientation
 
 from .models import Site
 

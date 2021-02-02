@@ -2,12 +2,12 @@ import ctypes
 import struct
 from typing import TypeVar
 
+from ground.base import Orientation
 from ground.hints import (Coordinate,
                           Point)
 from reprit.base import generate_repr
 
-from sect.core.utils import (Orientation,
-                             orientation)
+from sect.core.utils import orientation
 from sect.core.voronoi.enums import SourceCategory
 from sect.core.voronoi.hints import Source
 from sect.core.voronoi.utils import are_same_vertical_points

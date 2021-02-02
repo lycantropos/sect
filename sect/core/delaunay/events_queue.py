@@ -1,15 +1,15 @@
+from functools import partial
 from typing import (Iterable,
                     Optional)
 
+from ground.base import (Context,
+                         Orientation,
+                         Relation)
 from ground.hints import Point
 from prioq.base import PriorityQueue
 from reprit.base import generate_repr
 
-from sect.core.utils import (Orientation,
-                             SegmentsRelationship,
-                             orientation,
-                             segments_intersection,
-                             segments_relationship)
+from sect.core.hints import Orienteer
 from .event import Event
 from .hints import SegmentEndpoints
 from .quad_edge import QuadEdge
@@ -17,10 +17,10 @@ from .sweep_line import SweepLine
 
 
 class EventsQueueKey:
-    __slots__ = 'event',
+    __slots__ = 'event', 'orienteer'
 
-    def __init__(self, event: Event) -> None:
-        self.event = event
+    def __init__(self, orienteer: Orienteer, event: Event) -> None:
+        self.orienteer, self.event = orienteer, event
 
     __repr__ = generate_repr(__init__)
 
@@ -43,8 +43,8 @@ class EventsQueueKey:
         # same start, both events are left endpoints
         # or both are right endpoints
         else:
-            other_end_orientation = orientation(event.start, event.end,
-                                                other_event.end)
+            other_end_orientation = self.orienteer(event.start, event.end,
+                                                   other_event.end)
             # the lowest segment is processed first
             return (other_event.from_left
                     if other_end_orientation is Orientation.COLLINEAR
@@ -54,10 +54,12 @@ class EventsQueueKey:
 
 
 class EventsQueue:
-    __slots__ = '_queue',
+    __slots__ = 'context', '_queue'
 
-    def __init__(self) -> None:
-        self._queue = PriorityQueue(key=EventsQueueKey)
+    def __init__(self, context: Context) -> None:
+        self.context = context
+        self._queue = PriorityQueue(key=partial(EventsQueueKey,
+                                                context.angle_orientation))
 
     @staticmethod
     def compute_position(below_event: Optional[Event], event: Event) -> None:
@@ -72,9 +74,16 @@ class EventsQueue:
         Populates events queue with intersection events.
         Checks if events' segments overlap and have the same start.
         """
-        relationship = segments_relationship(
+        relation = self.context.segments_relation(
                 below_event.start, below_event.end, event.start, event.end)
-        if relationship is SegmentsRelationship.OVERLAP:
+        if relation is Relation.CROSS or relation is Relation.TOUCH:
+            point = self.context.segments_intersection(
+                    below_event.start, below_event.end, event.start, event.end)
+            if point != below_event.start and point != below_event.end:
+                self.divide_segment(below_event, point)
+            if point != event.start and point != event.end:
+                self.divide_segment(event, point)
+        elif relation is not Relation.DISJOINT:
             # segments overlap
             if below_event.from_left is event.from_left:
                 raise ValueError('Edges of the same polygon '
@@ -84,15 +93,15 @@ class EventsQueue:
             start_min, start_max = ((None, None)
                                     if starts_equal
                                     else ((event, below_event)
-                                          if (EventsQueueKey(event)
-                                              < EventsQueueKey(below_event))
+                                          if (self._queue.key(event)
+                                              < self._queue.key(below_event))
                                           else (below_event, event)))
             end_min, end_max = ((None, None)
                                 if ends_equal
                                 else
                                 ((event.complement, below_event.complement)
-                                 if (EventsQueueKey(event.complement)
-                                     < EventsQueueKey(below_event.complement))
+                                 if (self._queue.key(event.complement)
+                                     < self._queue.key(below_event.complement))
                                  else (below_event.complement,
                                        event.complement)))
             if starts_equal:
@@ -112,16 +121,6 @@ class EventsQueue:
                                     else start_max,
                                     end_min.start)
                 self.divide_segment(start_min, start_max.start)
-        elif (relationship is not SegmentsRelationship.NONE
-              and below_event.start != event.start
-              and below_event.end != event.end):
-            # segments do not intersect at endpoints
-            point = segments_intersection(below_event.start, below_event.end,
-                                          event.start, event.end)
-            if point != below_event.start and point != below_event.end:
-                self.divide_segment(below_event, point)
-            if point != event.start and point != event.end:
-                self.divide_segment(event, point)
         return False
 
     def divide_segment(self, event: Event, point: Point) -> None:
@@ -168,7 +167,7 @@ class EventsQueue:
         self._queue.push(end_event)
 
     def sweep(self) -> Iterable[Event]:
-        sweep_line = SweepLine()
+        sweep_line = SweepLine(self.context)
         while self._queue:
             event = self._queue.pop()
             if event.is_left_endpoint:

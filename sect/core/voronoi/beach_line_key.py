@@ -1,12 +1,12 @@
 from copy import copy
 from typing import Tuple
 
+from ground.base import Orientation
 from ground.hints import (Coordinate,
                           Point)
 from reprit.base import generate_repr
 
-from sect.core.utils import (Orientation,
-                             cross_product,
+from sect.core.utils import (cross_product,
                              orientation)
 from .events import Site
 from .utils import (robust_divide,
@@ -19,8 +19,7 @@ class BeachLineKey:
     __slots__ = '_left_site', '_right_site'
 
     def __init__(self, left_site: Site, right_site: Site) -> None:
-        self.left_site = left_site
-        self.right_site = right_site
+        self.left_site, self.right_site = left_site, right_site
 
     __repr__ = generate_repr(__init__)
 
