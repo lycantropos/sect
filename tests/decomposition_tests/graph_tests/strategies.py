@@ -1,18 +1,19 @@
 from functools import partial
 from typing import Tuple
 
+from ground.base import get_context
 from ground.hints import Coordinate
 from hypothesis import strategies
 from hypothesis_geometry import planar
 
-from sect.decomposition import Graph
+from sect.decomposition import to_graph_cls
 from tests.strategies import coordinates_strategies
 from tests.utils import (Multisegment,
                          Point,
                          Polygon,
                          Strategy)
 
-graph_classes = strategies.just(Graph)
+graph_classes = strategies.just(to_graph_cls(get_context()))
 to_non_empty_multisegments = partial(planar.multisegments,
                                      min_size=1)
 non_empty_multisegments = (coordinates_strategies
