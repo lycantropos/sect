@@ -2,7 +2,6 @@ from typing import (FrozenSet,
                     Iterable,
                     List,
                     Optional,
-                    Set,
                     Type)
 
 from ground.base import Context
@@ -107,8 +106,10 @@ def edge_to_neighbours(edge: QuadEdge) -> List[QuadEdge]:
             + list(_edge_to_incidents(edge.opposite)))
 
 
-def edge_to_non_adjacent_vertices(edge: QuadEdge) -> Set[Point]:
-    return {neighbour.end for neighbour in _edge_to_incidents(edge)}
+def edges_with_opposites(edges: Iterable[QuadEdge]) -> Iterable[QuadEdge]:
+    for edge in edges:
+        yield edge
+        yield edge.opposite
 
 
 def _edge_to_incidents(edge: QuadEdge) -> Iterable[QuadEdge]:
@@ -118,9 +119,3 @@ def _edge_to_incidents(edge: QuadEdge) -> Iterable[QuadEdge]:
     if (edge.orientation_of(edge.left_from_start.end)
             is Orientation.COUNTERCLOCKWISE):
         yield edge.left_from_start
-
-
-def edges_with_opposites(edges: Iterable[QuadEdge]) -> Iterable[QuadEdge]:
-    for edge in edges:
-        yield edge
-        yield edge.opposite

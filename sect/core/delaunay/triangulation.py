@@ -26,7 +26,6 @@ from sect.core.utils import (Orientation,
                              flatten,
                              pairwise,
                              segments_relationship)
-from .contracts import points_form_convex_quadrilateral
 from .events_queue import EventsQueue
 from .hints import (QuaternaryPointPredicate,
                     SegmentEndpoints,
@@ -34,7 +33,6 @@ from .hints import (QuaternaryPointPredicate,
 from .quad_edge import (QuadEdge,
                         edge_to_endpoints,
                         edge_to_neighbours,
-                        edge_to_non_adjacent_vertices,
                         edges_with_opposites,
                         to_quad_edge_cls)
 from .utils import (ceil_log2,
@@ -344,9 +342,7 @@ def detect_crossings(inner_edges: Iterable[QuadEdge],
 
 def edge_should_be_swapped(edge: QuadEdge,
                            incircle_test: QuaternaryPointPredicate) -> bool:
-    return (points_form_convex_quadrilateral(
-            (edge.start, edge.left_from_start.end,
-             edge.end, edge.right_from_start.end))
+    return (is_convex_quadrilateral_diagonal(edge)
             and (incircle_test(edge.start, edge.end, edge.left_from_start.end,
                                edge.right_from_start.end) > 0
                  or incircle_test(edge.end, edge.start,
@@ -372,6 +368,16 @@ def find_base_edge(left: Triangulation, right: Triangulation) -> QuadEdge:
     return base_edge
 
 
+def is_convex_quadrilateral_diagonal(edge: QuadEdge) -> bool:
+    return (edge.right_from_start.orientation_of(edge.end)
+            is Orientation.COUNTERCLOCKWISE
+            is edge.right_from_end.opposite.orientation_of(
+                    edge.left_from_start.end)
+            is edge.left_from_end.orientation_of(edge.start)
+            is edge.left_from_start.opposite.orientation_of(
+                    edge.right_from_start.end))
+
+
 def merge(left: Triangulation,
           right: Triangulation,
           incircle_test: QuaternaryPointPredicate) -> Triangulation:
@@ -387,11 +393,7 @@ def resolve_crossings(crossings: List[QuadEdge],
                       maxlen=len(crossings))
     while crossings:
         edge = crossings.popleft()
-        (first_non_edge_vertex,
-         second_non_edge_vertex) = edge_to_non_adjacent_vertices(edge)
-        if points_form_convex_quadrilateral((edge.start, edge.end,
-                                             first_non_edge_vertex,
-                                             second_non_edge_vertex)):
+        if is_convex_quadrilateral_diagonal(edge):
             edge.swap()
             if (segments_relationship(edge.start, edge.end, constraint_start,
                                       constraint_end)
