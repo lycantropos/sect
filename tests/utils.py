@@ -1,3 +1,4 @@
+from functools import partial
 from operator import getitem
 from typing import (AbstractSet,
                     Callable,
@@ -16,7 +17,7 @@ from hypothesis import strategies
 from hypothesis.strategies import SearchStrategy
 from orient.planar import point_in_segment
 
-from sect.core.delaunay.utils import (complete_vertices,
+from sect.core.delaunay.utils import (complete_vertices as _complete_vertices,
                                       normalize_contour_vertices,
                                       to_distinct)
 from sect.core.utils import contour_to_edges_endpoints
@@ -34,7 +35,8 @@ Segment = context.segment_cls
 MAX_COORDINATE_EXPONENT = 15
 MAX_RATIONAL_COORDINATE_EXPONENT = 7
 
-complete_vertices = complete_vertices
+complete_vertices = partial(_complete_vertices,
+                            context=context)
 is_contour = Contour.__instancecheck__
 
 
