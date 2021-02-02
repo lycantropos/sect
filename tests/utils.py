@@ -105,7 +105,8 @@ def is_convex_contour(contour: Contour) -> bool:
 
 
 def normalize_contour(contour: Contour) -> Contour:
-    return Contour(normalize_contour_vertices(contour.vertices))
+    return Contour(normalize_contour_vertices(contour.vertices,
+                                              context.angle_orientation))
 
 
 Element = TypeVar('Element')
