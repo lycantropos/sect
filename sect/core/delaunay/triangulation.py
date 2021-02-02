@@ -25,13 +25,13 @@ from reprit.base import generate_repr
 from sect.core.utils import (contour_to_edges_endpoints,
                              flatten,
                              pairwise)
+from .abcs import (QuadEdge,
+                   Triangulation)
 from .events_queue import EventsQueue
 from .hints import (QuaternaryPointPredicate,
                     SegmentEndpoints,
-                    SegmentsRelater,
-                    Triangulation)
-from .quad_edge import (QuadEdge,
-                        edge_to_endpoints,
+                    SegmentsRelater)
+from .quad_edge import (edge_to_endpoints,
                         edge_to_neighbours,
                         edges_with_opposites,
                         to_quad_edge_cls)

@@ -2,8 +2,7 @@ from itertools import chain
 from typing import (Iterable,
                     List,
                     Sequence,
-                    Tuple,
-                    TypeVar)
+                    Tuple)
 
 from ground.base import (Orientation,
                          get_context)
@@ -11,9 +10,8 @@ from ground.hints import (Contour,
                           Coordinate,
                           Point)
 
-from .hints import Orienteer
-
-Domain = TypeVar('Domain')
+from .hints import (Domain,
+                    Orienteer)
 
 
 def arg_min(sequence: Sequence[Domain]) -> int:

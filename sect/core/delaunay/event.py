@@ -5,7 +5,7 @@ from ground.hints import (Point,
                           Segment)
 from reprit.base import generate_repr
 
-from .quad_edge import QuadEdge
+from .abcs import QuadEdge
 
 
 class Event:

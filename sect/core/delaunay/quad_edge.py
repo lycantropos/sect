@@ -9,7 +9,7 @@ from ground.base import (Context,
 from ground.hints import Point
 from reprit.base import generate_repr
 
-from .hints import QuadEdge
+from .abcs import QuadEdge
 
 
 def to_quad_edge_cls(context: Context) -> Type[QuadEdge]:

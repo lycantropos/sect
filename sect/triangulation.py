@@ -1,5 +1,5 @@
-from .core.delaunay.hints import (QuadEdge,
-                                  Triangulation)
+from .core.delaunay.abcs import (QuadEdge,
+                                 Triangulation)
 from .core.delaunay.triangulation import to_triangulation_cls
 
 QuadEdge = QuadEdge
