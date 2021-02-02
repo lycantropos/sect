@@ -9,6 +9,5 @@ Diagram = Diagram
 Graph = Graph
 Location = Location
 Shuffler = Shuffler
-
 to_diagram_cls = to_diagram_cls
 to_graph_cls = to_graph_cls
