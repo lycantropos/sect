@@ -1,9 +1,13 @@
-from typing import Optional
+from typing import (TYPE_CHECKING,
+                    Optional)
 
 from ground.hints import Point
 from reprit.base import generate_repr
 
 from .edge import Edge
+
+if TYPE_CHECKING:
+    from .abcs import Node
 
 
 class Trapezoid:
@@ -15,7 +19,6 @@ class Trapezoid:
                  right: Point,
                  below: Edge,
                  above: Edge) -> None:
-        from .node import Node
         assert left < right, 'Incorrect endpoints order'
         self.left = left
         self.right = right
