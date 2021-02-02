@@ -1,8 +1,7 @@
 from ground.hints import (Multipoint,
                           Multisegment)
 
-from .core.trapezoidal.abcs import (Edge,
-                                    Graph)
+from .core.trapezoidal.abcs import Graph
 from .core.trapezoidal.graph import to_graph_cls
 from .core.trapezoidal.hints import Shuffler
 from .core.trapezoidal.location import Location
