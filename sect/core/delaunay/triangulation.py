@@ -37,8 +37,8 @@ from .quad_edge import (QuadEdge,
                         to_quad_edge_cls)
 from .utils import (ceil_log2,
                     complete_vertices,
+                    contour_to_oriented_edges_endpoints,
                     normalize_contour_vertices,
-                    to_clockwise_contour,
                     to_distinct)
 
 
@@ -320,8 +320,8 @@ def cut(triangulation: Triangulation, holes: Sequence[Contour]) -> None:
                                    from_left=True,
                                    is_counterclockwise_contour=True)
     for hole in holes:
-        for endpoints in contour_to_edges_endpoints(
-                to_clockwise_contour(hole)):
+        for endpoints in contour_to_oriented_edges_endpoints(hole,
+                                                             clockwise=True):
             events_queue.register_segment(endpoints,
                                           from_left=False,
                                           is_counterclockwise_contour=False)

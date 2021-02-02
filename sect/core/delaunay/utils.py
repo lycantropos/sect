@@ -17,6 +17,7 @@ from sect.core.utils import (Orientation,
                              orientation,
                              rotate_sequence,
                              to_contour_orientation)
+from .hints import SegmentEndpoints
 
 
 def ceil_log2(number: int) -> int:
@@ -35,22 +36,27 @@ def complete_vertices(border: Contour, holes: Sequence[Contour],
     return border, completed_holes, candidates
 
 
+def contour_to_oriented_edges_endpoints(contour: Contour,
+                                        *,
+                                        clockwise: bool = False
+                                        ) -> Iterable[SegmentEndpoints]:
+    vertices = contour.vertices
+    return (((vertices[index - 1], vertices[index])
+             for index in range(len(vertices)))
+            if (to_contour_orientation(contour)
+                is (Orientation.CLOCKWISE
+                    if clockwise
+                    else Orientation.COUNTERCLOCKWISE))
+            else ((vertices[index], vertices[index - 1])
+                  for index in range(len(vertices) - 1, -1, -1)))
+
+
 def normalize_contour_vertices(vertices: Sequence[Point]) -> Contour:
     vertices = rotate_sequence(vertices, arg_min(vertices))
     return (vertices[:1] + vertices[1:][::-1]
             if (orientation(vertices[-1], vertices[0], vertices[1])
                 is Orientation.CLOCKWISE)
             else vertices)
-
-
-def to_clockwise_contour(contour: Contour) -> Contour:
-    return (contour
-            if to_contour_orientation(contour) is Orientation.CLOCKWISE
-            else contour[:1] + contour[1:][::-1])
-
-
-def to_convex_hull(points: Sequence[Point]) -> Sequence[Point]:
-    return get_context().points_convex_hull(points)
 
 
 to_distinct = (OrderedDict if sys.version_info < (3, 6) else dict).fromkeys
