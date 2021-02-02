@@ -118,8 +118,8 @@ class Triangulation(ABC):
     def constrained_delaunay(cls: Type[Domain],
                              polygon: Polygon,
                              *,
-                             extra_constraints: Sequence[Segment] = (),
-                             extra_points: Sequence[Point] = ()) -> Domain:
+                             extra_constraints: Sequence[Segment] = ...,
+                             extra_points: Sequence[Point] = ...) -> Domain:
         """
         Constructs constrained Delaunay triangulation of given polygon
         (with potentially extra points and constraints).
