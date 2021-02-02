@@ -2,10 +2,10 @@ from typing import Iterable
 
 from ground.hints import Point
 
-from .hints import BoundingBox
+from .hints import Box
 
 
-def points_to_bounding_box(points: Iterable[Point]) -> BoundingBox:
+def box_from_points(points: Iterable[Point]) -> Box:
     points = iter(points)
     first_point = next(points)
     min_x = max_x = first_point.x

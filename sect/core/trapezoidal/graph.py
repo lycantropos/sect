@@ -1,3 +1,4 @@
+import random
 from typing import List
 
 from ground.base import (Orientation,
@@ -12,12 +13,12 @@ from sect.core.utils import (contour_to_edges_endpoints,
                              to_contour_orientation)
 from sect.hints import Shuffler
 from .edge import Edge
-from .hints import BoundingBox
+from .hints import Box
 from .leaf import Leaf
 from .location import Location
 from .node import Node
 from .trapezoid import Trapezoid
-from .utils import points_to_bounding_box
+from .bounding import box_from_points
 from .x_node import XNode
 from .y_node import YNode
 
@@ -70,22 +71,112 @@ class Graph:
     @classmethod
     def from_multisegment(cls,
                           multisegment: Multisegment,
-                          shuffler: Shuffler) -> 'Graph':
+                          *,
+                          shuffler: Shuffler = random.shuffle) -> 'Graph':
+        """
+        Constructs trapezoidal decomposition graph of given multisegment.
+
+        Based on incremental randomized algorithm by R. Seidel.
+
+        Time complexity:
+            ``O(segments_count * log segments_count)`` expected,
+            ``O(segments_count ** 2)`` worst,
+            where ``segments_count = len(multisegment)``.
+        Memory complexity:
+            ``O(segments_count)``,
+            where ``segments_count = len(multisegment)``.
+        Reference:
+            https://doi.org/10.1016%2F0925-7721%2891%2990012-4
+            https://www.cs.princeton.edu/courses/archive/fall05/cos528/handouts/A%20Simple%20and%20fast.pdf
+
+        :param multisegment: target multisegment.
+        :param shuffler:
+            function which mutates sequence by shuffling its elements,
+            required for randomization.
+        :returns: trapezoidal decomposition graph of the multisegment.
+
+        >>> from ground.base import get_context
+        >>> context = get_context()
+        >>> Multisegment, Point, Segment = (context.multisegment_cls,
+        ...                                 context.point_cls,
+        ...                                 context.segment_cls)
+        >>> graph = Graph.from_multisegment(
+        ...     Multisegment([Segment(Point(0, 0), Point(1, 0)),
+        ...                   Segment(Point(0, 0), Point(0, 1))]))
+        >>> Point(1, 0) in graph
+        True
+        >>> Point(0, 1) in graph
+        True
+        >>> Point(1, 1) in graph
+        False
+        >>> graph.locate(Point(1, 0)) is Location.BOUNDARY
+        True
+        >>> graph.locate(Point(0, 1)) is Location.BOUNDARY
+        True
+        >>> graph.locate(Point(1, 1)) is Location.EXTERIOR
+        True
+        """
         edges = [Edge(segment.start, segment.end, False)
                  if segment.start < segment.end
                  else Edge(segment.end, segment.start, False)
                  for segment in multisegment.segments]
         shuffler(edges)
-        bounding_box = points_to_bounding_box(
-                flatten((segment.start, segment.end)
-                        for segment in multisegment.segments))
-        result = cls(bounding_box_to_node(bounding_box))
+        box = box_from_points(flatten((segment.start, segment.end)
+                                      for segment in multisegment.segments))
+        result = cls(box_to_node(box))
         for edge in edges:
             result.add_edge(edge)
         return result
 
     @classmethod
-    def from_polygon(cls, polygon: Polygon, shuffler: Shuffler) -> 'Graph':
+    def from_polygon(cls,
+                     polygon: Polygon,
+                     *,
+                     shuffler: Shuffler = random.shuffle) -> 'Graph':
+        """
+        Constructs trapezoidal decomposition graph of given polygon.
+
+        Based on incremental randomized algorithm by R. Seidel.
+
+        Time complexity:
+            ``O(vertices_count * log vertices_count)`` expected,
+            ``O(vertices_count ** 2)`` worst,
+            where ``vertices_count = len(border) + sum(map(len, holes))``.
+        Memory complexity:
+            ``O(vertices_count)``,
+            where ``vertices_count = len(border) + sum(map(len, holes))``.
+        Reference:
+            https://doi.org/10.1016%2F0925-7721%2891%2990012-4
+            https://www.cs.princeton.edu/courses/archive/fall05/cos528/handouts/A%20Simple%20and%20fast.pdf
+
+        :param polygon: target polygon.
+        :param shuffler:
+            function which mutates sequence by shuffling its elements,
+            required for randomization.
+        :returns: trapezoidal decomposition graph of the border and holes.
+
+        >>> from ground.base import get_context
+        >>> context = get_context()
+        >>> Contour, Point, Polygon = (context.contour_cls, context.point_cls,
+        ...                            context.polygon_cls)
+        >>> graph = Graph.from_polygon(
+        ...     Polygon(Contour([Point(0, 0), Point(6, 0), Point(6, 6),
+        ...                      Point(0, 6)]),
+        ...             [Contour([Point(2, 2), Point(2, 4), Point(4, 4),
+        ...                       Point(4, 2)])]))
+        >>> Point(1, 1) in graph
+        True
+        >>> Point(2, 2) in graph
+        True
+        >>> Point(3, 3) in graph
+        False
+        >>> graph.locate(Point(1, 1)) is Location.INTERIOR
+        True
+        >>> graph.locate(Point(2, 2)) is Location.BOUNDARY
+        True
+        >>> graph.locate(Point(3, 3)) is Location.EXTERIOR
+        True
+        """
         border = polygon.border
         context = get_context()
         orienteer = context.angle_orientation
@@ -107,8 +198,7 @@ class Graph:
                                    not is_hole_negatively_oriented)
                          for start, end in contour_to_edges_endpoints(hole))
         shuffler(edges)
-        bounding_box = points_to_bounding_box(border.vertices)
-        result = cls(bounding_box_to_node(bounding_box))
+        result = cls(box_to_node(box_from_points(border.vertices)))
         for edge in edges:
             result.add_edge(edge)
         return result
@@ -274,7 +364,7 @@ class Graph:
         return result
 
 
-def bounding_box_to_node(bounding_box: BoundingBox) -> Leaf:
+def box_to_node(bounding_box: Box) -> Leaf:
     min_x, min_y, max_x, max_y = bounding_box
     delta_x, delta_y = max_x - min_x, max_y - min_y
     # handle horizontal/vertical cases
