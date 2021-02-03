@@ -2,7 +2,8 @@ from ground.base import Context
 from ground.hints import (Coordinate,
                           Point)
 
-from sect.core.voronoi.hints import DotProducer
+from sect.core.voronoi.hints import (CrossProducer,
+                                     DotProducer)
 from sect.core.voronoi.utils import (robust_divide,
                                      robust_evenly_divide,
                                      robust_sqrt,
@@ -280,7 +281,7 @@ def _to_point_point_segment_coefficient(first_point: Point,
                                         segment_start: Point,
                                         segment_end: Point,
                                         segment_index: int,
-                                        cross_producer: DotProducer,
+                                        cross_producer: CrossProducer,
                                         dot_producer: DotProducer
                                         ) -> Coordinate:
     points_cross_product = cross_producer(segment_start, segment_end,
