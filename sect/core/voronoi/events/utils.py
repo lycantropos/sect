@@ -1,11 +1,5 @@
 from typing import Tuple
 
-from ground.core.shewchuk import (scale_expansion,
-                                  square,
-                                  sum_expansions,
-                                  two_mul,
-                                  two_two_sub,
-                                  two_two_sum)
 from ground.hints import Coordinate
 
 from sect.core.voronoi.utils import (robust_divide,
@@ -21,19 +15,14 @@ def robust_sum_of_products_with_sqrt_pairs(
     """
     first_left, second_left = left
     first_right, second_right = right
-    first_addend, second_addend = (two_mul(first_left,
-                                           robust_sqrt(first_right)),
-                                   two_mul(second_left,
-                                           robust_sqrt(second_right)))
-    return (sum(two_two_sum(*first_addend, *second_addend))
-            if (first_addend[-1] >= 0 and second_addend[-1] >= 0
-                or first_addend[-1] <= 0 and second_addend[-1] <= 0)
-            else
-            sum(scale_expansion(sum_expansions(
-                    scale_expansion(square(first_left), first_right),
-                    scale_expansion(square(second_left), -second_right)),
-                    robust_divide(1, sum(two_two_sub(*first_addend,
-                                                     *second_addend))))))
+    first_addend, second_addend = (first_left * robust_sqrt(first_right),
+                                   second_left * robust_sqrt(second_right))
+    return (first_addend + second_addend
+            if (first_addend >= 0 and second_addend >= 0
+                or first_addend <= 0 and second_addend <= 0)
+            else robust_divide(first_left ** 2 * first_right
+                               - second_left ** 2 * second_right,
+                               first_addend - second_addend))
 
 
 def robust_sum_of_products_with_sqrt_triplets(
