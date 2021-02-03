@@ -2,11 +2,9 @@ from collections import deque
 from itertools import (accumulate,
                        chain,
                        repeat)
-from types import MappingProxyType
 from typing import (Callable,
                     Iterable,
                     List,
-                    Mapping,
                     Optional,
                     Sequence,
                     Set,
@@ -42,14 +40,14 @@ from .utils import (ceil_log2,
                     to_distinct)
 
 
-def _triangulate_two_points(cls: Type[Triangulation],
-                            sorted_points: Sequence[Point]) -> Triangulation:
+def triangulate_two_points(cls: Type[Triangulation],
+                           sorted_points: Sequence[Point]) -> Triangulation:
     first_edge = cls.edge_cls.from_endpoints(*sorted_points)
     return cls.from_sides(first_edge, first_edge.opposite)
 
 
-def _triangulate_three_points(cls: Type[Triangulation],
-                              sorted_points: Sequence[Point]) -> Triangulation:
+def triangulate_three_points(cls: Type[Triangulation],
+                             sorted_points: Sequence[Point]) -> Triangulation:
     left_point, mid_point, right_point = sorted_points
     first_edge, second_edge = (
         cls.edge_cls.from_endpoints(left_point, mid_point),
@@ -66,17 +64,35 @@ def _triangulate_three_points(cls: Type[Triangulation],
         return cls.from_sides(first_edge, second_edge.opposite)
 
 
-_base_cases = {2: _triangulate_two_points,
-               3: _triangulate_three_points}
-
 TriangulationBaseConstructor = Callable[[Type[Triangulation], Sequence[Point]],
                                         Triangulation]
 
 
-def to_triangulation_cls(context: Context,
-                         base_cases: Mapping[int, TriangulationBaseConstructor]
-                         = MappingProxyType(_base_cases)
-                         ) -> Type[Triangulation]:
+def to_triangulation_cls(context: Context) -> Type[Triangulation]:
+    """
+    Constructs triangulation class by given context.
+
+    >>> from ground.base import get_context
+    >>> context = get_context()
+    >>> Contour, Point, Polygon = (context.contour_cls, context.point_cls,
+    ...                            context.polygon_cls)
+    >>> Triangulation = to_triangulation_cls(context)
+    >>> dart = Polygon(Contour([Point(0, 0), Point(3, 0), Point(1, 1),
+    ...                         Point(0, 3)]), [])
+    >>> (Triangulation.delaunay(dart.border.vertices).triangles()
+    ...  == [Contour([Point(0, 0), Point(3, 0), Point(1, 1)]),
+    ...      Contour([Point(0, 0), Point(1, 1), Point(0, 3)]),
+    ...      Contour([Point(0, 3), Point(1, 1), Point(3, 0)])])
+    True
+    >>> (Triangulation.constrained_delaunay(dart).triangles()
+    ...  == [Contour([Point(0, 0), Point(3, 0), Point(1, 1)]),
+    ...      Contour([Point(0, 0), Point(1, 1), Point(0, 3)])])
+    True
+    """
+
+    base_cases = {2: triangulate_two_points,
+                  3: triangulate_three_points}
+
     class Result(Triangulation):
         __slots__ = 'left_side', 'right_side', '_triangular_holes_vertices'
 
@@ -178,7 +194,7 @@ def to_triangulation_cls(context: Context,
             :returns: triangulation of the points.
             """
             points = sorted(to_distinct(points))
-            lengths = coin_change(len(points), _base_cases)
+            lengths = coin_change(len(points), base_cases)
             result = [cls._initialize_triangulation(points[start:stop])
                       for start, stop in pairwise(accumulate((0,) + lengths))]
             incircle_test = context.point_point_point_incircle_test
