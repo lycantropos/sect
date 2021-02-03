@@ -112,12 +112,10 @@ def distance_to_segment_arc(segment_site: Site,
     if segment_site.is_vertical:
         return robust_evenly_divide(segment_site.start.x - point.x, 2)
     else:
-        start = segment_site.start
-        end = segment_site.end
+        start, end = segment_site.start, segment_site.end
         segment_length = robust_sqrt(to_segment_squared_length(start, end,
                                                                dot_producer))
-        segment_dx = end.x - start.x
-        segment_dy = end.y - start.y
+        segment_dx, segment_dy = end.x - start.x, end.y - start.y
         coefficient = (robust_divide(segment_length - segment_dy,
                                      segment_dx * segment_dx)
                        if segment_dy < 0
