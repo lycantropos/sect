@@ -13,10 +13,6 @@ from .faces import (Cell,
 class Diagram(ABC):
     __slots__ = ()
 
-    cells = ...  # type: List[Cell]
-    edges = ...  # type: List[Edge]
-    vertices = ...  # type: List[Vertex]
-
     @classmethod
     @abstractmethod
     def from_multipoint(cls, multipoint: Multipoint) -> 'Diagram':
@@ -26,3 +22,7 @@ class Diagram(ABC):
     @abstractmethod
     def from_multisegment(cls, multisegment: Multisegment) -> 'Diagram':
         """Constructs diagram from given multisegment."""
+
+    cells = ...  # type: List[Cell]
+    edges = ...  # type: List[Edge]
+    vertices = ...  # type: List[Vertex]

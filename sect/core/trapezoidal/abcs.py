@@ -15,9 +15,9 @@ from .trapezoid import Trapezoid
 class Edge(ABC):
     __slots__ = ()
 
-    left = ...  # type: Point
-    right = ...  # type: Point
-    interior_to_left = ...  # type: bool
+    @abstractmethod
+    def __lt__(self, other: 'Edge') -> bool:
+        """Checks if the edge is lower than the other."""
 
     @classmethod
     @abstractmethod
@@ -27,9 +27,9 @@ class Edge(ABC):
                        interior_to_left: bool) -> 'Edge':
         """Constructs edge given its endpoints."""
 
-    @abstractmethod
-    def __lt__(self, other: 'Edge') -> bool:
-        """Checks if the edge is lower than the other."""
+    left = ...  # type: Point
+    right = ...  # type: Point
+    interior_to_left = ...  # type: bool
 
     @abstractmethod
     def orientation_of(self, point: Point) -> Orientation:
@@ -84,8 +84,6 @@ class Node(ABC):
 class Graph(ABC):
     __slots__ = ()
 
-    root = ...  # type: Node
-
     @abstractmethod
     def __contains__(self, point: Point) -> bool:
         """Checks if point is contained in decomposed geometry."""
@@ -96,6 +94,8 @@ class Graph(ABC):
         """
         Returns height of the root node.
         """
+
+    root = ...  # type: Node
 
     @abstractmethod
     def locate(self, point: Point) -> Location:
