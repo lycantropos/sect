@@ -19,6 +19,7 @@ decomposition module
     :special-members:
 .. autoclass:: Location
     :members:
+.. autofunction:: to_graph_cls
 
 triangulation module
 ====================
@@ -29,3 +30,4 @@ triangulation module
     :members:
 .. autoclass:: Triangulation
     :members:
+.. autofunction:: to_triangulation_cls
