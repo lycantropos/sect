@@ -11,6 +11,8 @@ from .faces import (Cell,
 
 
 class Diagram(ABC):
+    __slots__ = ()
+
     cells = ...  # type: List[Cell]
     edges = ...  # type: List[Edge]
     vertices = ...  # type: List[Vertex]

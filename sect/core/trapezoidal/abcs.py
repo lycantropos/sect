@@ -13,6 +13,8 @@ from .trapezoid import Trapezoid
 
 
 class Edge(ABC):
+    __slots__ = ()
+
     left = ...  # type: Point
     right = ...  # type: Point
     interior_to_left = ...  # type: bool
@@ -81,6 +83,7 @@ class Node(ABC):
 
 class Graph(ABC):
     __slots__ = ()
+
     root = ...  # type: Node
 
     @abstractmethod
