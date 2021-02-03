@@ -83,20 +83,20 @@ class Graph(ABC):
     __slots__ = ()
     root = ...  # type: Node
 
+    @abstractmethod
     def __contains__(self, point: Point) -> bool:
         """Checks if point is contained in decomposed geometry."""
-        return bool(self.root.locate(point))
 
     @property
+    @abstractmethod
     def height(self) -> int:
         """
         Returns height of the root node.
         """
-        return self.root.height
 
+    @abstractmethod
     def locate(self, point: Point) -> Location:
         """Finds location of point relative to decomposed geometry."""
-        return self.root.locate(point)
 
     @classmethod
     @abstractmethod

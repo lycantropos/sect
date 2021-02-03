@@ -5,6 +5,7 @@ from typing import (List,
 from ground.base import (Context,
                          Orientation)
 from ground.hints import (Multisegment,
+                          Point,
                           Polygon)
 from reprit.base import generate_repr
 
@@ -19,12 +20,54 @@ from .edge import to_edge_cls
 from .hints import (Box,
                     Shuffler)
 from .leaf import Leaf
+from .location import Location
 from .trapezoid import Trapezoid
 from .x_node import XNode
 from .y_node import YNode
 
 
 def to_graph_cls(context: Context) -> Type[Graph]:
+    """
+    >>> from ground.base import get_context
+    >>> context = get_context()
+    >>> Multisegment, Point, Segment = (context.multisegment_cls,
+    ...                                 context.point_cls,
+    ...                                 context.segment_cls)
+    >>> Graph = to_graph_cls(context)
+    >>> multisegment_graph = Graph.from_multisegment(
+    ...     Multisegment([Segment(Point(0, 0), Point(1, 0)),
+    ...                   Segment(Point(0, 0), Point(0, 1))]))
+    >>> Point(1, 0) in multisegment_graph
+    True
+    >>> Point(0, 1) in multisegment_graph
+    True
+    >>> Point(1, 1) in multisegment_graph
+    False
+    >>> multisegment_graph.locate(Point(1, 0)) is Location.BOUNDARY
+    True
+    >>> multisegment_graph.locate(Point(0, 1)) is Location.BOUNDARY
+    True
+    >>> multisegment_graph.locate(Point(1, 1)) is Location.EXTERIOR
+    True
+    >>> Contour, Polygon = context.contour_cls, context.polygon_cls
+    >>> polygon_graph = Graph.from_polygon(
+    ...     Polygon(Contour([Point(0, 0), Point(6, 0), Point(6, 6),
+    ...                      Point(0, 6)]),
+    ...             [Contour([Point(2, 2), Point(2, 4), Point(4, 4),
+    ...                       Point(4, 2)])]))
+    >>> Point(1, 1) in polygon_graph
+    True
+    >>> Point(2, 2) in polygon_graph
+    True
+    >>> Point(3, 3) in polygon_graph
+    False
+    >>> polygon_graph.locate(Point(1, 1)) is Location.INTERIOR
+    True
+    >>> polygon_graph.locate(Point(2, 2)) is Location.BOUNDARY
+    True
+    >>> polygon_graph.locate(Point(3, 3)) is Location.EXTERIOR
+    True
+    """
     edge_factory = to_edge_cls(context).from_endpoints
 
     class Result(Graph):
@@ -42,6 +85,32 @@ def to_graph_cls(context: Context) -> Type[Graph]:
             self.root = root
 
         __repr__ = generate_repr(__init__)
+
+        def __contains__(self, point: Point) -> bool:
+            """
+            Checks if point is contained in decomposed geometry.
+
+            Time complexity:
+                ``O(self.height)``
+            Memory complexity:
+                ``O(1)``
+            """
+            return bool(self.root.locate(point))
+
+        @property
+        def height(self) -> int:
+            return self.root.height
+
+        def locate(self, point: Point) -> Location:
+            """
+            Finds location of point relative to decomposed geometry.
+
+            Time complexity:
+                ``O(self.height)``
+            Memory complexity:
+                ``O(1)``
+            """
+            return self.root.locate(point)
 
         @classmethod
         def from_multisegment(cls,
