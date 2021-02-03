@@ -6,12 +6,14 @@ from ground.base import (Context,
                          Orientation)
 from ground.hints import (Multisegment,
                           Polygon)
+from reprit.base import generate_repr
 
 from sect.core.utils import (contour_to_edges_endpoints,
                              flatten,
                              to_contour_orientation)
 from .abcs import (Edge,
-                   Graph)
+                   Graph,
+                   Node)
 from .bounding import box_from_points
 from .edge import to_edge_cls
 from .hints import (Box,
@@ -26,6 +28,21 @@ def to_graph_cls(context: Context) -> Type[Graph]:
     edge_factory = to_edge_cls(context).from_endpoints
 
     class Result(Graph):
+        __slots__ = 'root',
+
+        def __init__(self, root: Node) -> None:
+            """
+            Initializes graph.
+
+            Time complexity:
+                ``O(1)``
+            Memory complexity:
+                ``O(1)``
+            """
+            self.root = root
+
+        __repr__ = generate_repr(__init__)
+
         @classmethod
         def from_multisegment(cls,
                               multisegment: Multisegment,

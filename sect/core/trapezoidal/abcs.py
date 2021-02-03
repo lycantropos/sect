@@ -6,7 +6,6 @@ from ground.base import Orientation
 from ground.hints import (Multisegment,
                           Point,
                           Polygon)
-from reprit.base import generate_repr
 
 from .hints import Shuffler
 from .location import Location
@@ -81,20 +80,8 @@ class Node(ABC):
 
 
 class Graph(ABC):
-    __slots__ = 'root',
-
-    def __init__(self, root: Node) -> None:
-        """
-        Initializes graph.
-
-        Time complexity:
-            ``O(1)``
-        Memory complexity:
-            ``O(1)``
-        """
-        self.root = root
-
-    __repr__ = generate_repr(__init__)
+    __slots__ = ()
+    root = ...  # type: Node
 
     def __contains__(self, point: Point) -> bool:
         """Checks if point is contained in decomposed geometry."""
