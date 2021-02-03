@@ -1,3 +1,4 @@
+from itertools import chain
 from typing import (Sequence,
                     Tuple,
                     Type)
@@ -10,10 +11,11 @@ from sect.core.utils import flatten
 from sect.triangulation import Triangulation
 from tests.utils import (complete_vertices,
                          contour_to_edges_endpoints,
-                         is_contour,
                          is_contour_triangular,
                          is_convex_contour,
-                         to_contours_border_endpoints)
+                         to_contours_border_endpoints,
+                         to_convex_hull,
+                         to_distinct)
 from . import strategies
 
 
@@ -38,8 +40,14 @@ def test_sizes(triangulation_cls: Type[Triangulation],
     result = triangulation_cls.constrained_delaunay(polygon,
                                                     extra_points=extra_points)
 
-    assert all(is_contour(element) and is_contour_triangular(element)
-               for element in result.triangles())
+    triangles = result.triangles()
+    assert 0 < len(triangles) <= (
+            2 * (len(to_distinct(chain(polygon.border.vertices,
+                                       *[hole.vertices
+                                         for hole in polygon.holes],
+                                       extra_points))) - 1)
+            - len(to_convex_hull(polygon.border.vertices)))
+    assert all(is_contour_triangular(triangle) for triangle in triangles)
 
 
 @given(strategies.triangulation_classes, strategies.polygons_with_extra_points)
