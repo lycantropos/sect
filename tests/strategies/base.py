@@ -6,13 +6,10 @@ from ground.hints import Coordinate
 from hypothesis import strategies
 
 from tests.utils import (MAX_COORDINATE_EXPONENT,
-                         MAX_RATIONAL_COORDINATE_EXPONENT,
                          Strategy)
 
 MAX_COORDINATE = 10 ** MAX_COORDINATE_EXPONENT
 MIN_COORDINATE = -MAX_COORDINATE
-MAX_RATIONAL_COORDINATE = 10 ** MAX_RATIONAL_COORDINATE_EXPONENT
-MIN_RATIONAL_COORDINATE = -MAX_RATIONAL_COORDINATE
 
 
 def to_floats(min_value: Coordinate,
@@ -53,9 +50,9 @@ def to_digits_count(number: float,
 rational_coordinates_strategies_factories = (
     strategies.integers,
     partial(strategies.fractions,
-            max_denominator=MAX_RATIONAL_COORDINATE))
+            max_denominator=MAX_COORDINATE))
 rational_coordinates_strategies = strategies.sampled_from(
-        [factory(MIN_RATIONAL_COORDINATE, MAX_RATIONAL_COORDINATE)
+        [factory(MIN_COORDINATE, MAX_COORDINATE)
          for factory in rational_coordinates_strategies_factories])
 coordinates_strategies = strategies.sampled_from(
         [factory(MIN_COORDINATE, MAX_COORDINATE)

@@ -33,7 +33,6 @@ Polygon = context.polygon_cls
 Segment = context.segment_cls
 
 MAX_COORDINATE_EXPONENT = 15
-MAX_RATIONAL_COORDINATE_EXPONENT = 7
 
 complete_vertices = partial(_complete_vertices,
                             context=context)
