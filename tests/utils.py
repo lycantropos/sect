@@ -1,3 +1,4 @@
+from fractions import Fraction
 from functools import partial
 from operator import getitem
 from typing import (AbstractSet,
@@ -21,7 +22,6 @@ from sect.core.delaunay.utils import (complete_vertices as _complete_vertices,
                                       normalize_contour_vertices,
                                       to_distinct)
 from sect.core.utils import contour_to_edges_endpoints
-from sect.core.voronoi.utils import robust_divide
 
 Strategy = SearchStrategy
 context = get_context()
@@ -120,24 +120,23 @@ def sub_lists(sequence: Sequence[Element]) -> SearchStrategy[List[Element]]:
 
 
 def to_circumcenter(triangle: Contour) -> Point:
-    first, second, third = triangle.vertices
+    first, second, third = [Point(Fraction(vertex.x), Fraction(vertex.y))
+                            for vertex in triangle.vertices]
     first_x, first_y = first.x, first.y
     second_x, second_y = second.x, second.y
     third_x, third_y = third.x, third.y
-    first_squared_norm = first_x * first_x + first_y * first_y
-    second_squared_norm = second_x * second_x + second_y * second_y
-    third_squared_norm = third_x * third_x + third_y * third_y
-    center_x_numerator = (first_squared_norm * (second_y - third_y)
-                          + second_squared_norm * (third_y - first_y)
-                          + third_squared_norm * (first_y - second_y))
-    center_y_numerator = -(first_squared_norm * (second_x - third_x)
-                           + second_squared_norm * (third_x - first_x)
-                           + third_squared_norm * (first_x - second_x))
+    first_squared_length = first_x * first_x + first_y * first_y
+    second_squared_length = second_x * second_x + second_y * second_y
+    third_squared_length = third_x * third_x + third_y * third_y
+    center_x_numerator = (first_squared_length * (second_y - third_y)
+                          + second_squared_length * (third_y - first_y)
+                          + third_squared_length * (first_y - second_y))
+    center_y_numerator = -(first_squared_length * (second_x - third_x)
+                           + second_squared_length * (third_x - first_x)
+                           + third_squared_length * (first_x - second_x))
     denominator = 2 * context.cross_product(first, second, second, third)
-    inverted_denominator = robust_divide(1, denominator)
-    center_x = center_x_numerator * inverted_denominator
-    center_y = center_y_numerator * inverted_denominator
-    return Point(center_x, center_y)
+    return Point(center_x_numerator / denominator,
+                 center_y_numerator / denominator)
 
 
 def contour_to_multipoint(contour: Contour) -> Multipoint:
