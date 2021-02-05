@@ -124,13 +124,15 @@ Event = TypeVar('Event', Circle, Site)
 
 
 def less_than(left: Coordinate, right: Coordinate) -> bool:
-    return not are_almost_equal(left, right) and left < right
+    return ((not (isinstance(left, float) and isinstance(right, float))
+             or not are_floats_almost_equal(left, right))
+            and left < right)
 
 
-def are_almost_equal(left: Coordinate, right: Coordinate,
-                     max_ulps: int = 64) -> bool:
-    return (abs(_double_to_uint(float(left)) - _double_to_uint(float(right)))
-            <= max_ulps)
+def are_floats_almost_equal(left: float,
+                            right: float,
+                            max_ulps: int = 64) -> bool:
+    return abs(_double_to_uint(left) - _double_to_uint(right)) <= max_ulps
 
 
 def _double_to_uint(value: float,
