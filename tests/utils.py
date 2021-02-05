@@ -22,6 +22,7 @@ from sect.core.delaunay.utils import (complete_vertices as _complete_vertices,
                                       normalize_contour_vertices,
                                       to_distinct)
 from sect.core.utils import contour_to_edges_endpoints
+from sect.core.voronoi.faces import Vertex
 
 Strategy = SearchStrategy
 context = get_context()
@@ -165,3 +166,7 @@ def to_max_convex_hull_border_endpoints(points: Sequence[Point]
     max_convex_hull = to_max_convex_hull(points)
     return set(map(frozenset,
                    contour_to_edges_endpoints(Contour(max_convex_hull))))
+
+
+def vertex_to_point(vertex: Vertex) -> Point:
+    return Point(vertex.x, vertex.y)

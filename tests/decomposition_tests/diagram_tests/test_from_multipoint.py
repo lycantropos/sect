@@ -7,7 +7,9 @@ from hypothesis import given
 from sect.decomposition import Diagram
 from sect.triangulation import Triangulation
 from tests.utils import (contour_to_multipoint,
-                         to_circumcenter)
+                         to_circumcenter,
+                         to_distinct,
+                         vertex_to_point)
 from . import strategies
 
 
@@ -32,6 +34,5 @@ def test_duality(diagram_cls: Type[Diagram],
         to_circumcenter(triangle)
         for triangle in (triangulation_cls.delaunay(contour.vertices)
                          .triangles())]
-    assert all(any(vertex.x == center.x and vertex.y == center.y
-                   for center in circumcenters)
-               for vertex in result.vertices)
+    assert (sorted(map(vertex_to_point, result.vertices))
+            == sorted(to_distinct(circumcenters)))
