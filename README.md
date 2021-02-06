@@ -67,7 +67,6 @@ True
 ...      Contour([Point(0, 0), Point(1, 0), Point(0, 1)])])
 True
 >>> Polygon = context.polygon_cls
->>> constrained_delaunay = Triangulation.constrained_delaunay
 >>> (Triangulation.constrained_delaunay(
 ...      Polygon(Contour([Point(0, 0), Point(1, 0), Point(0, 1)]),
 ...              [])).triangles()
