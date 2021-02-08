@@ -9,6 +9,7 @@ from typing import (AbstractSet,
                     List,
                     Sequence,
                     Set,
+                    Tuple,
                     TypeVar)
 
 from ground.base import (Orientation,
@@ -150,6 +151,12 @@ def contour_to_edges(contour: Contour) -> Sequence[Segment]:
 
 
 contour_to_edges_endpoints = contour_to_edges_endpoints
+
+
+def multisegment_pop_left(multisegment: Multisegment
+                          ) -> Tuple[Segment, Multisegment]:
+    first_segment, *rest_segments = multisegment.segments
+    return first_segment, Multisegment(rest_segments)
 
 
 def segment_contains_point(segment: Segment, point: Point) -> bool:
