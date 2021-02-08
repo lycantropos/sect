@@ -9,6 +9,8 @@ from sect.core.voronoi.utils import (robust_divide,
                                      robust_sqrt,
                                      to_segment_squared_length)
 from .models import (Circle,
+                     LeftCircle,
+                     RightCircle,
                      Site)
 from .utils import (
     robust_sum_of_products_with_sqrt_pairs as pairs_sum_expression,
@@ -41,15 +43,15 @@ def to_point_point_point_circle(first_site: Site,
                                         dot_producer)
             * to_segment_squared_length(first_point, third_point,
                                         dot_producer))
-    lower_x_numerator = (center_x_numerator
-                         - robust_sqrt(squared_radius_numerator))
     denominator = 2 * context.cross_product(first_point, second_point,
                                             second_point, third_point)
     inverted_denominator = robust_divide(1, denominator)
     center_x = center_x_numerator * inverted_denominator
     center_y = center_y_numerator * inverted_denominator
-    lower_x = lower_x_numerator * inverted_denominator
-    return Circle(center_x, center_y, lower_x)
+    return ((LeftCircle if denominator > 0 else RightCircle)
+            (center_x, center_y,
+             squared_radius_numerator * inverted_denominator
+             * inverted_denominator))
 
 
 def to_point_point_segment_circle(first_point_site: Site,
