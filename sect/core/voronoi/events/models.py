@@ -250,7 +250,7 @@ class RightCircle(Circle):
                               self.center_y)
                              < ((squared_centers_dx - squared_radius_sum) ** 2,
                                 other.center_y)))
-        return (other.lower_x > self.center_x
+        return (self.center_x < other.lower_x
                 and ((self.squared_radius, self.center_y)
                      < ((other.lower_x - self.center_x) ** 2, other.center_y))
                 if isinstance(other, GenericCircle)
