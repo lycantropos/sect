@@ -1,3 +1,5 @@
+from functools import partial
+
 from ground.base import get_context
 from hypothesis import strategies
 from hypothesis_geometry import planar
@@ -16,3 +18,6 @@ rational_contours = (rational_coordinates_strategies
 empty_multisegments = strategies.builds(Multisegment, strategies.builds(list))
 rational_multisegments = (rational_coordinates_strategies
                           .flatmap(planar.multisegments))
+non_empty_rational_multisegments = (rational_coordinates_strategies
+                                    .flatmap(partial(planar.multisegments,
+                                                     min_size=1)))
