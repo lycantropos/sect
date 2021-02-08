@@ -62,7 +62,7 @@ class Site:
         else:
             start = self.start
             return (less_than(start.x, other.lower_x)
-                    if isinstance(other, Circle)
+                    if isinstance(other, GenericCircle)
                     else NotImplemented)
 
     @property
@@ -86,7 +86,7 @@ class Site:
                                                  not self.is_inverse)
 
 
-class BaseCircle:
+class Circle:
     center_x = center_y = ...  # type: Coordinate
     is_active = ...  # type: bool
 
@@ -103,7 +103,7 @@ class BaseCircle:
                 or less_than(end_y, self.center_y))
 
 
-class LeftCircle(BaseCircle):
+class LeftCircle(Circle):
     __slots__ = 'center_x', 'center_y', 'is_active', 'squared_radius'
 
     def __init__(self,
@@ -124,7 +124,7 @@ class LeftCircle(BaseCircle):
         return (other.lower_x < self.center_x
                 and ((self.squared_radius, other.center_y)
                      < (self.center_x - other.lower_x, self.center_y))
-                if isinstance(other, Circle)
+                if isinstance(other, GenericCircle)
                 else NotImplemented)
 
     def __lt__(self, other: 'Event') -> bool:
@@ -176,11 +176,11 @@ class LeftCircle(BaseCircle):
         return (self.center_x <= other.lower_x
                 or (((self.center_x - other.lower_x) ** 2, self.center_y)
                     < (self.squared_radius, other.center_y))
-                if isinstance(other, Circle)
+                if isinstance(other, GenericCircle)
                 else NotImplemented)
 
 
-class RightCircle(BaseCircle):
+class RightCircle(Circle):
     __slots__ = 'center_x', 'center_y', 'is_active', 'squared_radius'
 
     def __init__(self,
@@ -201,7 +201,7 @@ class RightCircle(BaseCircle):
         return (other.lower_x < self.center_x
                 and ((self.squared_radius, other.center_y)
                      < ((self.center_x - other.lower_x) ** 2, self.center_y))
-                if isinstance(other, Circle)
+                if isinstance(other, GenericCircle)
                 else NotImplemented)
 
     def __lt__(self, other: 'Event') -> bool:
@@ -253,11 +253,11 @@ class RightCircle(BaseCircle):
         return (other.lower_x > self.center_x
                 and ((self.squared_radius, self.center_y)
                      < ((other.lower_x - self.center_x) ** 2, other.center_y))
-                if isinstance(other, Circle)
+                if isinstance(other, GenericCircle)
                 else NotImplemented)
 
 
-class Circle(BaseCircle):
+class GenericCircle(Circle):
     __slots__ = 'center_x', 'center_y', 'lower_x', 'is_active'
 
     def __init__(self,
@@ -274,11 +274,11 @@ class Circle(BaseCircle):
         if isinstance(other, Site):
             return less_than(self.lower_x, other.start.x)
         return ((self.lower_x, self.center_y) < (other.lower_x, other.center_y)
-                if isinstance(other, Circle)
+                if isinstance(other, GenericCircle)
                 else NotImplemented)
 
 
-Event = TypeVar('Event', Circle, Site)
+Event = TypeVar('Event', GenericCircle, Site)
 
 
 def less_than(left: Coordinate, right: Coordinate) -> bool:

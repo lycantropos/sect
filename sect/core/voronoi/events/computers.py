@@ -8,8 +8,8 @@ from sect.core.voronoi.utils import (robust_divide,
                                      robust_evenly_divide,
                                      robust_sqrt,
                                      to_segment_squared_length)
-from .models import (BaseCircle,
-                     Circle,
+from .models import (Circle,
+                     GenericCircle,
                      LeftCircle,
                      RightCircle,
                      Site)
@@ -22,7 +22,7 @@ from .utils import (
 def to_point_point_point_circle(first_site: Site,
                                 second_site: Site,
                                 third_site: Site,
-                                context: Context) -> BaseCircle:
+                                context: Context) -> Circle:
     first_point, second_point, third_point = (
         first_site.start, second_site.start, third_site.start)
     first_x, first_y = first_point.x, first_point.y
@@ -59,7 +59,7 @@ def to_point_point_segment_circle(first_point_site: Site,
                                   second_point_site: Site,
                                   segment_site: Site,
                                   segment_index: int,
-                                  context: Context) -> BaseCircle:
+                                  context: Context) -> Circle:
     first_point, second_point = first_point_site.start, second_point_site.start
     segment_start, segment_end = segment_site.start, segment_site.end
     first_point_x, first_point_y = first_point.x, first_point.y
@@ -74,20 +74,20 @@ def to_point_point_segment_circle(first_point_site: Site,
                                     + coefficient * points_dy, 2)
     center_y = robust_evenly_divide(first_point_y + second_point_y
                                     - coefficient * points_dx, 2)
-    radius = robust_divide(
-            abs(cross_producer(segment_start,
-                               context.point_cls(center_x, center_y),
-                               segment_start, segment_end)),
-            robust_sqrt(to_segment_squared_length(segment_start, segment_end,
-                                                  dot_producer)))
-    return Circle(center_x, center_y, center_x + radius)
+    squared_radius = robust_divide(
+            cross_producer(segment_start,
+                           context.point_cls(center_x, center_y),
+                           segment_start, segment_end) ** 2,
+            to_segment_squared_length(segment_start, segment_end,
+                                      dot_producer))
+    return RightCircle(center_x, center_y, squared_radius)
 
 
 def to_point_segment_segment_circle(point_site: Site,
                                     first_segment_site: Site,
                                     second_segment_site: Site,
                                     point_index: int,
-                                    context: Context) -> BaseCircle:
+                                    context: Context) -> Circle:
     point = point_site.start
     first_start, first_end = first_segment_site.start, first_segment_site.end
     second_start, second_end = (second_segment_site.start,
@@ -208,13 +208,13 @@ def to_point_segment_segment_circle(point_site: Site,
         center_x = robust_divide(center_x_numerator, denominator)
         center_y = robust_divide(center_y_numerator, denominator)
         lower_x = robust_divide(lower_x_numerator, denominator)
-    return Circle(center_x, center_y, lower_x)
+    return GenericCircle(center_x, center_y, lower_x)
 
 
 def to_segment_segment_segment_circle(first_site: Site,
                                       second_site: Site,
                                       third_site: Site,
-                                      context: Context) -> BaseCircle:
+                                      context: Context) -> Circle:
     first_start, first_end = first_site.start, first_site.end
     second_start, second_end = second_site.start, second_site.end
     third_start, third_end = third_site.start, third_site.end
@@ -276,7 +276,7 @@ def to_segment_segment_segment_circle(first_site: Site,
     center_x = robust_divide(center_x_numerator, denominator)
     center_y = robust_divide(center_y_numerator, denominator)
     lower_x = robust_divide(lower_x_numerator, denominator)
-    return Circle(center_x, center_y, lower_x)
+    return GenericCircle(center_x, center_y, lower_x)
 
 
 def _to_point_point_segment_coefficient(first_point: Point,
