@@ -6,12 +6,9 @@ from sect.core.voronoi.hints import (CrossProducer,
                                      DotProducer)
 from sect.core.voronoi.utils import (robust_divide,
                                      robust_evenly_divide,
-                                     robust_sqrt,
-                                     to_segment_squared_length)
+                                     to_segment_squared_length,
+                                     to_sqrt)
 from .models import (Circle,
-                     GenericCircle,
-                     LeftCircle,
-                     RightCircle,
                      Site)
 from .utils import (
     robust_sum_of_products_with_sqrt_pairs as pairs_sum_expression,
@@ -44,15 +41,13 @@ def to_point_point_point_circle(first_site: Site,
                                         dot_producer)
             * to_segment_squared_length(first_point, third_point,
                                         dot_producer))
+    lower_x_numerator = center_x_numerator - to_sqrt(squared_radius_numerator)
     denominator = 2 * context.cross_product(first_point, second_point,
                                             second_point, third_point)
     inverted_denominator = robust_divide(1, denominator)
     center_x = center_x_numerator * inverted_denominator
     center_y = center_y_numerator * inverted_denominator
-    return ((LeftCircle if denominator > 0 else RightCircle)
-            (center_x, center_y,
-             squared_radius_numerator * inverted_denominator
-             * inverted_denominator))
+    return Circle(center_x, center_y, lower_x_numerator * inverted_denominator)
 
 
 def to_point_point_segment_circle(first_point_site: Site,
@@ -74,13 +69,13 @@ def to_point_point_segment_circle(first_point_site: Site,
                                     + coefficient * points_dy, 2)
     center_y = robust_evenly_divide(first_point_y + second_point_y
                                     - coefficient * points_dx, 2)
-    squared_radius = robust_divide(
-            cross_producer(segment_start,
-                           context.point_cls(center_x, center_y),
-                           segment_start, segment_end) ** 2,
-            to_segment_squared_length(segment_start, segment_end,
-                                      dot_producer))
-    return RightCircle(center_x, center_y, squared_radius)
+    radius = robust_divide(
+            abs(cross_producer(segment_start,
+                               context.point_cls(center_x, center_y),
+                               segment_start, segment_end)),
+            to_sqrt(to_segment_squared_length(segment_start, segment_end,
+                                              dot_producer)))
+    return Circle(center_x, center_y, center_x + radius)
 
 
 def to_point_segment_segment_circle(point_site: Site,
@@ -208,7 +203,7 @@ def to_point_segment_segment_circle(point_site: Site,
         center_x = robust_divide(center_x_numerator, denominator)
         center_y = robust_divide(center_y_numerator, denominator)
         lower_x = robust_divide(lower_x_numerator, denominator)
-    return GenericCircle(center_x, center_y, lower_x)
+    return Circle(center_x, center_y, lower_x)
 
 
 def to_segment_segment_segment_circle(first_site: Site,
@@ -276,7 +271,7 @@ def to_segment_segment_segment_circle(first_site: Site,
     center_x = robust_divide(center_x_numerator, denominator)
     center_y = robust_divide(center_y_numerator, denominator)
     lower_x = robust_divide(lower_x_numerator, denominator)
-    return GenericCircle(center_x, center_y, lower_x)
+    return Circle(center_x, center_y, lower_x)
 
 
 def _to_point_point_segment_coefficient(first_point: Point,
@@ -297,7 +292,7 @@ def _to_point_point_segment_coefficient(first_point: Point,
         sign = -1 if segment_index == 2 else 1
         second_point_cross_product = cross_producer(
                 segment_start, segment_end, second_point, segment_end)
-        determinant = robust_sqrt(
+        determinant = to_sqrt(
                 to_segment_squared_length(first_point, second_point,
                                           dot_producer)
                 * to_segment_squared_length(segment_start, segment_end,

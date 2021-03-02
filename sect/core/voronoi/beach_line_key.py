@@ -13,8 +13,8 @@ from .hints import (CrossProducer,
                     DotProducer)
 from .utils import (robust_divide,
                     robust_evenly_divide,
-                    robust_sqrt,
-                    to_segment_squared_length)
+                    to_segment_squared_length,
+                    to_sqrt)
 
 
 class BeachLineKey:
@@ -113,8 +113,8 @@ def distance_to_segment_arc(segment_site: Site,
         return robust_evenly_divide(segment_site.start.x - point.x, 2)
     else:
         start, end = segment_site.start, segment_site.end
-        segment_length = robust_sqrt(to_segment_squared_length(start, end,
-                                                               dot_producer))
+        segment_length = to_sqrt(to_segment_squared_length(start, end,
+                                                           dot_producer))
         segment_dx, segment_dy = end.x - start.x, end.y - start.y
         coefficient = (robust_divide(segment_length - segment_dy,
                                      segment_dx * segment_dx)
