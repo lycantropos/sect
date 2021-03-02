@@ -78,7 +78,7 @@ class Constant(Expression):
                 if isinstance(other, (Real, Constant))
                 else NotImplemented)
 
-    def __mul__(self, other: Union[Real, 'Constant']):
+    def __mul__(self, other: Union[Real, 'Constant']) -> 'Constant':
         return (Constant(self.value * other.value)
                 if isinstance(other, Constant)
                 else (Constant(self.value * other)
