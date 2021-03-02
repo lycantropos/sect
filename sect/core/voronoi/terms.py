@@ -139,14 +139,14 @@ class Term(Expression):
         if isinstance(argument, Constant):
             argument_value = argument.value
             argument_numerator = argument_value.numerator
-            argument_numerator_isqrt = _sqrt_floor(argument_numerator)
-            if square(argument_numerator_isqrt) == argument_numerator:
-                scale *= argument_numerator_isqrt
+            argument_numerator_sqrt_floor = _sqrt_floor(argument_numerator)
+            if square(argument_numerator_sqrt_floor) == argument_numerator:
+                scale *= argument_numerator_sqrt_floor
                 argument /= argument_numerator
             argument_denominator = argument_value.denominator
-            argument_denominator_isqrt = _sqrt_floor(argument_denominator)
-            if square(argument_denominator_isqrt) == argument_denominator:
-                scale /= argument_denominator_isqrt
+            argument_denominator_sqrt_floor = _sqrt_floor(argument_denominator)
+            if square(argument_denominator_sqrt_floor) == argument_denominator:
+                scale /= argument_denominator_sqrt_floor
                 argument *= argument_denominator
                 if argument == One:
                     return scale
