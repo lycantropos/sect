@@ -1,15 +1,13 @@
 from fractions import Fraction
 from itertools import groupby
-from numbers import Real
 from typing import (List,
                     TypeVar)
 
 from ground.hints import (Coordinate,
                           Point)
+from symba.base import sqrt
 
 from .hints import DotProducer
-from .terms import (Constant,
-                    Term)
 
 Domain = TypeVar('Domain')
 
@@ -32,9 +30,7 @@ def robust_divide(dividend: Coordinate, divisor: Coordinate) -> Coordinate:
 
 
 def to_sqrt(value: Coordinate) -> Coordinate:
-    return Term.from_components(Constant(1), (Constant(value)
-                                              if isinstance(value, Real)
-                                              else value))
+    return sqrt(value)
 
 
 def to_segment_squared_length(start: Point,
