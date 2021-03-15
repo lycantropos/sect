@@ -1,5 +1,7 @@
 from functools import partial
 
+from bentley_ottmann.planar import (segments_cross_or_overlap,
+                                    segments_intersect)
 from clipping.planar import segments_to_multisegment
 from ground.base import get_context
 from ground.hints import Coordinate
@@ -25,7 +27,8 @@ def coordinates_to_multisegments(coordinates: Strategy[Coordinate],
                                  *,
                                  min_size: int = 0) -> Strategy[Multisegment]:
     return (strategies.lists(planar.segments(coordinates),
-                             min_size=min_size)
+                             min_size=min_size,
+                             max_size=5)
             .map(segments_to_multisegment))
 
 
