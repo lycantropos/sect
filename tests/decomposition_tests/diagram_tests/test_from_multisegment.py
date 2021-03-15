@@ -35,5 +35,5 @@ def test_step(diagram_cls: Type[Diagram],
     next_result = diagram_cls.from_multisegment(multisegment)
 
     assert len(result.cells) < len(next_result.cells)
-    assert len(result.edges) < len(next_result.edges)
+    assert len(result.edges) <= len(next_result.edges)
     assert len(result.vertices) <= len(next_result.vertices)
