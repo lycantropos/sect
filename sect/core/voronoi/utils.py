@@ -3,6 +3,8 @@ from itertools import groupby
 from typing import (List,
                     TypeVar)
 
+from ground.base import (Context,
+                         Mode)
 from ground.hints import (Coordinate,
                           Point)
 from symba.base import sqrt
@@ -37,6 +39,9 @@ def to_segment_squared_length(start: Point,
                               end: Point,
                               dot_producer: DotProducer) -> Coordinate:
     return dot_producer(start, end, start, end)
+
+
+plain_cross_product = Context(mode=Mode.PLAIN).cross_product
 
 
 def to_unique_just_seen(iterable: List[Domain]) -> List[Domain]:

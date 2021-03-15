@@ -1,11 +1,9 @@
-import ctypes
-import struct
 from typing import TypeVar
 
 from ground.base import Orientation
-from ground.hints import (Coordinate,
-                          Point)
+from ground.hints import Point
 from reprit.base import generate_repr
+from symba.base import Expression
 
 from sect.core.hints import Orienteer
 from sect.core.voronoi.enums import SourceCategory
@@ -40,8 +38,7 @@ class Site:
 
     def __lt__(self, other: 'Event') -> bool:
         if isinstance(other, Site):
-            start = self.start
-            other_start = other.start
+            start, other_start = self.start, other.start
             if start.x != other_start.x:
                 return start.x < other_start.x
             elif not self.is_segment:
@@ -60,8 +57,7 @@ class Site:
                 return (self.orienteer(self.end, self.start, other.end)
                         is Orientation.COUNTERCLOCKWISE)
         else:
-            start = self.start
-            return (less_than(start.x, other.lower_x)
+            return (self.start.x < other.lower_x
                     if isinstance(other, Circle)
                     else NotImplemented)
 
@@ -90,9 +86,9 @@ class Circle:
     __slots__ = 'center_x', 'center_y', 'lower_x', 'is_active'
 
     def __init__(self,
-                 center_x: Coordinate,
-                 center_y: Coordinate,
-                 lower_x: Coordinate,
+                 center_x: Expression,
+                 center_y: Expression,
+                 lower_x: Expression,
                  is_active: bool = True) -> None:
         self.center_x, self.center_y, self.lower_x, self.is_active = (
             center_x, center_y, lower_x, is_active)
@@ -100,11 +96,11 @@ class Circle:
     __repr__ = generate_repr(__init__)
 
     def __lt__(self, other: 'Event') -> bool:
-        if isinstance(other, Site):
-            return less_than(self.lower_x, other.start.x)
         return ((self.lower_x, self.center_y) < (other.lower_x, other.center_y)
                 if isinstance(other, Circle)
-                else NotImplemented)
+                else (self.lower_x < other.start.x
+                      if isinstance(other, Site)
+                      else NotImplemented))
 
     def deactivate(self) -> None:
         self.is_active = False
@@ -115,30 +111,7 @@ class Circle:
         start_y, end_y = ((site.end.y, site.start.y)
                           if site.is_inverse
                           else (site.start.y, site.end.y))
-        return (less_than(self.center_y, start_y)
-                or less_than(end_y, self.center_y))
+        return self.center_y < start_y or end_y < self.center_y
 
 
 Event = TypeVar('Event', Circle, Site)
-
-
-def less_than(left: Coordinate, right: Coordinate) -> bool:
-    return ((not (isinstance(left, float) and isinstance(right, float))
-             or not are_floats_almost_equal(left, right))
-            and left < right)
-
-
-def are_floats_almost_equal(left: float,
-                            right: float,
-                            max_ulps: int = 64) -> bool:
-    return abs(_double_to_uint(left) - _double_to_uint(right)) <= max_ulps
-
-
-def _double_to_uint(value: float,
-                    *,
-                    sign_bit_mask: int = 2 ** 63) -> int:
-    result, = struct.unpack('!Q', struct.pack('!d', value))
-    return (ctypes.c_uint64(~result + 1
-                            if sign_bit_mask & result
-                            else sign_bit_mask | result)
-            .value)

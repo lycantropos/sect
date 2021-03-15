@@ -4,8 +4,8 @@ from ground.hints import (Coordinate,
 
 from sect.core.voronoi.hints import (CrossProducer,
                                      DotProducer)
-from sect.core.voronoi.utils import (robust_divide,
-                                     robust_evenly_divide,
+from sect.core.voronoi.utils import (plain_cross_product,
+                                     robust_divide,
                                      to_segment_squared_length,
                                      to_sqrt)
 from .models import (Circle,
@@ -65,14 +65,12 @@ def to_point_point_segment_circle(first_point_site: Site,
     coefficient = _to_point_point_segment_coefficient(
             first_point, second_point, segment_start, segment_end,
             segment_index, cross_producer, dot_producer)
-    center_x = robust_evenly_divide(first_point_x + second_point_x
-                                    + coefficient * points_dy, 2)
-    center_y = robust_evenly_divide(first_point_y + second_point_y
-                                    - coefficient * points_dx, 2)
+    center_x = (first_point_x + second_point_x + coefficient * points_dy) / 2
+    center_y = (first_point_y + second_point_y - coefficient * points_dx) / 2
     radius = robust_divide(
-            abs(cross_producer(segment_start,
-                               context.point_cls(center_x, center_y),
-                               segment_start, segment_end)),
+            abs(plain_cross_product(segment_start,
+                                    context.point_cls(center_x, center_y),
+                                    segment_start, segment_end)),
             to_sqrt(to_segment_squared_length(segment_start, segment_end,
                                               dot_producer)))
     return Circle(center_x, center_y, center_x + radius)
@@ -102,10 +100,10 @@ def to_point_segment_segment_circle(point_site: Site,
     if segments_cross_product:
         second_dx = second_end_x - second_start_x
         second_dy = second_end_y - second_start_y
-        point_first_cross_product = cross_producer(
-                first_start, first_end, point, first_end)
-        point_second_cross_product = cross_producer(
-                second_start, second_end, point, second_end)
+        point_first_cross_product = cross_producer(first_start, first_end,
+                                                   point, first_end)
+        point_second_cross_product = cross_producer(second_start, second_end,
+                                                    point, second_end)
         total_cross_product_x = (second_dx * point_first_cross_product
                                  - first_dx * point_second_cross_product)
         total_cross_product_y = (second_dy * point_first_cross_product
@@ -159,16 +157,13 @@ def to_point_segment_segment_circle(point_site: Site,
                     (second_mixed_product, first_mixed_product,
                      sign * segments_cross_product),
                     common_right_coefficients)
-            center_x = robust_divide(center_x_numerator, denominator)
-            center_y = robust_divide(center_y_numerator, denominator)
-            radius = robust_divide(
-                    -first_mixed_product * point_second_cross_product
-                    - second_mixed_product * point_first_cross_product,
-                    abs(denominator))
-            lower_x = center_x + radius
+            center_x = center_x_numerator / denominator
+            center_y = center_y_numerator / denominator
+            radius = ((-first_mixed_product * point_second_cross_product
+                       - second_mixed_product * point_first_cross_product)
+                      / abs(denominator))
         else:
-            center_x = lower_x = point_x
-            center_y = point_y
+            center_x, center_y, radius = point_x, point_y, 0
     else:
         sign = -1 if point_index == 2 else 1
         point_cls = context.point_cls
@@ -194,16 +189,14 @@ def to_point_segment_segment_circle(point_site: Site,
         center_y_numerator = pairs_sum_expression(
                 (2 * sign * first_dy, center_y_second_left_coefficient),
                 common_right_coefficients)
-        lower_x_numerator = triplets_sum_expression(
-                center_x_left_coefficients
-                + (abs(cross_producer(first_start, first_end, first_end,
-                                      second_start)),),
-                common_right_coefficients + (first_squared_length,))
+        radius_numerator = (abs(cross_producer(first_start, first_end,
+                                               first_end, second_start))
+                            * to_sqrt(first_squared_length))
         denominator = 2 * first_squared_length
-        center_x = robust_divide(center_x_numerator, denominator)
-        center_y = robust_divide(center_y_numerator, denominator)
-        lower_x = robust_divide(lower_x_numerator, denominator)
-    return Circle(center_x, center_y, lower_x)
+        center_x = center_x_numerator / denominator
+        center_y = center_y_numerator / denominator
+        radius = radius_numerator / denominator
+    return Circle(center_x, center_y, center_x + radius)
 
 
 def to_segment_segment_segment_circle(first_site: Site,
@@ -262,16 +255,15 @@ def to_segment_segment_segment_circle(first_site: Site,
     radius_numerator = (first_second_cross_product * third_cross_product
                         + second_third_cross_product * first_cross_product
                         + third_first_cross_product * second_cross_product)
-    lower_x_numerator = center_x_numerator - radius_numerator
     denominator = triplets_sum_expression(
             (first_second_cross_product, second_third_cross_product,
              third_first_cross_product),
             (third_squared_length, first_squared_length,
              second_squared_length))
-    center_x = robust_divide(center_x_numerator, denominator)
-    center_y = robust_divide(center_y_numerator, denominator)
-    lower_x = robust_divide(lower_x_numerator, denominator)
-    return Circle(center_x, center_y, lower_x)
+    center_x = center_x_numerator / denominator
+    center_y = center_y_numerator / denominator
+    radius = radius_numerator / denominator
+    return Circle(center_x, center_y, center_x - radius)
 
 
 def _to_point_point_segment_coefficient(first_point: Point,
