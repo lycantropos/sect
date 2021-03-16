@@ -1,32 +1,38 @@
-from ground.base import Orientation
+from ground.base import (Context,
+                         Orientation)
 
-from sect.core.hints import Orienteer
 from .models import Site
 
 
 def point_point_point_circle_exists(first_point_site: Site,
                                     second_point_site: Site,
                                     third_point_site: Site,
-                                    orienteer: Orienteer) -> bool:
-    return orienteer(first_point_site.start, second_point_site.start,
-                     third_point_site.start) is Orientation.CLOCKWISE
+                                    context: Context) -> bool:
+    return (context.angle_orientation(first_point_site.start,
+                                      second_point_site.start,
+                                      third_point_site.start)
+            is Orientation.CLOCKWISE)
 
 
 def point_point_segment_circle_exists(first_point_site: Site,
                                       second_point_site: Site,
                                       segment_site: Site,
                                       segment_index: int,
-                                      orienteer: Orienteer) -> bool:
+                                      context: Context) -> bool:
     if segment_index == 2:
-        return (segment_site.start != first_point_site.start
-                or segment_site.end != second_point_site.start)
+        return (not context.segment_contains_point(segment_site.start,
+                                                   segment_site.end,
+                                                   first_point_site.start)
+                or not context.segment_contains_point(segment_site.start,
+                                                      segment_site.end,
+                                                      second_point_site.start))
     else:
-        first_orientation = orienteer(first_point_site.start,
-                                      second_point_site.start,
-                                      segment_site.start)
-        second_orientation = orienteer(first_point_site.start,
-                                       second_point_site.start,
-                                       segment_site.end)
+        first_orientation = context.angle_orientation(first_point_site.start,
+                                                      second_point_site.start,
+                                                      segment_site.start)
+        second_orientation = context.angle_orientation(first_point_site.start,
+                                                       second_point_site.start,
+                                                       segment_site.end)
         first_point, second_point = (first_point_site.start,
                                      second_point_site.start)
         if segment_index == 1 and second_point.x <= first_point.x:
@@ -42,15 +48,16 @@ def point_segment_segment_circle_exists(point_site: Site,
                                         first_segment_site: Site,
                                         second_segment_site: Site,
                                         point_index: int,
-                                        orienteer: Orienteer) -> bool:
+                                        context: Context) -> bool:
     return (first_segment_site.sorted_index
             != second_segment_site.sorted_index
             and (point_index != 2 or (first_segment_site.is_inverse
                                       or not second_segment_site.is_inverse)
                  and (first_segment_site.is_inverse
                       is not second_segment_site.is_inverse
-                      or orienteer(first_segment_site.start,
-                                   point_site.start, second_segment_site.end)
+                      or context.angle_orientation(first_segment_site.start,
+                                                   point_site.start,
+                                                   second_segment_site.end)
                       is Orientation.CLOCKWISE)))
 
 

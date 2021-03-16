@@ -79,14 +79,12 @@ def to_diagram_cls(context: Context) -> Type[Diagram]:
                              second_site: Site,
                              third_site: Site,
                              bisector_node: red_black.Node) -> None:
-            orienteer = context.angle_orientation
             if first_site.is_point:
                 if second_site.is_point:
                     if third_site.is_point:
                         # (point, point, point) sites
                         if not point_point_point_circle_exists(
-                                first_site, second_site, third_site,
-                                orienteer):
+                                first_site, second_site, third_site, context):
                             return
                         circle = to_point_point_point_circle(
                                 first_site, second_site, third_site, context)
@@ -94,7 +92,7 @@ def to_diagram_cls(context: Context) -> Type[Diagram]:
                         # (point, point, segment) sites
                         if not point_point_segment_circle_exists(
                                 first_site, second_site, third_site, 3,
-                                orienteer):
+                                context):
                             return
                         circle = to_point_point_segment_circle(
                                 first_site, second_site, third_site, 3,
@@ -102,14 +100,14 @@ def to_diagram_cls(context: Context) -> Type[Diagram]:
                 elif third_site.is_point:
                     # (point, segment, point) sites
                     if not point_point_segment_circle_exists(
-                            first_site, third_site, second_site, 2, orienteer):
+                            first_site, third_site, second_site, 2, context):
                         return
                     circle = to_point_point_segment_circle(
                             first_site, third_site, second_site, 2, context)
                 else:
                     # (point, segment, segment) sites.
                     if not point_segment_segment_circle_exists(
-                            first_site, second_site, third_site, 1, orienteer):
+                            first_site, second_site, third_site, 1, context):
                         return
                     circle = to_point_segment_segment_circle(
                             first_site, second_site, third_site, 1, context)
@@ -117,21 +115,21 @@ def to_diagram_cls(context: Context) -> Type[Diagram]:
                 if third_site.is_point:
                     # (segment, point, point) sites
                     if not point_point_segment_circle_exists(
-                            second_site, third_site, first_site, 1, orienteer):
+                            second_site, third_site, first_site, 1, context):
                         return
                     circle = to_point_point_segment_circle(
                             second_site, third_site, first_site, 1, context)
                 else:
                     # (segment, point, segment) sites
                     if not point_segment_segment_circle_exists(
-                            second_site, first_site, third_site, 2, orienteer):
+                            second_site, first_site, third_site, 2, context):
                         return
                     circle = to_point_segment_segment_circle(
                             second_site, first_site, third_site, 2, context)
             elif third_site.is_point:
                 # (segment, segment, point) sites
                 if not point_segment_segment_circle_exists(
-                        third_site, first_site, second_site, 3, orienteer):
+                        third_site, first_site, second_site, 3, context):
                     return
                 circle = to_point_segment_segment_circle(
                         third_site, first_site, second_site, 3, context)
