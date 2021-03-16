@@ -26,10 +26,8 @@ empty_multisegments = strategies.builds(Multisegment, strategies.builds(list))
 def coordinates_to_multisegments(coordinates: Strategy[Coordinate],
                                  *,
                                  min_size: int = 0) -> Strategy[Multisegment]:
-    return (strategies.lists(planar.segments(coordinates),
-                             min_size=min_size,
-                             max_size=5)
-            .map(segments_to_multisegment))
+    return planar.multisegments(coordinates,
+                                min_size=min_size)
 
 
 rational_multisegments = (rational_coordinates_strategies
