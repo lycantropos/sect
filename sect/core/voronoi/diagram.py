@@ -391,12 +391,10 @@ def insert_new_edge(diagram: Diagram,
                                   first_site.source_category))
     # the second site represents a new site during site processing,
     # add a new cell to the cell records
-    diagram.cells.append(Cell(second_site.source,
-                              second_site.source_category))
+    diagram.cells.append(Cell(second_site.source, second_site.source_category))
     is_linear = is_linear_edge(first_site, second_site)
     is_primary = is_primary_edge(first_site, second_site)
-    first_edge = Edge(None, diagram.cells[first_site.sorted_index],
-                      is_linear,
+    first_edge = Edge(None, diagram.cells[first_site.sorted_index], is_linear,
                       is_primary)
     second_edge = Edge(None, diagram.cells[second_site.sorted_index],
                        is_linear, is_primary)
