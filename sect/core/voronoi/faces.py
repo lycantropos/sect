@@ -2,7 +2,6 @@ from reprlib import recursive_repr
 from typing import Optional
 
 from ground.hints import Coordinate
-from reprit import seekers
 from reprit.base import generate_repr
 
 from .enums import (GeometryCategory,
@@ -54,8 +53,8 @@ class Vertex:
 
 
 class Edge:
-    __slots__ = ('start', 'twin', 'prev', 'next', 'cell', 'is_linear',
-                 'is_primary')
+    __slots__ = ('cell', 'is_linear', 'is_primary', 'left_from_end',
+                 'left_in_start', 'opposite', 'start')
 
     def __init__(self,
                  start: Optional[Vertex],
@@ -65,14 +64,13 @@ class Edge:
         self.start = start
         self.cell = cell
         self.is_linear, self.is_primary = is_linear, is_primary
-        self.twin = self.prev = self.next = None
+        self.opposite = self.left_in_start = self.left_from_end = None
 
-    __repr__ = recursive_repr()(generate_repr(__init__,
-                                              field_seeker=seekers.complex_))
+    __repr__ = recursive_repr()(generate_repr(__init__))
 
     @property
     def end(self) -> Optional[Vertex]:
-        return None if self.twin is None else self._end
+        return None if self.opposite is None else self.opposite.start
 
     @property
     def is_curved(self) -> bool:
@@ -90,46 +88,37 @@ class Edge:
 
     @property
     def is_infinite(self) -> bool:
-        return self.start is None or self._end is None
+        return self.start is None or self.end is None
 
     @property
     def is_secondary(self) -> bool:
         return not self.is_primary
 
     @property
-    def rot_next(self) -> Optional['Edge']:
-        return None if self.prev is None else self._rot_next
+    def left_from_start(self) -> Optional['Edge']:
+        return (None
+                if self.left_in_start is None
+                else self.left_in_start.opposite)
 
     @property
-    def rot_prev(self) -> Optional['Edge']:
-        return None if self.twin is None else self._rot_prev
-
-    @property
-    def _end(self) -> Optional[Vertex]:
-        return self.twin.start
-
-    @property
-    def _rot_next(self) -> Optional['Edge']:
-        return self.prev.twin
-
-    @property
-    def _rot_prev(self) -> Optional['Edge']:
-        return self.twin.next
+    def right_from_start(self) -> Optional['Edge']:
+        return None if self.opposite is None else self.opposite.left_from_end
 
     def disconnect(self) -> None:
         vertex = self.start
-        cursor = self.twin.rot_next
-        while cursor is not self.twin:
+        cursor = self.opposite.left_from_start
+        while cursor is not self.opposite:
             cursor.start = vertex
-            cursor = cursor.rot_next
-        twin = self.twin
-        edge_rot_prev, edge_rot_next = self.rot_prev, self.rot_next
-        twin_rot_prev, twin_rot_next = twin.rot_prev, twin.rot_next
+            cursor = cursor.left_from_start
+        right_from_start, left_from_start = (self.right_from_start,
+                                             self.left_from_start)
+        opposite_right_from_start, opposite_left_from_start = (
+            self.opposite.right_from_start, self.opposite.left_from_start)
         # update prev/next pointers for the incident edges
-        edge_rot_next.twin.next = twin_rot_prev
-        twin_rot_prev.prev = edge_rot_next.twin
-        edge_rot_prev.prev = twin_rot_next.twin
-        twin_rot_next.twin.next = edge_rot_prev
+        left_from_start.opposite.left_from_end = opposite_right_from_start
+        opposite_right_from_start.left_in_start = left_from_start.opposite
+        right_from_start.left_in_start = opposite_left_from_start.opposite
+        opposite_left_from_start.opposite.left_from_end = right_from_start
 
     def set_as_incident(self) -> None:
         self.cell.incident_edge = self

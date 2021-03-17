@@ -400,7 +400,7 @@ def insert_new_edge(diagram: Diagram,
                       is_primary)
     second_edge = Edge(None, diagram.cells[second_site.sorted_index],
                        is_linear, is_primary)
-    first_edge.twin, second_edge.twin = second_edge, first_edge
+    first_edge.opposite, second_edge.opposite = second_edge, first_edge
     diagram.edges.append(first_edge)
     diagram.edges.append(second_edge)
     return first_edge, second_edge
@@ -419,15 +419,17 @@ def insert_new_edge_from_intersection(diagram: Diagram,
     first_bisector.start = second_bisector.start = new_vertex
     is_linear = is_linear_edge(first_site, second_site)
     is_primary = is_primary_edge(first_site, second_site)
-    first_edge = Edge(None, diagram.cells[first_site.sorted_index],
-                      is_linear, is_primary)
+    first_edge = Edge(None, diagram.cells[first_site.sorted_index], is_linear,
+                      is_primary)
     second_edge = Edge(new_vertex, diagram.cells[second_site.sorted_index],
                        is_linear, is_primary)
-    first_edge.twin, second_edge.twin = second_edge, first_edge
-    first_edge.next, second_edge.prev = first_bisector, second_bisector.twin
-    first_bisector.prev, second_bisector.prev = first_edge, first_bisector.twin
-    first_bisector.twin.next, second_bisector.twin.next = (second_bisector,
-                                                           second_edge)
+    first_edge.opposite, second_edge.opposite = second_edge, first_edge
+    first_edge.left_from_end, second_edge.left_in_start = (
+        first_bisector, second_bisector.opposite)
+    first_bisector.left_in_start, second_bisector.left_in_start = (
+        first_edge, first_bisector.opposite)
+    (first_bisector.opposite.left_from_end,
+     second_bisector.opposite.left_from_end) = second_bisector, second_edge
     diagram.edges.append(first_edge)
     diagram.edges.append(second_edge)
     return first_edge, second_edge
@@ -465,11 +467,13 @@ def remove_degenerate_edges(diagram: Diagram) -> None:
                 diagram.edges[first_degenerate_edge_index] = edge
                 next_edge = diagram.edges[first_degenerate_edge_index + 1] = (
                     diagram.edges[edge_index + 1])
-                edge.twin, next_edge.twin = next_edge, edge
-                if edge.prev is not None:
-                    edge.prev.next, next_edge.next.prev = edge, next_edge
-                if next_edge.prev is not None:
-                    edge.next.prev, next_edge.prev.next = edge, next_edge
+                edge.opposite, next_edge.opposite = next_edge, edge
+                if edge.left_in_start is not None:
+                    (edge.left_in_start.left_from_end,
+                     next_edge.left_from_end.left_in_start) = edge, next_edge
+                if next_edge.left_in_start is not None:
+                    (edge.left_from_end.left_in_start,
+                     next_edge.left_in_start.left_from_end) = edge, next_edge
             first_degenerate_edge_index += 2
     del diagram.edges[first_degenerate_edge_index:]
 
@@ -484,7 +488,7 @@ def remove_degenerate_vertices(diagram: Diagram) -> None:
             cursor = vertex.incident_edge
             while True:
                 cursor.start = vertex
-                cursor = cursor.rot_next
+                cursor = cursor.left_from_start
                 if cursor is vertex.incident_edge:
                     break
         first_degenerate_vertex_index += 1
@@ -494,18 +498,18 @@ def remove_degenerate_vertices(diagram: Diagram) -> None:
 def update_line_edges(diagram: Diagram) -> None:
     edge_index = 0
     edge = diagram.edges[edge_index]
-    edge.prev = edge.next = edge
+    edge.left_in_start = edge.left_from_end = edge
     edge_index += 1
     edge = diagram.edges[edge_index]
     edge_index += 1
     while edge_index < len(diagram.edges):
         next_edge = diagram.edges[edge_index]
         edge_index += 1
-        edge.prev = edge.next = next_edge
-        next_edge.prev = next_edge.next = edge
+        edge.left_in_start = edge.left_from_end = next_edge
+        next_edge.left_in_start = next_edge.left_from_end = edge
         edge = diagram.edges[edge_index]
         edge_index += 1
-    edge.prev = edge.next = edge
+    edge.left_in_start = edge.left_from_end = edge
 
 
 def update_ray_edges(diagram: Diagram) -> None:
@@ -515,14 +519,15 @@ def update_ray_edges(diagram: Diagram) -> None:
         # move to the previous edge while it is possible
         # in the clockwise direction
         left_edge = cell.incident_edge
-        while left_edge.prev is not None:
-            left_edge = left_edge.prev
+        while left_edge.left_in_start is not None:
+            left_edge = left_edge.left_in_start
             # terminate if this is not a boundary cell
             if left_edge is cell.incident_edge:
                 break
-        if left_edge.prev is not None:
+        if left_edge.left_in_start is not None:
             continue
         right_edge = cell.incident_edge
-        while right_edge.next is not None:
-            right_edge = right_edge.next
-        left_edge.prev, right_edge.next = right_edge, left_edge
+        while right_edge.left_from_end is not None:
+            right_edge = right_edge.left_from_end
+        left_edge.left_in_start, right_edge.left_from_end = (right_edge,
+                                                             left_edge)
