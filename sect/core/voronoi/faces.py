@@ -1,4 +1,3 @@
-from reprlib import recursive_repr
 from typing import Optional
 
 from ground.hints import Coordinate
@@ -66,7 +65,7 @@ class Edge:
         self.is_linear, self.is_primary = is_linear, is_primary
         self.opposite = self.left_in_start = self.left_from_end = None
 
-    __repr__ = recursive_repr()(generate_repr(__init__))
+    __repr__ = generate_repr(__init__)
 
     @property
     def end(self) -> Optional[Vertex]:
