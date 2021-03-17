@@ -27,21 +27,19 @@ def point_point_segment_circle_exists(first_point_site: Site,
                                                       segment_site.end,
                                                       second_point_site.start))
     else:
-        first_orientation = context.angle_orientation(first_point_site.start,
-                                                      second_point_site.start,
-                                                      segment_site.start)
-        second_orientation = context.angle_orientation(first_point_site.start,
-                                                       second_point_site.start,
-                                                       segment_site.end)
         first_point, second_point = (first_point_site.start,
                                      second_point_site.start)
+        start_orientation = context.angle_orientation(
+                first_point, second_point, segment_site.start)
+        end_orientation = context.angle_orientation(first_point, second_point,
+                                                    segment_site.end)
         if segment_index == 1 and second_point.x <= first_point.x:
-            return first_orientation is Orientation.CLOCKWISE
+            return start_orientation is Orientation.CLOCKWISE
         elif segment_index == 3 and first_point.x <= second_point.x:
-            return second_orientation is Orientation.CLOCKWISE
+            return end_orientation is Orientation.CLOCKWISE
         else:
-            return (first_orientation is Orientation.CLOCKWISE
-                    or second_orientation is Orientation.CLOCKWISE)
+            return (start_orientation is Orientation.CLOCKWISE
+                    or end_orientation is Orientation.CLOCKWISE)
 
 
 def point_segment_segment_circle_exists(point_site: Site,
