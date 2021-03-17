@@ -439,8 +439,8 @@ def is_linear_edge(first_site: Site, second_site: Site) -> bool:
 
 
 def is_primary_edge(first_site: Site, second_site: Site) -> bool:
-    first_site_is_segment, second_site_is_segment = (
-        first_site.is_segment, second_site.is_segment)
+    first_site_is_segment, second_site_is_segment = (first_site.is_segment,
+                                                     second_site.is_segment)
     if first_site_is_segment and not second_site_is_segment:
         return (first_site.start != second_site.start
                 and first_site.end != second_site.start)
