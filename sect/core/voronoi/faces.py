@@ -1,7 +1,7 @@
 from typing import Optional
 
-from ground.hints import Coordinate
 from reprit.base import generate_repr
+from symba.base import Expression
 
 from .enums import (GeometryCategory,
                     SourceCategory)
@@ -35,7 +35,7 @@ class Cell:
 class Vertex:
     __slots__ = 'x', 'y', 'incident_edge'
 
-    def __init__(self, x: Coordinate, y: Coordinate) -> None:
+    def __init__(self, x: Expression, y: Expression) -> None:
         self.x, self.y = x, y
         self.incident_edge = None  # type: Optional[Edge]
 
