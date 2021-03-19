@@ -1,6 +1,6 @@
 from ground.base import Context
-from ground.hints import (Coordinate,
-                          Point)
+from ground.hints import Point
+from symba.base import Expression
 
 from sect.core.voronoi.hints import (CrossProducer,
                                      DotProducer)
@@ -11,9 +11,10 @@ from sect.core.voronoi.utils import (plain_cross_product,
 from .models import (Circle,
                      Site)
 from .utils import (
-    robust_sum_of_products_with_sqrt_pairs as pairs_sum_expression,
-    robust_sum_of_products_with_sqrt_triplets as triplets_sum_expression,
-    to_point_segment_segment_mixed_expression as to_mixed_expression)
+    point_segment_segment_mixed_expression as mixed_expression,
+    sum_of_products_with_sqrt_pairs as pairs_sum_expression,
+    sum_of_products_with_sqrt_triplets as triplets_sum_expression,
+    to_constant)
 
 
 def to_point_point_point_circle(first_site: Site,
@@ -35,19 +36,19 @@ def to_point_point_point_circle(first_site: Site,
                            + second_squared_norm * (third_x - first_x)
                            + third_squared_norm * (first_x - second_x))
     dot_producer = context.dot_product
-    squared_radius_numerator = (
+    radius_numerator = to_sqrt(
             to_segment_squared_length(first_point, second_point, dot_producer)
             * to_segment_squared_length(second_point, third_point,
                                         dot_producer)
             * to_segment_squared_length(first_point, third_point,
                                         dot_producer))
-    lower_x_numerator = center_x_numerator - to_sqrt(squared_radius_numerator)
     denominator = 2 * context.cross_product(first_point, second_point,
                                             second_point, third_point)
     inverted_denominator = robust_divide(1, denominator)
-    center_x = center_x_numerator * inverted_denominator
-    center_y = center_y_numerator * inverted_denominator
-    return Circle(center_x, center_y, lower_x_numerator * inverted_denominator)
+    center_x = to_constant(center_x_numerator * inverted_denominator)
+    center_y = to_constant(center_y_numerator * inverted_denominator)
+    radius = radius_numerator * inverted_denominator
+    return Circle(center_x, center_y, center_x - radius)
 
 
 def to_point_point_segment_circle(first_point_site: Site,
@@ -134,7 +135,7 @@ def to_point_segment_segment_circle(point_site: Site,
             center_x_third_left_coefficient = (
                     (total_cross_product_x + point_x * segments_cross_product)
                     * sign)
-            center_x_numerator = to_mixed_expression(
+            center_x_numerator = mixed_expression(
                     (center_x_first_left_coefficient,
                      center_x_second_left_coefficient,
                      center_x_third_left_coefficient),
@@ -148,12 +149,12 @@ def to_point_segment_segment_circle(point_site: Site,
             center_y_third_left_coefficient = (
                     (total_cross_product_y + point_y * segments_cross_product)
                     * sign)
-            center_y_numerator = to_mixed_expression(
+            center_y_numerator = mixed_expression(
                     (center_y_first_left_coefficient,
                      center_y_second_left_coefficient,
                      center_y_third_left_coefficient),
                     common_right_coefficients)
-            denominator = to_mixed_expression(
+            denominator = mixed_expression(
                     (second_mixed_product, first_mixed_product,
                      sign * segments_cross_product),
                     common_right_coefficients)
@@ -163,7 +164,8 @@ def to_point_segment_segment_circle(point_site: Site,
                        - second_mixed_product * point_first_cross_product)
                       / abs(denominator))
         else:
-            center_x, center_y, radius = point_x, point_y, 0
+            center_x, center_y, radius = (to_constant(point_x),
+                                          to_constant(point_y), to_constant(0))
     else:
         sign = -1 if point_index == 2 else 1
         point_cls = context.point_cls
@@ -273,7 +275,7 @@ def _to_point_point_segment_coefficient(first_point: Point,
                                         segment_index: int,
                                         cross_producer: CrossProducer,
                                         dot_producer: DotProducer
-                                        ) -> Coordinate:
+                                        ) -> Expression:
     points_cross_product = cross_producer(segment_start, segment_end,
                                           first_point, second_point)
     points_dot_product = dot_producer(segment_start, segment_end, first_point,
@@ -297,6 +299,7 @@ def _to_point_point_segment_coefficient(first_point: Point,
                                 + second_point_cross_product),
                              points_cross_product * points_cross_product)
     else:
-        return (robust_divide(points_dot_product,
-                              4 * first_point_cross_product)
-                - robust_divide(first_point_cross_product, points_dot_product))
+        return to_constant(robust_divide(points_dot_product,
+                                         4 * first_point_cross_product)
+                           - robust_divide(first_point_cross_product,
+                                           points_dot_product))
