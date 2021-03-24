@@ -47,7 +47,8 @@ def to_diagram_cls(context: Context) -> Type[Diagram]:
             self.cells = [] if cells is None else cells
             self.edges = [] if edges is None else edges
             self.vertices = [] if vertices is None else vertices
-            self._sites, self._site_index = [], None
+            self._sites = []  # type: List[Site]
+            self._site_index = None  # type: Optional[int]
             self._beach_line = red_black.Tree.from_components([])
             self._circles = PriorityQueue(key=itemgetter(0))
             self._end_points = PriorityQueue(key=itemgetter(0))
