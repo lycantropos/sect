@@ -1,4 +1,3 @@
-from fractions import Fraction
 from functools import partial
 from operator import getitem
 from typing import (AbstractSet,
@@ -9,7 +8,6 @@ from typing import (AbstractSet,
                     List,
                     Sequence,
                     Set,
-                    Tuple,
                     TypeVar)
 
 from ground.base import (Orientation,
@@ -23,7 +21,6 @@ from sect.core.delaunay.utils import (complete_vertices as _complete_vertices,
                                       normalize_contour_vertices,
                                       to_distinct)
 from sect.core.utils import contour_to_edges_endpoints
-from sect.core.voronoi.faces import Vertex
 
 Strategy = SearchStrategy
 context = get_context()
@@ -121,42 +118,12 @@ def sub_lists(sequence: Sequence[Element]) -> SearchStrategy[List[Element]]:
                              strategies.slices(max(len(sequence), 1)))
 
 
-def to_circumcenter(triangle: Contour) -> Point:
-    first, second, third = [Point(Fraction(vertex.x), Fraction(vertex.y))
-                            for vertex in triangle.vertices]
-    first_x, first_y = first.x, first.y
-    second_x, second_y = second.x, second.y
-    third_x, third_y = third.x, third.y
-    first_squared_length = first_x * first_x + first_y * first_y
-    second_squared_length = second_x * second_x + second_y * second_y
-    third_squared_length = third_x * third_x + third_y * third_y
-    center_x_numerator = (first_squared_length * (second_y - third_y)
-                          + second_squared_length * (third_y - first_y)
-                          + third_squared_length * (first_y - second_y))
-    center_y_numerator = -(first_squared_length * (second_x - third_x)
-                           + second_squared_length * (third_x - first_x)
-                           + third_squared_length * (first_x - second_x))
-    denominator = 2 * context.cross_product(first, second, second, third)
-    return Point(center_x_numerator / denominator,
-                 center_y_numerator / denominator)
-
-
-def contour_to_multipoint(contour: Contour) -> Multipoint:
-    return Multipoint(contour.vertices)
-
-
 def contour_to_edges(contour: Contour) -> Sequence[Segment]:
     return [Segment(start, end)
             for start, end in contour_to_edges_endpoints(contour)]
 
 
 contour_to_edges_endpoints = contour_to_edges_endpoints
-
-
-def multisegment_pop_left(multisegment: Multisegment
-                          ) -> Tuple[Segment, Multisegment]:
-    first_segment, *rest_segments = multisegment.segments
-    return first_segment, Multisegment(rest_segments)
 
 
 def segment_contains_point(segment: Segment, point: Point) -> bool:
@@ -173,7 +140,3 @@ def to_max_convex_hull_border_endpoints(points: Sequence[Point]
     max_convex_hull = to_max_convex_hull(points)
     return set(map(frozenset,
                    contour_to_edges_endpoints(Contour(max_convex_hull))))
-
-
-def vertex_to_point(vertex: Vertex) -> Point:
-    return Point(vertex.x, vertex.y)
