@@ -1,10 +1,10 @@
 from typing import (Tuple,
                     Type)
 
+from ground.base import Relation
 from ground.hints import (Multisegment,
                           Point)
 from hypothesis import given
-from orient.planar import Relation
 
 from sect.decomposition import (Graph,
                                 Location)

@@ -1,10 +1,10 @@
 from typing import (Tuple,
                     Type)
 
+from ground.base import Relation
 from ground.hints import Point
 from hypothesis import given
-from orient.planar import (Relation,
-                           point_in_polygon)
+from orient.planar import point_in_polygon
 
 from sect.decomposition import (Graph,
                                 Location)
