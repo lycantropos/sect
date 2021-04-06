@@ -1,5 +1,5 @@
 clipping>=1.0.0,<2.0
-orient>=1.2.0,<2.0
+orient>=1.3.0,<2.0
 pytest>=6.1.2
 hypothesis>=5.33.2
 hypothesis-geometry>=1.3.0,<2.0
