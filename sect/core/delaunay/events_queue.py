@@ -99,16 +99,16 @@ class EventsQueue:
             end_min, end_max = ((None, None)
                                 if ends_equal
                                 else
-                                ((event.complement, below_event.complement)
-                                 if (self._queue.key(event.complement)
-                                     < self._queue.key(below_event.complement))
-                                 else (below_event.complement,
-                                       event.complement)))
+                                ((event.opposite, below_event.opposite)
+                                 if (self._queue.key(event.opposite)
+                                     < self._queue.key(below_event.opposite))
+                                 else (below_event.opposite,
+                                       event.opposite)))
             if starts_equal:
                 # both line segments are equal or share the left endpoint
                 event.is_overlap = below_event.is_overlap = True
                 if not ends_equal:
-                    self.divide_segment(end_max.complement, end_min.start)
+                    self.divide_segment(end_max.opposite, end_min.start)
                 return True
             elif ends_equal:
                 # the line segments share the right endpoint
@@ -116,7 +116,7 @@ class EventsQueue:
             else:
                 self.divide_segment(start_min
                                     # one line segment includes the other one
-                                    if start_min is end_max.complement
+                                    if start_min is end_max.opposite
                                     # no line segment includes the other one
                                     else start_max,
                                     end_min.start)
@@ -124,11 +124,12 @@ class EventsQueue:
         return False
 
     def divide_segment(self, event: Event, point: Point) -> None:
-        left_event = Event(True, point, event.complement, event.from_left,
-                           event.interior_to_left, event.edge)
-        right_event = Event(False, point, event, event.from_left,
-                            event.interior_to_left, event.edge)
-        event.complement.complement, event.complement = left_event, right_event
+        left_event = event.opposite.opposite = Event(
+                point, event.opposite, True, event.from_left,
+                event.interior_to_left, event.edge)
+        right_event = event.opposite = Event(
+                point, event, False, event.from_left, event.interior_to_left,
+                event.edge)
         self._queue.push(left_event)
         self._queue.push(right_event)
 
@@ -142,11 +143,11 @@ class EventsQueue:
         if start > end:
             start, end = end, start
             interior_to_left = not interior_to_left
-        start_event = Event(True, start, None, from_left, interior_to_left,
+        start_event = Event(start, None, True, from_left, interior_to_left,
                             edge)
-        end_event = Event(False, end, start_event, from_left, interior_to_left,
+        end_event = Event(end, start_event, False, from_left, interior_to_left,
                           edge)
-        start_event.complement = end_event
+        start_event.opposite = end_event
         self._queue.push(start_event)
         self._queue.push(end_event)
 
@@ -160,9 +161,9 @@ class EventsQueue:
         if start > end:
             start, end = end, start
             interior_to_left = not interior_to_left
-        start_event = Event(True, start, None, from_left, interior_to_left)
-        end_event = Event(False, end, start_event, from_left, interior_to_left)
-        start_event.complement = end_event
+        start_event = Event(start, None, True, from_left, interior_to_left)
+        end_event = Event(end, start_event, False, from_left, interior_to_left)
+        start_event.opposite = end_event
         self._queue.push(start_event)
         self._queue.push(end_event)
 
@@ -183,7 +184,7 @@ class EventsQueue:
                     self.compute_position(sweep_line.below(below_event),
                                           below_event)
             else:
-                event = event.complement
+                event = event.opposite
                 if event in sweep_line:
                     above_event, below_event = (sweep_line.above(event),
                                                 sweep_line.below(event))
