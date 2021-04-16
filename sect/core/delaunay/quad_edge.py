@@ -1,100 +1,158 @@
 from typing import (FrozenSet,
                     Iterable,
                     List,
-                    Optional,
-                    Type)
+                    Optional)
 
 from ground.base import (Context,
                          Orientation)
 from ground.hints import Point
 from reprit.base import generate_repr
 
-from .abcs import QuadEdge
 
+class QuadEdge:
+    """
+    Based on:
+        quad-edge data structure.
 
-def to_quad_edge_cls(context: Context) -> Type[QuadEdge]:
-    class Result(QuadEdge):
+    Reference:
+        https://en.wikipedia.org/wiki/Quad-edge
+        http://www.sccg.sk/~samuelcik/dgs/quad_edge.pdf
+    """
+
+    @classmethod
+    def from_endpoints(cls, start: Point, end: Point,
+                       *,
+                       context: Context) -> 'QuadEdge':
+        """Creates new edge from endpoints."""
+        result, opposite = (cls(start,
+                                context=context),
+                            cls(end,
+                                context=context))
+        rotated, triple_rotated = (cls(context=context),
+                                   cls(context=context))
+        result._left_from_start = result
+        opposite._left_from_start = opposite
+        rotated._left_from_start = triple_rotated
+        triple_rotated._left_from_start = rotated
+        result._rotated = rotated
+        rotated._rotated = opposite
+        opposite._rotated = triple_rotated
+        triple_rotated._rotated = result
+        return result
+
+    @property
+    def context(self) -> Context:
+        return self._context
+
+    @property
+    def left_from_start(self) -> 'QuadEdge':
         """
-        Based on:
-            quad-edge data structure.
-
-        Reference:
-            https://en.wikipedia.org/wiki/Quad-edge
-            http://www.sccg.sk/~samuelcik/dgs/quad_edge.pdf
+        aka "Onext" in L. Guibas and J. Stolfi notation.
         """
-        __slots__ = '_start', '_left_from_start', '_rotated'
+        return self._left_from_start
 
-        def __init__(self,
-                     start: Optional[Point] = None,
-                     left_from_start: Optional[QuadEdge] = None,
-                     rotated: Optional[QuadEdge] = None) -> None:
-            self._start, self._left_from_start, self._rotated = (
-                start, left_from_start, rotated)
+    @property
+    def end(self) -> Point:
+        """
+        aka "Dest" in L. Guibas and J. Stolfi notation.
+        """
+        return self.opposite.start
 
-        orientation = staticmethod(context.angle_orientation)
+    @property
+    def left_from_end(self) -> 'QuadEdge':
+        """
+        aka "Lnext" in L. Guibas and J. Stolfi notation.
+        """
+        return self.rotated.opposite.left_from_start.rotated
 
-        @property
-        def left_from_start(self) -> QuadEdge:
-            return self._left_from_start
+    @property
+    def opposite(self) -> 'QuadEdge':
+        """
+        aka "Sym" in L. Guibas and J. Stolfi notation.
+        """
+        return self.rotated.rotated
 
-        @property
-        def start(self) -> Point:
-            return self._start
+    @property
+    def right_from_end(self) -> 'QuadEdge':
+        """
+        aka "Rprev" in L. Guibas and J. Stolfi notation.
+        """
+        return self.opposite.left_from_start
 
-        @property
-        def rotated(self) -> QuadEdge:
-            return self._rotated
+    @property
+    def right_from_start(self) -> 'QuadEdge':
+        """
+        aka "Oprev" in L. Guibas and J. Stolfi notation.
+        """
+        return self.rotated.left_from_start.rotated
 
-        @classmethod
-        def from_endpoints(cls, start: Point, end: Point) -> QuadEdge:
-            result, opposite = cls(start), cls(end)
-            rotated, triple_rotated = cls(), cls()
-            result._left_from_start = result
-            opposite._left_from_start = opposite
-            rotated._left_from_start = triple_rotated
-            triple_rotated._left_from_start = rotated
-            result._rotated = rotated
-            rotated._rotated = opposite
-            opposite._rotated = triple_rotated
-            triple_rotated._rotated = result
-            return result
+    @property
+    def rotated(self) -> 'QuadEdge':
+        """
+        aka "Rot" in L. Guibas and J. Stolfi notation.
+        """
+        return self._rotated
 
-        __repr__ = generate_repr(from_endpoints)
+    @property
+    def start(self) -> Point:
+        """
+        aka "Org" in L. Guibas and J. Stolfi notation.
+        """
+        return self._start
 
-        def connect(self, other: QuadEdge) -> QuadEdge:
-            result = self.from_endpoints(self.end, other.start)
-            result.splice(self.left_from_end)
-            result.opposite.splice(other)
-            return result
+    __slots__ = '_context', '_left_from_start', '_rotated', '_start'
 
-        def delete(self) -> None:
-            self.splice(self.right_from_start)
-            self.opposite.splice(self.opposite.right_from_start)
+    def __init__(self,
+                 start: Optional[Point] = None,
+                 left_from_start: Optional['QuadEdge'] = None,
+                 rotated: Optional['QuadEdge'] = None,
+                 *,
+                 context: Context) -> None:
+        (self._context, self._left_from_start, self._rotated,
+         self._start) = context, left_from_start, rotated, start
 
-        def orientation_of(self, point: Point) -> Orientation:
-            return self.orientation(self.start, self.end, point)
+    __repr__ = generate_repr(from_endpoints)
 
-        def splice(self, other: QuadEdge) -> None:
-            alpha = self.left_from_start.rotated
-            beta = other.left_from_start.rotated
-            self._left_from_start, other._left_from_start = (
-                other.left_from_start, self.left_from_start)
-            alpha._left_from_start, beta._left_from_start = (
-                beta.left_from_start, alpha.left_from_start)
+    def connect(self, other: 'QuadEdge') -> 'QuadEdge':
+        """Connects the edge with the other."""
+        result = self.from_endpoints(self.end, other.start,
+                                     context=self.context)
+        result.splice(self.left_from_end)
+        result.opposite.splice(other)
+        return result
 
-        def swap(self) -> None:
-            side = self.right_from_start
-            opposite = self.opposite
-            opposite_side = opposite.right_from_start
-            self.splice(side)
-            opposite.splice(opposite_side)
-            self.splice(side.left_from_end)
-            opposite.splice(opposite_side.left_from_end)
-            self._start = side.end
-            opposite._start = opposite_side.end
+    def delete(self) -> None:
+        """Deletes the edge."""
+        self.splice(self.right_from_start)
+        self.opposite.splice(self.opposite.right_from_start)
 
-    Result.__name__ = Result.__qualname__ = QuadEdge.__name__
-    return Result
+    def orientation_of(self, point: Point) -> Orientation:
+        """Returns orientation of the point relative to the edge."""
+        return self.context.angle_orientation(self.start, self.end, point)
+
+    def splice(self, other: 'QuadEdge') -> None:
+        """Splices the edge with the other."""
+        alpha = self.left_from_start.rotated
+        beta = other.left_from_start.rotated
+        self._left_from_start, other._left_from_start = (
+            other.left_from_start, self.left_from_start)
+        alpha._left_from_start, beta._left_from_start = (
+            beta.left_from_start, alpha.left_from_start)
+
+    def swap(self) -> None:
+        """
+        Swaps diagonal in a quadrilateral formed by triangles
+        in both clockwise and counterclockwise order around the start.
+        """
+        side = self.right_from_start
+        opposite = self.opposite
+        opposite_side = opposite.right_from_start
+        self.splice(side)
+        opposite.splice(opposite_side)
+        self.splice(side.left_from_end)
+        opposite.splice(opposite_side.left_from_end)
+        self._start = side.end
+        opposite._start = opposite_side.end
 
 
 def edge_to_endpoints(edge: QuadEdge) -> FrozenSet[Point]:

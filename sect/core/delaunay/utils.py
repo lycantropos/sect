@@ -27,7 +27,6 @@ def ceil_log2(number: int) -> int:
 def complete_vertices(border: Contour,
                       holes: Sequence[Contour],
                       candidates: Sequence[Point],
-                      *,
                       context: Context
                       ) -> Tuple[Contour, Sequence[Contour], Sequence[Point]]:
     candidates = sorted(to_distinct(candidates))

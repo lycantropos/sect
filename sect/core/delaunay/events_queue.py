@@ -12,7 +12,7 @@ from reprit.base import generate_repr
 from sect.core.hints import Orienteer
 from .event import Event
 from .hints import SegmentEndpoints
-from .abcs import QuadEdge
+from .quad_edge import QuadEdge
 from .sweep_line import SweepLine
 
 
