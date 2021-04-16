@@ -24,50 +24,7 @@ from .y_node import YNode
 
 
 class Graph:
-    """
-    Represents trapezoidal decomposition graph.
-
-    >>> from ground.base import get_context
-    >>> context = get_context()
-    >>> Multisegment, Point, Segment = (context.multisegment_cls,
-    ...                                 context.point_cls,
-    ...                                 context.segment_cls)
-    >>> multisegment_graph = Graph.from_multisegment(
-    ...     Multisegment([Segment(Point(0, 0), Point(1, 0)),
-    ...                   Segment(Point(0, 0), Point(0, 1))]),
-    ...     context=context)
-    >>> Point(1, 0) in multisegment_graph
-    True
-    >>> Point(0, 1) in multisegment_graph
-    True
-    >>> Point(1, 1) in multisegment_graph
-    False
-    >>> multisegment_graph.locate(Point(1, 0)) is Location.BOUNDARY
-    True
-    >>> multisegment_graph.locate(Point(0, 1)) is Location.BOUNDARY
-    True
-    >>> multisegment_graph.locate(Point(1, 1)) is Location.EXTERIOR
-    True
-    >>> Contour, Polygon = context.contour_cls, context.polygon_cls
-    >>> polygon_graph = Graph.from_polygon(
-    ...     Polygon(Contour([Point(0, 0), Point(6, 0), Point(6, 6),
-    ...                      Point(0, 6)]),
-    ...             [Contour([Point(2, 2), Point(2, 4), Point(4, 4),
-    ...                       Point(4, 2)])]),
-    ...     context=context)
-    >>> Point(1, 1) in polygon_graph
-    True
-    >>> Point(2, 2) in polygon_graph
-    True
-    >>> Point(3, 3) in polygon_graph
-    False
-    >>> polygon_graph.locate(Point(1, 1)) is Location.INTERIOR
-    True
-    >>> polygon_graph.locate(Point(2, 2)) is Location.BOUNDARY
-    True
-    >>> polygon_graph.locate(Point(3, 3)) is Location.EXTERIOR
-    True
-    """
+    """Represents trapezoidal decomposition graph."""
 
     @classmethod
     def from_multisegment(cls,
@@ -97,6 +54,28 @@ class Graph:
             required for randomization.
         :param context: geometric context.
         :returns: trapezoidal decomposition graph of the multisegment.
+
+        >>> from ground.base import get_context
+        >>> context = get_context()
+        >>> Multisegment, Point, Segment = (context.multisegment_cls,
+        ...                                 context.point_cls,
+        ...                                 context.segment_cls)
+        >>> graph = Graph.from_multisegment(
+        ...     Multisegment([Segment(Point(0, 0), Point(1, 0)),
+        ...                   Segment(Point(0, 0), Point(0, 1))]),
+        ...     context=context)
+        >>> Point(1, 0) in graph
+        True
+        >>> Point(0, 1) in graph
+        True
+        >>> Point(1, 1) in graph
+        False
+        >>> graph.locate(Point(1, 0)) is Location.BOUNDARY
+        True
+        >>> graph.locate(Point(0, 1)) is Location.BOUNDARY
+        True
+        >>> graph.locate(Point(1, 1)) is Location.EXTERIOR
+        True
         """
         edges = [
             Edge.from_endpoints(segment.start, segment.end, False, context)
@@ -141,6 +120,29 @@ class Graph:
             required for randomization.
         :param context: geometric context.
         :returns: trapezoidal decomposition graph of the border and holes.
+
+        >>> from ground.base import get_context
+        >>> context = get_context()
+        >>> Contour, Point, Polygon = (context.contour_cls, context.point_cls,
+        ...                            context.polygon_cls)
+        >>> graph = Graph.from_polygon(
+        ...     Polygon(Contour([Point(0, 0), Point(6, 0), Point(6, 6),
+        ...                      Point(0, 6)]),
+        ...             [Contour([Point(2, 2), Point(2, 4), Point(4, 4),
+        ...                       Point(4, 2)])]),
+        ...     context=context)
+        >>> Point(1, 1) in graph
+        True
+        >>> Point(2, 2) in graph
+        True
+        >>> Point(3, 3) in graph
+        False
+        >>> graph.locate(Point(1, 1)) is Location.INTERIOR
+        True
+        >>> graph.locate(Point(2, 2)) is Location.BOUNDARY
+        True
+        >>> graph.locate(Point(3, 3)) is Location.EXTERIOR
+        True
         """
         border = polygon.border
         orienteer = context.angle_orientation
