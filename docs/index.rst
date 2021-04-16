@@ -13,21 +13,12 @@ decomposition module
 ====================
 
 .. automodule:: sect.decomposition
+    :imported-members:
     :members:
-.. autoclass:: Graph
-    :members:
-    :special-members:
-.. autoclass:: Location
-    :members:
-.. autofunction:: to_graph_cls
 
 triangulation module
 ====================
 
 .. automodule:: sect.triangulation
+    :imported-members:
     :members:
-.. autoclass:: QuadEdge
-    :members:
-.. autoclass:: Triangulation
-    :members:
-.. autofunction:: to_triangulation_cls
