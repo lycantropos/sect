@@ -1,7 +1,7 @@
-from typing import (Tuple,
-                    Type)
+from typing import Tuple
 
-from ground.base import Relation
+from ground.base import (Context,
+                         Relation)
 from ground.hints import (Multisegment,
                           Point)
 from hypothesis import given
@@ -12,39 +12,45 @@ from tests.utils import point_in_multisegment
 from . import strategies
 
 
-@given(strategies.graph_classes, strategies.non_empty_multisegments)
-def test_basic(graph_cls: Type[Graph],
+@given(strategies.contexts, strategies.non_empty_multisegments)
+def test_basic(context: Context,
                multisegment: Multisegment) -> None:
-    assert isinstance(graph_cls.from_multisegment(multisegment), graph_cls)
+    result = Graph.from_multisegment(multisegment,
+                                     context=context)
+
+    assert isinstance(result, Graph)
 
 
-@given(strategies.graph_classes, strategies.non_empty_multisegments)
-def test_height(graph_cls: Type[Graph],
+@given(strategies.contexts, strategies.non_empty_multisegments)
+def test_height(context: Context,
                 multisegment: Multisegment) -> None:
-    result = graph_cls.from_multisegment(multisegment)
+    result = Graph.from_multisegment(multisegment,
+                                     context=context)
 
     assert 0 < result.height <= 2 * (len(multisegment.segments) + 2)
 
 
-@given(strategies.graph_classes,
+@given(strategies.contexts,
        strategies.non_empty_multisegments_with_points)
-def test_contains(graph_cls: Type[Graph],
+def test_contains(context: Context,
                   multisegment_with_point: Tuple[Multisegment, Point]) -> None:
     multisegment, point = multisegment_with_point
 
-    result = graph_cls.from_multisegment(multisegment)
+    result = Graph.from_multisegment(multisegment,
+                                     context=context)
 
     assert (point in result) is (point_in_multisegment(point, multisegment)
                                  is Relation.COMPONENT)
 
 
-@given(strategies.graph_classes,
+@given(strategies.contexts,
        strategies.non_empty_multisegments_with_points)
-def test_locate(graph_cls: Type[Graph],
+def test_locate(context: Context,
                 multisegment_with_point: Tuple[Multisegment, Point]) -> None:
     multisegment, point = multisegment_with_point
 
-    result = graph_cls.from_multisegment(multisegment)
+    result = Graph.from_multisegment(multisegment,
+                                     context=context)
 
     location = result.locate(point)
     relation = point_in_multisegment(point, multisegment)
