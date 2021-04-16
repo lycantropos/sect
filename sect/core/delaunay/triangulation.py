@@ -39,40 +39,7 @@ from .utils import (ceil_log2,
 
 
 class Triangulation:
-    """
-    Represents triangulation.
-
-    >>> from ground.base import get_context
-    >>> context = get_context()
-    >>> Contour, Point, Polygon = (context.contour_cls, context.point_cls,
-    ...                            context.polygon_cls)
-    >>> dart = Polygon(Contour([Point(0, 0), Point(3, 0), Point(1, 1),
-    ...                         Point(0, 3)]), [])
-    >>> (Triangulation.delaunay(dart.border.vertices,
-    ...                         context=context).triangles()
-    ...  == [Contour([Point(0, 0), Point(3, 0), Point(1, 1)]),
-    ...      Contour([Point(0, 0), Point(1, 1), Point(0, 3)]),
-    ...      Contour([Point(0, 3), Point(1, 1), Point(3, 0)])])
-    True
-    >>> (Triangulation.constrained_delaunay(dart,
-    ...                                     context=context).triangles()
-    ...  == [Contour([Point(0, 0), Point(3, 0), Point(1, 1)]),
-    ...      Contour([Point(0, 0), Point(1, 1), Point(0, 3)])])
-    True
-
-    """
-    __slots__ = ('context', 'left_side', 'right_side',
-                 '_triangular_holes_vertices')
-
-    def __init__(self,
-                 left_side: QuadEdge,
-                 right_side: QuadEdge,
-                 context: Context) -> None:
-        self.context, self.left_side, self.right_side = (context, left_side,
-                                                         right_side)
-        self._triangular_holes_vertices = set()
-
-    __repr__ = generate_repr(__init__)
+    """Represents triangulation."""
 
     @classmethod
     def constrained_delaunay(cls,
@@ -121,6 +88,17 @@ class Triangulation:
         :returns:
             triangulation of the border, holes & extra points
             considering constraints.
+
+        >>> from ground.base import get_context
+        >>> context = get_context()
+        >>> Contour, Point, Polygon = (context.contour_cls, context.point_cls,
+        ...                            context.polygon_cls)
+        >>> dart = [Point(0, 0), Point(3, 0), Point(1, 1), Point(0, 3)]
+        >>> (Triangulation.constrained_delaunay(Polygon(Contour(dart), []),
+        ...                                     context=context).triangles()
+        ...  == [Contour([Point(0, 0), Point(3, 0), Point(1, 1)]),
+        ...      Contour([Point(0, 0), Point(1, 1), Point(0, 3)])])
+        True
         """
         border, holes = polygon.border, polygon.holes
         if extra_points:
@@ -165,6 +143,17 @@ class Triangulation:
         :param points: 3 or more points to triangulate.
         :param context: geometric context.
         :returns: triangulation of the points.
+
+        >>> from ground.base import get_context
+        >>> context = get_context()
+        >>> Contour, Point = context.contour_cls, context.point_cls
+        >>> dart = [Point(0, 0), Point(3, 0), Point(1, 1), Point(0, 3)]
+        >>> (Triangulation.delaunay(dart,
+        ...                         context=context).triangles()
+        ...  == [Contour([Point(0, 0), Point(3, 0), Point(1, 1)]),
+        ...      Contour([Point(0, 0), Point(1, 1), Point(0, 3)]),
+        ...      Contour([Point(0, 3), Point(1, 1), Point(3, 0)])])
+        True
         """
         points = sorted(to_distinct(points))
         lengths = coin_change(len(points), base_cases)
@@ -184,6 +173,19 @@ class Triangulation:
                    context: Context) -> 'Triangulation':
         """Constructs triangulation given its sides."""
         return cls(left_side, right_side, context)
+
+    __slots__ = ('context', 'left_side', 'right_side',
+                 '_triangular_holes_vertices')
+
+    def __init__(self,
+                 left_side: QuadEdge,
+                 right_side: QuadEdge,
+                 context: Context) -> None:
+        self.context, self.left_side, self.right_side = (context, left_side,
+                                                         right_side)
+        self._triangular_holes_vertices = set()
+
+    __repr__ = generate_repr(__init__)
 
     def delete(self, edge: QuadEdge) -> None:
         """Deletes given edge from the triangulation."""
