@@ -1,6 +1,5 @@
 import random
-from typing import (List,
-                    Type)
+from typing import List
 
 from ground.base import (Context,
                          Orientation)
@@ -12,31 +11,31 @@ from reprit.base import generate_repr
 from sect.core.utils import (contour_to_edges_endpoints,
                              flatten,
                              to_contour_orientation)
-from .abcs import (Edge,
-                   Graph,
-                   Node)
 from .bounding import box_from_points
-from .edge import to_edge_cls
+from .edge import Edge
 from .hints import (Box,
                     Shuffler)
 from .leaf import Leaf
 from .location import Location
+from .node import Node
 from .trapezoid import Trapezoid
 from .x_node import XNode
 from .y_node import YNode
 
 
-def to_graph_cls(context: Context) -> Type[Graph]:
+class Graph:
     """
+    Represents trapezoidal decomposition graph.
+
     >>> from ground.base import get_context
     >>> context = get_context()
     >>> Multisegment, Point, Segment = (context.multisegment_cls,
     ...                                 context.point_cls,
     ...                                 context.segment_cls)
-    >>> Graph = to_graph_cls(context)
     >>> multisegment_graph = Graph.from_multisegment(
     ...     Multisegment([Segment(Point(0, 0), Point(1, 0)),
-    ...                   Segment(Point(0, 0), Point(0, 1))]))
+    ...                   Segment(Point(0, 0), Point(0, 1))]),
+    ...     context=context)
     >>> Point(1, 0) in multisegment_graph
     True
     >>> Point(0, 1) in multisegment_graph
@@ -54,7 +53,8 @@ def to_graph_cls(context: Context) -> Type[Graph]:
     ...     Polygon(Contour([Point(0, 0), Point(6, 0), Point(6, 6),
     ...                      Point(0, 6)]),
     ...             [Contour([Point(2, 2), Point(2, 4), Point(4, 4),
-    ...                       Point(4, 2)])]))
+    ...                       Point(4, 2)])]),
+    ...     context=context)
     >>> Point(1, 1) in polygon_graph
     True
     >>> Point(2, 2) in polygon_graph
@@ -68,159 +68,157 @@ def to_graph_cls(context: Context) -> Type[Graph]:
     >>> polygon_graph.locate(Point(3, 3)) is Location.EXTERIOR
     True
     """
-    edge_factory = to_edge_cls(context).from_endpoints
 
-    class Result(Graph):
-        __slots__ = 'root',
+    @classmethod
+    def from_multisegment(cls,
+                          multisegment: Multisegment,
+                          *,
+                          shuffler: Shuffler = random.shuffle,
+                          context: Context) -> 'Graph':
+        """
+        Constructs trapezoidal decomposition graph of given multisegment.
 
-        def __init__(self, root: Node) -> None:
-            """
-            Initializes graph.
+        Based on incremental randomized algorithm by R. Seidel.
 
-            Time complexity:
-                ``O(1)``
-            Memory complexity:
-                ``O(1)``
-            """
-            self.root = root
+        Time complexity:
+            ``O(segments_count * log segments_count)`` expected,
+            ``O(segments_count ** 2)`` worst,
+            where ``segments_count = len(multisegment)``.
+        Memory complexity:
+            ``O(segments_count)``,
+            where ``segments_count = len(multisegment)``.
+        Reference:
+            https://doi.org/10.1016%2F0925-7721%2891%2990012-4
+            https://www.cs.princeton.edu/courses/archive/fall05/cos528/handouts/A%20Simple%20and%20fast.pdf
 
-        __repr__ = generate_repr(__init__)
+        :param multisegment: target multisegment.
+        :param shuffler:
+            function which mutates sequence by shuffling its elements,
+            required for randomization.
+        :param context: geometric context.
+        :returns: trapezoidal decomposition graph of the multisegment.
+        """
+        edges = [
+            Edge.from_endpoints(segment.start, segment.end, False, context)
+            if segment.start < segment.end
+            else Edge.from_endpoints(segment.end, segment.start, False,
+                                     context)
+            for segment in multisegment.segments]
+        shuffler(edges)
+        box = box_from_points(flatten(
+                (segment.start, segment.end)
+                for segment in multisegment.segments))
+        result = cls(box_to_node(box, context))
+        for edge in edges:
+            add_edge(result, edge)
+        return result
 
-        def __contains__(self, point: Point) -> bool:
-            """
-            Checks if point is contained in decomposed geometry.
+    @classmethod
+    def from_polygon(cls,
+                     polygon: Polygon,
+                     *,
+                     shuffler: Shuffler = random.shuffle,
+                     context: Context) -> 'Graph':
+        """
+        Constructs trapezoidal decomposition graph of given polygon.
 
-            Time complexity:
-                ``O(self.height)``
-            Memory complexity:
-                ``O(1)``
-            """
-            return bool(self.root.locate(point))
+        Based on incremental randomized algorithm by R. Seidel.
 
-        @property
-        def height(self) -> int:
-            return self.root.height
+        Time complexity:
+            ``O(vertices_count * log vertices_count)`` expected,
+            ``O(vertices_count ** 2)`` worst,
+            where ``vertices_count = len(border) + sum(map(len, holes))``.
+        Memory complexity:
+            ``O(vertices_count)``,
+            where ``vertices_count = len(border) + sum(map(len, holes))``.
+        Reference:
+            https://doi.org/10.1016%2F0925-7721%2891%2990012-4
+            https://www.cs.princeton.edu/courses/archive/fall05/cos528/handouts/A%20Simple%20and%20fast.pdf
 
-        def locate(self, point: Point) -> Location:
-            """
-            Finds location of point relative to decomposed geometry.
+        :param polygon: target polygon.
+        :param shuffler:
+            function which mutates sequence by shuffling its elements,
+            required for randomization.
+        :param context: geometric context.
+        :returns: trapezoidal decomposition graph of the border and holes.
+        """
+        border = polygon.border
+        orienteer = context.angle_orientation
+        is_border_positively_oriented = (to_contour_orientation(border,
+                                                                orienteer)
+                                         is Orientation.COUNTERCLOCKWISE)
+        edges = [
+            Edge.from_endpoints(start, end, is_border_positively_oriented,
+                                context)
+            if start < end
+            else Edge.from_endpoints(end, start,
+                                     not is_border_positively_oriented,
+                                     context)
+            for start, end in contour_to_edges_endpoints(border)]
+        for hole in polygon.holes:
+            is_hole_negatively_oriented = (
+                    to_contour_orientation(hole, orienteer)
+                    is Orientation.CLOCKWISE)
+            edges.extend(
+                    Edge.from_endpoints(start, end,
+                                        is_hole_negatively_oriented,
+                                        context)
+                    if start < end
+                    else
+                    Edge.from_endpoints(end, start,
+                                        not is_hole_negatively_oriented,
+                                        context)
+                    for start, end in contour_to_edges_endpoints(hole))
+        shuffler(edges)
+        result = cls(box_to_node(box_from_points(border.vertices),
+                                 context))
+        for edge in edges:
+            add_edge(result, edge)
+        return result
 
-            Time complexity:
-                ``O(self.height)``
-            Memory complexity:
-                ``O(1)``
-            """
-            return self.root.locate(point)
+    @property
+    def height(self) -> int:
+        """
+        Returns height of the root node.
+        """
+        return self.root.height
 
-        @classmethod
-        def from_multisegment(cls,
-                              multisegment: Multisegment,
-                              *,
-                              shuffler: Shuffler = random.shuffle) -> Graph:
-            """
-            Constructs trapezoidal decomposition graph of given multisegment.
+    __slots__ = 'root',
 
-            Based on incremental randomized algorithm by R. Seidel.
+    def __init__(self, root: Node) -> None:
+        """
+        Initializes graph.
 
-            Time complexity:
-                ``O(segments_count * log segments_count)`` expected,
-                ``O(segments_count ** 2)`` worst,
-                where ``segments_count = len(multisegment)``.
-            Memory complexity:
-                ``O(segments_count)``,
-                where ``segments_count = len(multisegment)``.
-            Reference:
-                https://doi.org/10.1016%2F0925-7721%2891%2990012-4
-                https://www.cs.princeton.edu/courses/archive/fall05/cos528/handouts/A%20Simple%20and%20fast.pdf
+        Time complexity:
+            ``O(1)``
+        Memory complexity:
+            ``O(1)``
+        """
+        self.root = root
 
-            :param multisegment: target multisegment.
-            :param shuffler:
-                function which mutates sequence by shuffling its elements,
-                required for randomization.
-            :returns: trapezoidal decomposition graph of the multisegment.
-            """
-            edges = [edge_factory(segment.start, segment.end, False)
-                     if segment.start < segment.end
-                     else edge_factory(segment.end, segment.start, False)
-                     for segment in multisegment.segments]
-            shuffler(edges)
-            box = box_from_points(flatten(
-                    (segment.start, segment.end)
-                    for segment in multisegment.segments))
-            result = cls(box_to_node(box))
-            for edge in edges:
-                add_edge(result, edge)
-            return result
+    def __contains__(self, point: Point) -> bool:
+        """
+        Checks if point is contained in decomposed geometry.
 
-        @classmethod
-        def from_polygon(cls,
-                         polygon: Polygon,
-                         *,
-                         shuffler: Shuffler = random.shuffle) -> Graph:
-            """
-            Constructs trapezoidal decomposition graph of given polygon.
+        Time complexity:
+            ``O(self.height)``
+        Memory complexity:
+            ``O(1)``
+        """
+        return bool(self.root.locate(point))
 
-            Based on incremental randomized algorithm by R. Seidel.
+    __repr__ = generate_repr(__init__)
 
-            Time complexity:
-                ``O(vertices_count * log vertices_count)`` expected,
-                ``O(vertices_count ** 2)`` worst,
-                where ``vertices_count = len(border) + sum(map(len, holes))``.
-            Memory complexity:
-                ``O(vertices_count)``,
-                where ``vertices_count = len(border) + sum(map(len, holes))``.
-            Reference:
-                https://doi.org/10.1016%2F0925-7721%2891%2990012-4
-                https://www.cs.princeton.edu/courses/archive/fall05/cos528/handouts/A%20Simple%20and%20fast.pdf
+    def locate(self, point: Point) -> Location:
+        """
+        Finds location of point relative to decomposed geometry.
 
-            :param polygon: target polygon.
-            :param shuffler:
-                function which mutates sequence by shuffling its elements,
-                required for randomization.
-            :returns: trapezoidal decomposition graph of the border and holes.
-            """
-            border = polygon.border
-            orienteer = context.angle_orientation
-            is_border_positively_oriented = (to_contour_orientation(border,
-                                                                    orienteer)
-                                             is Orientation.COUNTERCLOCKWISE)
-            edges = [edge_factory(start, end, is_border_positively_oriented)
-                     if start < end
-                     else edge_factory(end, start,
-                                       not is_border_positively_oriented)
-                     for start, end in contour_to_edges_endpoints(border)]
-            for hole in polygon.holes:
-                is_hole_negatively_oriented = (
-                        to_contour_orientation(hole, orienteer)
-                        is Orientation.CLOCKWISE)
-                edges.extend(
-                        edge_factory(start, end, is_hole_negatively_oriented)
-                        if start < end
-                        else edge_factory(end, start,
-                                          not is_hole_negatively_oriented)
-                        for start, end in contour_to_edges_endpoints(hole))
-            shuffler(edges)
-            result = cls(box_to_node(box_from_points(border.vertices)))
-            for edge in edges:
-                add_edge(result, edge)
-            return result
-
-    def box_to_node(box: Box) -> Leaf:
-        min_x, min_y, max_x, max_y = box
-        delta_x, delta_y = max_x - min_x, max_y - min_y
-        # handle horizontal/vertical cases
-        delta_x, delta_y = delta_x or 1, delta_y or 1
-        min_x, min_y, max_x, max_y = (min_x - delta_x, min_y - delta_y,
-                                      max_x + delta_x, max_y + delta_y)
-        point_cls = context.point_cls
-        return Leaf(Trapezoid(point_cls(min_x, min_y), point_cls(max_x, min_y),
-                              edge_factory(point_cls(min_x, min_y),
-                                           point_cls(max_x, min_y), False),
-                              edge_factory(point_cls(min_x, max_y),
-                                           point_cls(max_x, max_y), True)))
-
-    Result.__name__ = Result.__qualname__ = Graph.__name__
-    return Result
+        Time complexity:
+            ``O(self.height)``
+        Memory complexity:
+            ``O(1)``
+        """
+        return self.root.locate(point)
 
 
 def add_edge(graph: Graph, edge: Edge) -> None:
@@ -370,6 +368,24 @@ def add_edge(graph: Graph, edge: Edge) -> None:
             trapezoid_node.replace_with(candidate)
         # prepare for next loop
         prev_trapezoid, prev_above, prev_below = trapezoid, above, below
+
+
+def box_to_node(box: Box, context: Context) -> Leaf:
+    min_x, min_y, max_x, max_y = box
+    delta_x, delta_y = max_x - min_x, max_y - min_y
+    # handle horizontal/vertical cases
+    delta_x, delta_y = delta_x or 1, delta_y or 1
+    min_x, min_y, max_x, max_y = (min_x - delta_x, min_y - delta_y,
+                                  max_x + delta_x, max_y + delta_y)
+    point_cls = context.point_cls
+    return Leaf(Trapezoid(
+            point_cls(min_x, min_y), point_cls(max_x, min_y),
+            Edge.from_endpoints(point_cls(min_x, min_y),
+                                point_cls(max_x, min_y), False,
+                                context),
+            Edge.from_endpoints(point_cls(min_x, max_y),
+                                point_cls(max_x, max_y), True,
+                                context)))
 
 
 def find_intersecting_trapezoids(graph: Graph, edge: Edge) -> List[Trapezoid]:
