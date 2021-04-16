@@ -1,6 +1,6 @@
-from typing import (Sequence,
-                    Type)
+from typing import Sequence
 
+from ground.base import Context
 from ground.hints import (Contour,
                           Point)
 from hypothesis import given
@@ -16,18 +16,20 @@ from tests.utils import (is_contour_triangular,
 from . import strategies
 
 
-@given(strategies.triangulation_classes, strategies.points_lists)
-def test_basic(triangulation_cls: Type[Triangulation],
+@given(strategies.contexts, strategies.points_lists)
+def test_basic(context: Context,
                points: Sequence[Point]) -> None:
-    result = triangulation_cls.delaunay(points)
+    result = Triangulation.delaunay(points,
+                                    context=context)
 
-    assert isinstance(result, triangulation_cls)
+    assert isinstance(result, Triangulation)
 
 
-@given(strategies.triangulation_classes, strategies.points_lists)
-def test_sizes(triangulation_cls: Type[Triangulation],
+@given(strategies.contexts, strategies.points_lists)
+def test_sizes(context: Context,
                points: Sequence[Point]) -> None:
-    result = triangulation_cls.delaunay(points)
+    result = Triangulation.delaunay(points,
+                                    context=context)
 
     triangles = result.triangles()
     assert 0 < len(triangles) <= (2 * (len(to_distinct(points)) - 1)
@@ -35,42 +37,47 @@ def test_sizes(triangulation_cls: Type[Triangulation],
     assert all(is_contour_triangular(triangle) for triangle in triangles)
 
 
-@given(strategies.triangulation_classes, strategies.points_lists)
-def test_delaunay_criterion(triangulation_cls: Type[Triangulation],
+@given(strategies.contexts, strategies.points_lists)
+def test_delaunay_criterion(context: Context,
                             points: Sequence[Point]) -> None:
-    result = triangulation_cls.delaunay(points)
+    result = Triangulation.delaunay(points,
+                                    context=context)
 
     assert all(not any(is_point_inside_circumcircle(*triangle.vertices, point)
                        for triangle in result.triangles())
                for point in points)
 
 
-@given(strategies.triangulation_classes, strategies.points_lists)
-def test_boundary(triangulation_cls: Type[Triangulation],
+@given(strategies.contexts, strategies.points_lists)
+def test_boundary(context: Context,
                   points: Sequence[Point]) -> None:
-    result = triangulation_cls.delaunay(points)
+    result = Triangulation.delaunay(points,
+                                    context=context)
 
     assert (to_contours_border_endpoints(result.triangles())
             == to_max_convex_hull_border_endpoints(points))
 
 
-@given(strategies.triangulation_classes, strategies.triangles)
-def test_base_case(triangulation_cls: Type[Triangulation],
+@given(strategies.contexts, strategies.triangles)
+def test_base_case(context: Context,
                    triangle: Contour) -> None:
-    result = triangulation_cls.delaunay(triangle.vertices)
+    result = Triangulation.delaunay(triangle.vertices,
+                                    context=context)
 
     triangles = result.triangles()
     assert len(triangles) == 1
     assert normalize_contour(triangle) in triangles
 
 
-@given(strategies.triangulation_classes, strategies.non_triangle_points_lists)
-def test_step(triangulation_cls: Type[Triangulation],
+@given(strategies.contexts, strategies.non_triangle_points_lists)
+def test_step(context: Context,
               points: Sequence[Point]) -> None:
     rest_points, last_point = points[:-1], points[-1]
 
-    result = triangulation_cls.delaunay(rest_points)
-    next_result = triangulation_cls.delaunay(points)
+    result = Triangulation.delaunay(rest_points,
+                                    context=context)
+    next_result = Triangulation.delaunay(points,
+                                         context=context)
 
     triangles = result.triangles()
     next_triangles = next_result.triangles()

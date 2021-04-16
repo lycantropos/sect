@@ -1,8 +1,8 @@
 from itertools import chain
 from typing import (Sequence,
-                    Tuple,
-                    Type)
+                    Tuple)
 
+from ground.base import Context
 from ground.hints import (Point,
                           Polygon)
 from hypothesis import given
@@ -19,26 +19,28 @@ from tests.utils import (complete_vertices,
 from . import strategies
 
 
-@given(strategies.triangulation_classes, strategies.polygons_with_extra_points)
-def test_basic(triangulation_cls: Type[Triangulation],
+@given(strategies.contexts, strategies.polygons_with_extra_points)
+def test_basic(context: Context,
                polygon_with_extra_points: Tuple[Polygon, Sequence[Point]]
                ) -> None:
     polygon, extra_points = polygon_with_extra_points
 
-    result = triangulation_cls.constrained_delaunay(polygon,
-                                                    extra_points=extra_points)
+    result = Triangulation.constrained_delaunay(polygon,
+                                                extra_points=extra_points,
+                                                context=context)
 
-    assert isinstance(result, triangulation_cls)
+    assert isinstance(result, Triangulation)
 
 
-@given(strategies.triangulation_classes, strategies.polygons_with_extra_points)
-def test_sizes(triangulation_cls: Type[Triangulation],
+@given(strategies.contexts, strategies.polygons_with_extra_points)
+def test_sizes(context: Context,
                polygon_with_extra_points: Tuple[Polygon, Sequence[Point]]
                ) -> None:
     polygon, extra_points = polygon_with_extra_points
 
-    result = triangulation_cls.constrained_delaunay(polygon,
-                                                    extra_points=extra_points)
+    result = Triangulation.constrained_delaunay(polygon,
+                                                extra_points=extra_points,
+                                                context=context)
 
     triangles = result.triangles()
     assert 0 < len(triangles) <= (
@@ -50,14 +52,15 @@ def test_sizes(triangulation_cls: Type[Triangulation],
     assert all(is_contour_triangular(triangle) for triangle in triangles)
 
 
-@given(strategies.triangulation_classes, strategies.polygons_with_extra_points)
-def test_points(triangulation_cls: Type[Triangulation],
+@given(strategies.contexts, strategies.polygons_with_extra_points)
+def test_points(context: Context,
                 polygon_with_extra_points: Tuple[Polygon, Sequence[Point]]
                 ) -> None:
     polygon, extra_points = polygon_with_extra_points
 
-    result = triangulation_cls.constrained_delaunay(polygon,
-                                                    extra_points=extra_points)
+    result = Triangulation.constrained_delaunay(polygon,
+                                                extra_points=extra_points,
+                                                context=context)
 
     assert (set(flatten(triangle.vertices for triangle in result.triangles()))
             == (set(sum([hole.vertices for hole in polygon.holes],
@@ -65,14 +68,15 @@ def test_points(triangulation_cls: Type[Triangulation],
                 | set(extra_points)))
 
 
-@given(strategies.triangulation_classes, strategies.polygons_with_extra_points)
-def test_edges(triangulation_cls: Type[Triangulation],
+@given(strategies.contexts, strategies.polygons_with_extra_points)
+def test_edges(context: Context,
                polygon_with_extra_points: Tuple[Polygon, Sequence[Point]]
                ) -> None:
     polygon, extra_points = polygon_with_extra_points
 
-    result = triangulation_cls.constrained_delaunay(polygon,
-                                                    extra_points=extra_points)
+    result = Triangulation.constrained_delaunay(polygon,
+                                                extra_points=extra_points,
+                                                context=context)
 
     border, holes, _ = complete_vertices(polygon.border, polygon.holes,
                                          extra_points)
@@ -81,14 +85,15 @@ def test_edges(triangulation_cls: Type[Triangulation],
                        contour_to_edges_endpoints(border))))
 
 
-@given(strategies.triangulation_classes, strategies.polygons_with_extra_points)
-def test_boundary(triangulation_cls: Type[Triangulation],
+@given(strategies.contexts, strategies.polygons_with_extra_points)
+def test_boundary(context: Context,
                   polygon_with_extra_points: Tuple[Polygon, Sequence[Point]]
                   ) -> None:
     polygon, extra_points = polygon_with_extra_points
 
-    result = triangulation_cls.constrained_delaunay(polygon,
-                                                    extra_points=extra_points)
+    result = Triangulation.constrained_delaunay(polygon,
+                                                extra_points=extra_points,
+                                                context=context)
 
     border, holes, _ = complete_vertices(polygon.border, polygon.holes,
                                          extra_points)
@@ -97,13 +102,14 @@ def test_boundary(triangulation_cls: Type[Triangulation],
                                       contour_to_edges_endpoints(border)))))
 
 
-@given(strategies.triangulation_classes, strategies.whole_polygons)
-def test_connection_with_delaunay_triangles(triangulation_cls
-                                            : Type[Triangulation],
+@given(strategies.contexts, strategies.whole_polygons)
+def test_connection_with_delaunay_triangles(context: Context,
                                             polygon: Polygon) -> None:
-    result = triangulation_cls.constrained_delaunay(polygon)
+    result = Triangulation.constrained_delaunay(polygon,
+                                                context=context)
 
     border = polygon.border
     assert ((result.triangles()
-             == triangulation_cls.delaunay(border.vertices).triangles())
+             == Triangulation.delaunay(border.vertices,
+                                       context=context).triangles())
             is is_convex_contour(border))
