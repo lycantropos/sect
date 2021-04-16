@@ -20,7 +20,7 @@ python -m pip install --upgrade pip setuptools
 
 ### User
 
-Download and install the latest stable version from `PyPI` repository:
+Download and install the latest stable version from `PyPI` repository
 ```bash
 python -m pip install --upgrade sect
 ```
