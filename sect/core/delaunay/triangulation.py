@@ -1,8 +1,10 @@
 from collections import deque
+from functools import partial
 from itertools import (accumulate,
                        chain,
                        repeat)
 from typing import (Callable,
+                    Dict,
                     Iterable,
                     List,
                     Optional,
@@ -166,13 +168,6 @@ class Triangulation:
                        for offset in range(0, parts_to_merge_count, 2)]
                       + result[parts_to_merge_count:])
         return result[0]
-
-    @classmethod
-    def from_sides(cls, left_side: QuadEdge, right_side: QuadEdge,
-                   *,
-                   context: Context) -> 'Triangulation':
-        """Constructs triangulation given its sides."""
-        return cls(left_side, right_side, context)
 
     __slots__ = ('context', 'left_side', 'right_side',
                  '_triangular_holes_vertices')
@@ -353,8 +348,7 @@ def is_convex_quadrilateral_diagonal(edge: QuadEdge) -> bool:
 def merge(left: Triangulation, right: Triangulation) -> Triangulation:
     connect(find_base_edge(left, right),
             left.context.point_point_point_incircle_test)
-    return left.from_sides(left.left_side, right.right_side,
-                           context=left.context)
+    return type(left)(left.left_side, right.right_side, left.context)
 
 
 def resolve_crossings(crossings: List[QuadEdge],
@@ -463,14 +457,22 @@ def to_unique_inner_edges(triangulation: Triangulation) -> Set[QuadEdge]:
             .difference(to_boundary_edges(triangulation)))
 
 
+BaseCase = Callable[[Type[Triangulation], Sequence[Point], Context],
+                    Triangulation]
+base_cases = {}  # type: Dict[int, BaseCase]
+register_base_case = partial(partial, base_cases.setdefault)
+
+
+@register_base_case(2)
 def triangulate_two_points(cls: Type[Triangulation],
                            sorted_points: Sequence[Point],
                            context: Context) -> Triangulation:
     first_edge = QuadEdge.from_endpoints(*sorted_points,
                                          context=context)
-    return cls.from_sides(first_edge, first_edge.opposite, context=context)
+    return cls(first_edge, first_edge.opposite, context)
 
 
+@register_base_case(3)
 def triangulate_three_points(cls: Type[Triangulation],
                              sorted_points: Sequence[Point],
                              context: Context) -> Triangulation:
@@ -483,17 +485,9 @@ def triangulate_three_points(cls: Type[Triangulation],
     orientation = first_edge.orientation_of(right_point)
     if orientation is Orientation.COUNTERCLOCKWISE:
         second_edge.connect(first_edge)
-        return cls.from_sides(first_edge, second_edge.opposite,
-                              context=context)
+        return cls(first_edge, second_edge.opposite, context)
     elif orientation is Orientation.CLOCKWISE:
         third_edge = second_edge.connect(first_edge)
-        return cls.from_sides(third_edge.opposite, third_edge, context=context)
+        return cls(third_edge.opposite, third_edge, context)
     else:
-        return cls.from_sides(first_edge, second_edge.opposite,
-                              context=context)
-
-
-TriangulationBaseConstructor = Callable[[Type[Triangulation], Sequence[Point],
-                                         Context], Triangulation]
-base_cases = {2: triangulate_two_points,
-              3: triangulate_three_points}
+        return cls(first_edge, second_edge.opposite, context)
