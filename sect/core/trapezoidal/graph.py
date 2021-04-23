@@ -3,18 +3,16 @@ from typing import List
 
 from ground.base import (Context,
                          Orientation)
-from ground.hints import (Multisegment,
+from ground.hints import (Box,
+                          Multisegment,
                           Point,
                           Polygon)
 from reprit.base import generate_repr
 
 from sect.core.utils import (contour_to_edges_endpoints,
-                             flatten,
                              to_contour_orientation)
-from .bounding import box_from_points
 from .edge import Edge
-from .hints import (Box,
-                    Shuffler)
+from .hints import Shuffler
 from .leaf import Leaf
 from .location import Location
 from .node import Node
@@ -84,10 +82,8 @@ class Graph:
                                      context)
             for segment in multisegment.segments]
         shuffler(edges)
-        box = box_from_points(flatten(
-                (segment.start, segment.end)
-                for segment in multisegment.segments))
-        result = cls(box_to_node(box, context))
+        result = cls(box_to_node(context.segments_box(multisegment.segments),
+                                 context))
         for edge in edges:
             add_edge(result, edge)
         return result
@@ -172,8 +168,7 @@ class Graph:
                                         context)
                     for start, end in contour_to_edges_endpoints(hole))
         shuffler(edges)
-        result = cls(box_to_node(box_from_points(border.vertices),
-                                 context))
+        result = cls(box_to_node(context.contour_box(border), context))
         for edge in edges:
             add_edge(result, edge)
         return result
@@ -373,7 +368,7 @@ def add_edge(graph: Graph, edge: Edge) -> None:
 
 
 def box_to_node(box: Box, context: Context) -> Leaf:
-    min_x, min_y, max_x, max_y = box
+    min_x, min_y, max_x, max_y = box.min_x, box.min_y, box.max_x, box.max_y
     delta_x, delta_y = max_x - min_x, max_y - min_y
     # handle horizontal/vertical cases
     delta_x, delta_y = delta_x or 1, delta_y or 1

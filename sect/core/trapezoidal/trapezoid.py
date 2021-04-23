@@ -1,5 +1,4 @@
-from typing import (TYPE_CHECKING,
-                    Optional)
+from typing import (Optional, TYPE_CHECKING)
 
 from ground.hints import Point
 from reprit.base import generate_repr
