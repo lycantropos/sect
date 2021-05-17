@@ -2,7 +2,7 @@ from functools import partial
 from typing import Tuple
 
 from ground.base import get_context
-from ground.hints import Coordinate
+from ground.hints import Scalar
 from hypothesis import strategies
 from hypothesis_geometry import planar
 
@@ -19,7 +19,7 @@ non_empty_multisegments = (coordinates_strategies
                            .flatmap(to_non_empty_multisegments))
 
 
-def to_non_empty_multisegments_with_points(coordinates: Strategy[Coordinate]
+def to_non_empty_multisegments_with_points(coordinates: Strategy[Scalar]
                                            ) -> Strategy[Tuple[Multisegment,
                                                                Point]]:
     return strategies.tuples(to_non_empty_multisegments(coordinates),
@@ -31,7 +31,7 @@ non_empty_multisegments_with_points = (
 polygons = coordinates_strategies.flatmap(planar.polygons)
 
 
-def to_polygons_with_points(coordinates: Strategy[Coordinate]
+def to_polygons_with_points(coordinates: Strategy[Scalar]
                             ) -> Strategy[Tuple[Polygon, Point]]:
     return strategies.tuples(planar.polygons(coordinates),
                              planar.points(coordinates))

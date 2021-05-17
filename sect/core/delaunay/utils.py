@@ -1,7 +1,8 @@
 import sys
 from bisect import bisect
 from collections import OrderedDict
-from typing import (Iterable,
+from typing import (FrozenSet,
+                    Iterable,
                     Sequence,
                     Tuple,
                     Type)
@@ -9,15 +10,16 @@ from typing import (Iterable,
 from ground.base import (Context,
                          Orientation)
 from ground.hints import (Contour,
-                          Point)
+                          Point,
+                          Segment)
 
 from sect.core.hints import Orienteer
 from sect.core.utils import (arg_min,
                              flatten,
                              rotate_sequence,
                              to_contour_orientation)
-from .hints import (SegmentEndpoints,
-                    SegmentPointRelater)
+from .hints import (SegmentContainmentChecker,
+                    SegmentEndpoints)
 
 
 def ceil_log2(number: int) -> int:
@@ -30,14 +32,17 @@ def complete_vertices(border: Contour,
                       context: Context
                       ) -> Tuple[Contour, Sequence[Contour], Sequence[Point]]:
     candidates = sorted(to_distinct(candidates))
-    contour_cls, segment_point_relater = (context.contour_cls,
-                                          context.segment_contains_point)
+    contour_cls, segment_cls, segment_point_relater = (
+        context.contour_cls, context.segment_cls,
+        context.segment_contains_point)
     border, candidates = _complete_contour_vertices(
-            border, candidates, contour_cls, segment_point_relater)
+            border, candidates, contour_cls, segment_cls,
+            segment_point_relater)
     completed_holes = []
     for hole in holes:
         hole, candidates = _complete_contour_vertices(
-                hole, candidates, contour_cls, segment_point_relater)
+                hole, candidates, contour_cls, segment_cls,
+                segment_point_relater)
         completed_holes.append(hole)
     return border, completed_holes, candidates
 
@@ -73,7 +78,8 @@ to_distinct = (OrderedDict if sys.version_info < (3, 6) else dict).fromkeys
 def _complete_contour_vertices(contour: Contour,
                                candidates: Sequence[Point],
                                contour_cls: Type[Contour],
-                               segment_point_relater: SegmentPointRelater
+                               segment_cls: Type[Segment],
+                               containment_checker: SegmentContainmentChecker
                                ) -> Tuple[Contour, Sequence[Point]]:
     extra_vertices = {}
     vertices = contour.vertices
@@ -87,7 +93,7 @@ def _complete_contour_vertices(contour: Contour,
             candidate_index
             for candidate_index in range(start_index, end_index)
             if _is_inner_segment_point(start, end, candidates[candidate_index],
-                                       segment_point_relater)]
+                                       segment_cls, containment_checker)]
         if extra_vertices_indices:
             extra_vertices[index] = [candidates[index]
                                      for index in extra_vertices_indices]
@@ -112,7 +118,12 @@ def _complete_contour_vertices(contour: Contour,
 def _is_inner_segment_point(start: Point,
                             end: Point,
                             point: Point,
-                            segment_point_relater: SegmentPointRelater
+                            segment_cls: Type[Segment],
+                            containment_checker: SegmentContainmentChecker
                             ) -> bool:
     return (point != start and point != end
-            and segment_point_relater(start, end, point))
+            and containment_checker(segment_cls(start, end), point))
+
+
+def to_endpoints(edge: Segment) -> FrozenSet[Point]:
+    return frozenset((edge.start, edge.end))

@@ -14,7 +14,6 @@ from tests.utils import (complete_vertices,
                          is_contour_triangular,
                          is_convex_contour,
                          to_contours_border_endpoints,
-                         to_convex_hull,
                          to_distinct)
 from . import strategies
 
@@ -48,7 +47,7 @@ def test_sizes(context: Context,
                                        *[hole.vertices
                                          for hole in polygon.holes],
                                        extra_points))) - 1)
-            - len(to_convex_hull(polygon.border.vertices)))
+            - len(context.points_convex_hull(polygon.border.vertices)))
     assert all(is_contour_triangular(triangle) for triangle in triangles)
 
 

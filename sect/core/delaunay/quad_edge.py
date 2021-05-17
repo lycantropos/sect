@@ -1,5 +1,4 @@
-from typing import (FrozenSet,
-                    Iterable,
+from typing import (Iterable,
                     List,
                     Optional)
 
@@ -153,10 +152,6 @@ class QuadEdge:
         opposite.splice(opposite_side.left_from_end)
         self._start = side.end
         opposite._start = opposite_side.end
-
-
-def edge_to_endpoints(edge: QuadEdge) -> FrozenSet[Point]:
-    return frozenset((edge.start, edge.end))
 
 
 def edge_to_neighbours(edge: QuadEdge) -> List[QuadEdge]:

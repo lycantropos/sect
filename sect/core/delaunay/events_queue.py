@@ -74,11 +74,9 @@ class EventsQueue:
         Populates events queue with intersection events.
         Checks if events' segments overlap and have the same start.
         """
-        relation = self.context.segments_relation(
-                below_event.start, below_event.end, event.start, event.end)
+        relation = self.context.segments_relation(below_event, event)
         if relation is Relation.CROSS or relation is Relation.TOUCH:
-            point = self.context.segments_intersection(
-                    below_event.start, below_event.end, event.start, event.end)
+            point = self.context.segments_intersection(below_event, event)
             if point != below_event.start and point != below_event.end:
                 self.divide_segment(below_event, point)
             if point != event.start and point != event.end:

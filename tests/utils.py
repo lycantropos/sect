@@ -65,9 +65,6 @@ def to_contours_border_endpoints(contours: Iterable[Contour]
     return result
 
 
-to_convex_hull = context.points_convex_hull
-
-
 def to_max_convex_hull(points: Sequence[Point]) -> List[Point]:
     points = sorted(to_distinct(points))
     lower, upper = _to_sub_hull(points), _to_sub_hull(reversed(points))
@@ -124,11 +121,7 @@ def contour_to_edges(contour: Contour) -> Sequence[Segment]:
 
 
 contour_to_edges_endpoints = contour_to_edges_endpoints
-
-
-def segment_contains_point(segment: Segment, point: Point) -> bool:
-    return context.segment_contains_point(segment.start, segment.end, point)
-
+segment_contains_point = context.segment_contains_point
 
 _T = TypeVar('_T',
              bound=Hashable)
