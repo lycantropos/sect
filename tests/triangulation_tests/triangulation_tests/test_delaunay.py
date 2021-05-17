@@ -17,8 +17,7 @@ from . import strategies
 
 
 @given(strategies.contexts, strategies.points_lists)
-def test_basic(context: Context,
-               points: Sequence[Point]) -> None:
+def test_basic(context: Context, points: Sequence[Point]) -> None:
     result = Triangulation.delaunay(points,
                                     context=context)
 
@@ -26,8 +25,7 @@ def test_basic(context: Context,
 
 
 @given(strategies.contexts, strategies.points_lists)
-def test_sizes(context: Context,
-               points: Sequence[Point]) -> None:
+def test_sizes(context: Context, points: Sequence[Point]) -> None:
     result = Triangulation.delaunay(points,
                                     context=context)
 
@@ -38,8 +36,7 @@ def test_sizes(context: Context,
 
 
 @given(strategies.contexts, strategies.points_lists)
-def test_delaunay_criterion(context: Context,
-                            points: Sequence[Point]) -> None:
+def test_delaunay_criterion(context: Context, points: Sequence[Point]) -> None:
     result = Triangulation.delaunay(points,
                                     context=context)
 
@@ -49,8 +46,7 @@ def test_delaunay_criterion(context: Context,
 
 
 @given(strategies.contexts, strategies.points_lists)
-def test_boundary(context: Context,
-                  points: Sequence[Point]) -> None:
+def test_boundary(context: Context, points: Sequence[Point]) -> None:
     result = Triangulation.delaunay(points,
                                     context=context)
 
@@ -59,8 +55,7 @@ def test_boundary(context: Context,
 
 
 @given(strategies.contexts, strategies.triangles)
-def test_base_case(context: Context,
-                   triangle: Contour) -> None:
+def test_base_case(context: Context, triangle: Contour) -> None:
     result = Triangulation.delaunay(triangle.vertices,
                                     context=context)
 
@@ -70,8 +65,7 @@ def test_base_case(context: Context,
 
 
 @given(strategies.contexts, strategies.non_triangle_points_lists)
-def test_step(context: Context,
-              points: Sequence[Point]) -> None:
+def test_step(context: Context, points: Sequence[Point]) -> None:
     rest_points, last_point = points[:-1], points[-1]
 
     result = Triangulation.delaunay(rest_points,

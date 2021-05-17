@@ -13,21 +13,17 @@ from tests.utils import (Multisegment,
                          Strategy)
 
 contexts = strategies.just(get_context())
-to_non_empty_multisegments = partial(planar.multisegments,
-                                     min_size=1)
-non_empty_multisegments = (coordinates_strategies
-                           .flatmap(to_non_empty_multisegments))
+multisegments = coordinates_strategies.flatmap(planar.multisegments)
 
 
-def to_non_empty_multisegments_with_points(coordinates: Strategy[Scalar]
-                                           ) -> Strategy[Tuple[Multisegment,
-                                                               Point]]:
-    return strategies.tuples(to_non_empty_multisegments(coordinates),
+def to_multisegments_with_points(coordinates: Strategy[Scalar]
+                                 ) -> Strategy[Tuple[Multisegment, Point]]:
+    return strategies.tuples(planar.multisegments(coordinates),
                              planar.points(coordinates))
 
 
-non_empty_multisegments_with_points = (
-    coordinates_strategies.flatmap(to_non_empty_multisegments_with_points))
+multisegments_with_points = (coordinates_strategies
+                             .flatmap(to_multisegments_with_points))
 polygons = coordinates_strategies.flatmap(planar.polygons)
 
 
