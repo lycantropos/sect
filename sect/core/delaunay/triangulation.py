@@ -271,7 +271,7 @@ def cut(triangulation: Triangulation, holes: Sequence[Contour]) -> None:
     events_queue = EventsQueue(triangulation.context)
     for edge in to_unique_inner_edges(triangulation):
         events_queue.register_edge(edge,
-                                   from_left=True,
+                                   from_first=True,
                                    is_counterclockwise_contour=True)
     orienteer = triangulation.context.angle_orientation
     for hole in holes:
@@ -280,10 +280,10 @@ def cut(triangulation: Triangulation, holes: Sequence[Contour]) -> None:
                 clockwise=True,
                 orienteer=orienteer):
             events_queue.register_segment(endpoints,
-                                          from_left=False,
+                                          from_first=False,
                                           is_counterclockwise_contour=False)
     for event in events_queue.sweep():
-        if event.from_left and event.inside:
+        if event.from_first and event.inside:
             triangulation.delete(event.edge)
 
 

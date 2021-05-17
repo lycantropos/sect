@@ -10,7 +10,8 @@ from prioq.base import PriorityQueue
 from reprit.base import generate_repr
 
 from sect.core.hints import Orienteer
-from .event import Event
+from .event import (Event,
+                    LeftEvent)
 from .hints import SegmentEndpoints
 from .quad_edge import QuadEdge
 from .sweep_line import SweepLine
@@ -36,21 +37,21 @@ class EventsQueueKey:
             # different points, but same x-coordinate,
             # the event with lower y-coordinate is processed first
             return start.y < other_start.y
-        elif event.is_left_endpoint is not other_event.is_left_endpoint:
+        elif event.is_left is not other_event.is_left:
             # same start, but one is a left endpoint
             # and the other a right endpoint,
             # the right endpoint is processed first
-            return other_event.is_left_endpoint
+            return other_event.is_left
         # same start, both events are left endpoints
         # or both are right endpoints
         else:
             other_end_orientation = self.orienteer(event.start, event.end,
                                                    other_event.end)
             # the lowest segment is processed first
-            return (other_event.from_left
+            return (other_event.from_first
                     if other_end_orientation is Orientation.COLLINEAR
                     else other_end_orientation is (Orientation.COUNTERCLOCKWISE
-                                                   if event.is_left_endpoint
+                                                   if event.is_left
                                                    else Orientation.CLOCKWISE))
 
 
@@ -63,14 +64,17 @@ class EventsQueue:
                                                 context.angle_orientation))
 
     @staticmethod
-    def compute_position(below_event: Optional[Event], event: Event) -> None:
+    def compute_position(below_event: Optional[LeftEvent],
+                         event: LeftEvent) -> None:
         if below_event is not None:
             event.other_interior_to_left = (below_event.other_interior_to_left
-                                            if (event.from_left
-                                                is below_event.from_left)
+                                            if (event.from_first
+                                                is below_event.from_first)
                                             else below_event.interior_to_left)
 
-    def detect_intersection(self, below_event: Event, event: Event) -> bool:
+    def detect_intersection(self,
+                            below_event: LeftEvent,
+                            event: LeftEvent) -> bool:
         """
         Populates events queue with intersection events.
         Checks if events' segments overlap and have the same start.
@@ -84,30 +88,26 @@ class EventsQueue:
                 self.divide_segment(event, point)
         elif relation is not Relation.DISJOINT:
             # segments overlap
-            if below_event.from_left is event.from_left:
+            if below_event.from_first is event.from_first:
                 raise ValueError('Edges of the same polygon '
                                  'should not overlap.')
             starts_equal = below_event.start == event.start
             ends_equal = below_event.end == event.end
-            start_min, start_max = ((None, None)
-                                    if starts_equal
-                                    else ((event, below_event)
-                                          if (self._queue.key(event)
-                                              < self._queue.key(below_event))
-                                          else (below_event, event)))
-            end_min, end_max = ((None, None)
-                                if ends_equal
-                                else
-                                ((event.opposite, below_event.opposite)
-                                 if (self._queue.key(event.opposite)
-                                     < self._queue.key(below_event.opposite))
-                                 else (below_event.opposite,
-                                       event.opposite)))
+            start_min, start_max = (
+                (event, below_event)
+                if starts_equal or (self._queue.key(event)
+                                    < self._queue.key(below_event))
+                else (below_event, event))
+            end_min, end_max = (
+                (event.right, below_event.right)
+                if ends_equal or (self._queue.key(event.right)
+                                  < self._queue.key(below_event.right))
+                else (below_event.right, event.right))
             if starts_equal:
                 # both line segments are equal or share the left endpoint
                 event.is_overlap = below_event.is_overlap = True
                 if not ends_equal:
-                    self.divide_segment(end_max.opposite, end_min.start)
+                    self.divide_segment(end_max.left, end_min.start)
                 return True
             elif ends_equal:
                 # the line segments share the right endpoint
@@ -115,43 +115,47 @@ class EventsQueue:
             else:
                 self.divide_segment(start_min
                                     # one line segment includes the other one
-                                    if start_min is end_max.opposite
+                                    if start_min is end_max.left
                                     # no line segment includes the other one
                                     else start_max,
                                     end_min.start)
                 self.divide_segment(start_min, start_max.start)
         return False
 
-    def divide_segment(self, event: Event, point: Point) -> None:
-        self._queue.push(event.divide(point))
-        self._queue.push(event.opposite)
+    def divide_segment(self, event: LeftEvent, point: Point) -> None:
+        self.push(event.divide(point))
+        self.push(event.right)
+
+    def push(self, event: Event) -> None:
+        self._queue.push(event)
 
     def register_edge(self,
                       edge: QuadEdge,
                       *,
-                      from_left: bool,
+                      from_first: bool,
                       is_counterclockwise_contour: bool) -> None:
-        start_event = Event.from_segment_endpoints(
-                to_endpoints(edge), from_left, is_counterclockwise_contour)
+        start_event = LeftEvent.from_segment_endpoints(
+                to_endpoints(edge), from_first, is_counterclockwise_contour)
         start_event.edge = edge
-        self._queue.push(start_event)
-        self._queue.push(start_event.opposite)
+        self.push(start_event)
+        self.push(start_event.right)
 
     def register_segment(self,
                          endpoints: SegmentEndpoints,
                          *,
-                         from_left: bool,
+                         from_first: bool,
                          is_counterclockwise_contour: bool) -> None:
-        start_event = Event.from_segment_endpoints(endpoints, from_left,
-                                                   is_counterclockwise_contour)
-        self._queue.push(start_event)
-        self._queue.push(start_event.opposite)
+        start_event = LeftEvent.from_segment_endpoints(
+                endpoints, from_first, is_counterclockwise_contour)
+        self.push(start_event)
+        self.push(start_event.right)
 
-    def sweep(self) -> Iterable[Event]:
+    def sweep(self) -> Iterable[LeftEvent]:
         sweep_line = SweepLine(self.context)
-        while self._queue:
-            event = self._queue.pop()
-            if event.is_left_endpoint:
+        queue = self._queue
+        while queue:
+            event = queue.pop()
+            if event.is_left:
                 sweep_line.add(event)
                 above_event, below_event = (sweep_line.above(event),
                                             sweep_line.below(event))
@@ -164,7 +168,7 @@ class EventsQueue:
                     self.compute_position(sweep_line.below(below_event),
                                           below_event)
             else:
-                event = event.opposite
+                event = event.left
                 if event in sweep_line:
                     above_event, below_event = (sweep_line.above(event),
                                                 sweep_line.below(event))

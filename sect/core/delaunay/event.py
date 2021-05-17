@@ -1,3 +1,5 @@
+from abc import (ABC,
+                 abstractmethod)
 from reprlib import recursive_repr
 from typing import Optional
 
@@ -8,44 +10,71 @@ from .hints import SegmentEndpoints
 from .quad_edge import QuadEdge
 
 
-class Event:
+class Event(ABC):
+    __slots__ = ()
+
+    @property
+    @abstractmethod
+    def end(self) -> Point:
+        """Returns end of the event."""
+
+    @property
+    @abstractmethod
+    def is_left(self) -> bool:
+        """Checks if event's start corresponds to the leftmost endpoint."""
+
+    @property
+    @abstractmethod
+    def start(self) -> Point:
+        """Returns start of the event."""
+
+    @property
+    @abstractmethod
+    def from_first(self) -> bool:
+        """Checks if event is from left."""
+
+
+class LeftEvent(Event):
+    is_left = True
+
     @classmethod
     def from_segment_endpoints(cls,
                                endpoints: SegmentEndpoints,
-                               from_left: bool,
-                               is_counterclockwise_contour: bool) -> 'Event':
+                               from_first: bool,
+                               is_counterclockwise_contour: bool
+                               ) -> 'LeftEvent':
         start, end = endpoints
         interior_to_left = is_counterclockwise_contour
         if start > end:
             start, end = end, start
             interior_to_left = not interior_to_left
-        result = cls(start, None, True, from_left, interior_to_left)
-        result.opposite = cls(end, result, False, from_left, interior_to_left)
+        result = cls(start, None, from_first, interior_to_left)
+        result.right = RightEvent(end, result)
         return result
 
-    __slots__ = ('edge', 'from_left', 'interior_to_left', 'is_left_endpoint',
-                 'is_overlap', 'opposite', 'other_interior_to_left', 'start')
+    __slots__ = ('edge', 'interior_to_left', 'is_overlap',
+                 'other_interior_to_left', 'right', '_from_first', '_start')
 
     def __init__(self,
                  start: Point,
-                 opposite: Optional['Event'],
-                 is_left_endpoint: bool,
-                 from_left: bool,
+                 right: Optional['RightEvent'],
+                 from_first: bool,
                  interior_to_left: bool,
                  edge: Optional[QuadEdge] = None) -> None:
-        self.is_left_endpoint, self.opposite, self.start = (is_left_endpoint,
-                                                            opposite, start)
-        self.from_left, self.interior_to_left, self.other_interior_to_left = (
-            from_left, interior_to_left, False)
-        self.is_overlap = False
+        self.right, self._from_first, self._start = right, from_first, start
+        self.interior_to_left = interior_to_left
         self.edge = edge
+        self.is_overlap = self.other_interior_to_left = False
 
     __repr__ = recursive_repr()(generate_repr(__init__))
 
     @property
     def end(self) -> Point:
-        """Returns end of the event's segment."""
-        return self.opposite.start
+        return self.right.start
+
+    @property
+    def from_first(self) -> bool:
+        return self._from_first
 
     @property
     def inside(self) -> bool:
@@ -55,10 +84,34 @@ class Event:
         """
         return self.other_interior_to_left and not self.is_overlap
 
-    def divide(self, point: Point) -> 'Event':
-        tail = self.opposite.opposite = Event(point, self.opposite, True,
-                                              self.from_left,
-                                              self.interior_to_left, self.edge)
-        self.opposite = Event(point, self, False, self.from_left,
-                              self.interior_to_left, self.edge)
+    @property
+    def start(self) -> Point:
+        return self._start
+
+    def divide(self, point: Point) -> 'LeftEvent':
+        tail = self.right.left = LeftEvent(point, self.right, True,
+                                           self.interior_to_left, self.edge)
+        self.right = RightEvent(point, self)
         return tail
+
+
+class RightEvent(Event):
+    is_left = False
+    __slots__ = 'left', '_start'
+
+    def __init__(self, start: Point, left: LeftEvent) -> None:
+        self.left, self._start = left, start
+
+    __repr__ = recursive_repr()(generate_repr(__init__))
+
+    @property
+    def end(self) -> Point:
+        return self.left.start
+
+    @property
+    def from_first(self) -> bool:
+        return self.left.from_first
+
+    @property
+    def start(self) -> Point:
+        return self._start

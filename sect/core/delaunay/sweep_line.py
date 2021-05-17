@@ -7,7 +7,7 @@ from ground.base import (Context,
 from reprit.base import generate_repr
 
 from sect.core.hints import Orienteer
-from .event import Event
+from .event import LeftEvent
 
 
 class SweepLine:
@@ -19,22 +19,22 @@ class SweepLine:
 
     __repr__ = generate_repr(__init__)
 
-    def __contains__(self, event: Event) -> bool:
+    def __contains__(self, event: LeftEvent) -> bool:
         return event in self._tree
 
-    def add(self, event: Event) -> None:
+    def add(self, event: LeftEvent) -> None:
         self._tree.add(event)
 
-    def remove(self, event: Event) -> None:
+    def remove(self, event: LeftEvent) -> None:
         self._tree.remove(event)
 
-    def above(self, event: Event) -> Optional[Event]:
+    def above(self, event: LeftEvent) -> Optional[LeftEvent]:
         try:
             return self._tree.next(event)
         except ValueError:
             return None
 
-    def below(self, event: Event) -> Optional[Event]:
+    def below(self, event: LeftEvent) -> Optional[LeftEvent]:
         try:
             return self._tree.prev(event)
         except ValueError:
@@ -44,7 +44,7 @@ class SweepLine:
 class SweepLineKey:
     __slots__ = 'event', 'orienteer'
 
-    def __init__(self, orienteer: Orienteer, event: Event) -> None:
+    def __init__(self, orienteer: Orienteer, event: LeftEvent) -> None:
         self.orienteer, self.event = orienteer, event
 
     __repr__ = generate_repr(__init__)
@@ -62,7 +62,7 @@ class SweepLineKey:
         other_start_orientation = self.orienteer(start, end, other_start)
         other_end_orientation = self.orienteer(start, end, other_end)
         if other_start_orientation is other_end_orientation:
-            return (other_event.from_left
+            return (other_event.from_first
                     if other_start_orientation is Orientation.COLLINEAR
                     else (other_start_orientation
                           is Orientation.COUNTERCLOCKWISE))
