@@ -14,6 +14,7 @@ from .event import Event
 from .hints import SegmentEndpoints
 from .quad_edge import QuadEdge
 from .sweep_line import SweepLine
+from .utils import to_endpoints
 
 
 class EventsQueueKey:
@@ -130,34 +131,21 @@ class EventsQueue:
                       *,
                       from_left: bool,
                       is_counterclockwise_contour: bool) -> None:
-        start, end = edge.start, edge.end
-        interior_to_left = is_counterclockwise_contour
-        if start > end:
-            start, end = end, start
-            interior_to_left = not interior_to_left
-        start_event = Event(start, None, True, from_left, interior_to_left,
-                            edge)
-        end_event = Event(end, start_event, False, from_left, interior_to_left,
-                          edge)
-        start_event.opposite = end_event
+        start_event = Event.from_segment_endpoints(
+                to_endpoints(edge), from_left, is_counterclockwise_contour)
+        start_event.edge = edge
         self._queue.push(start_event)
-        self._queue.push(end_event)
+        self._queue.push(start_event.opposite)
 
     def register_segment(self,
                          endpoints: SegmentEndpoints,
                          *,
                          from_left: bool,
                          is_counterclockwise_contour: bool) -> None:
-        start, end = endpoints
-        interior_to_left = is_counterclockwise_contour
-        if start > end:
-            start, end = end, start
-            interior_to_left = not interior_to_left
-        start_event = Event(start, None, True, from_left, interior_to_left)
-        end_event = Event(end, start_event, False, from_left, interior_to_left)
-        start_event.opposite = end_event
+        start_event = Event.from_segment_endpoints(endpoints, from_left,
+                                                   is_counterclockwise_contour)
         self._queue.push(start_event)
-        self._queue.push(end_event)
+        self._queue.push(start_event.opposite)
 
     def sweep(self) -> Iterable[Event]:
         sweep_line = SweepLine(self.context)

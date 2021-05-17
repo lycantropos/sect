@@ -4,10 +4,25 @@ from typing import Optional
 from ground.hints import Point
 from reprit.base import generate_repr
 
+from .hints import SegmentEndpoints
 from .quad_edge import QuadEdge
 
 
 class Event:
+    @classmethod
+    def from_segment_endpoints(cls,
+                               endpoints: SegmentEndpoints,
+                               from_left: bool,
+                               is_counterclockwise_contour: bool) -> 'Event':
+        start, end = endpoints
+        interior_to_left = is_counterclockwise_contour
+        if start > end:
+            start, end = end, start
+            interior_to_left = not interior_to_left
+        result = cls(start, None, True, from_left, interior_to_left)
+        result.opposite = cls(end, result, False, from_left, interior_to_left)
+        return result
+
     __slots__ = ('edge', 'from_left', 'interior_to_left', 'is_left_endpoint',
                  'is_overlap', 'opposite', 'other_interior_to_left', 'start')
 
