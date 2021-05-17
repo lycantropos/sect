@@ -39,3 +39,11 @@ class Event:
         or lies within the region of the intersection.
         """
         return self.other_interior_to_left and not self.is_overlap
+
+    def divide(self, point: Point) -> 'Event':
+        tail = self.opposite.opposite = Event(point, self.opposite, True,
+                                              self.from_left,
+                                              self.interior_to_left, self.edge)
+        self.opposite = Event(point, self, False, self.from_left,
+                              self.interior_to_left, self.edge)
+        return tail

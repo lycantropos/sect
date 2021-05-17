@@ -122,14 +122,8 @@ class EventsQueue:
         return False
 
     def divide_segment(self, event: Event, point: Point) -> None:
-        left_event = event.opposite.opposite = Event(
-                point, event.opposite, True, event.from_left,
-                event.interior_to_left, event.edge)
-        right_event = event.opposite = Event(
-                point, event, False, event.from_left, event.interior_to_left,
-                event.edge)
-        self._queue.push(left_event)
-        self._queue.push(right_event)
+        self._queue.push(event.divide(point))
+        self._queue.push(event.opposite)
 
     def register_edge(self,
                       edge: QuadEdge,
