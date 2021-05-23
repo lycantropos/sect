@@ -66,13 +66,19 @@ class Triangulation:
         Time complexity:
             ``O(vertices_count * log vertices_count)`` for convex polygons
             without extra constraints,
-            ``O(vertices_count ** 2)`` otherwise,
-            where ``vertices_count = len(border) + sum(map(len, holes))\
-     + len(extra_points) + len(extra_constraints)``.
+            ``O(vertices_count ** 2)`` otherwise
         Memory complexity:
-            ``O(vertices_count)``,
-            where ``vertices_count = len(border) + sum(map(len, holes))\
-     + len(extra_points) + len(extra_constraints)``.
+            ``O(vertices_count)``
+
+        where
+
+        .. code-block:: python
+
+            vertices_count = (len(polygon.border.vertices)
+                              + sum(len(hole.vertices)
+                                    for hole in polygon.holes)
+                              + len(extra_points) + len(extra_constraints))
+
         Reference:
             http://www.sccg.sk/~samuelcik/dgs/quad_edge.pdf
             https://www.newcastle.edu.au/__data/assets/pdf_file/0019/22519/23_A-fast-algortithm-for-generating-constrained-Delaunay-triangulations.pdf

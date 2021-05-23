@@ -37,11 +37,12 @@ class Graph:
 
         Time complexity:
             ``O(segments_count * log segments_count)`` expected,
-            ``O(segments_count ** 2)`` worst,
-            where ``segments_count = len(multisegment)``.
+            ``O(segments_count ** 2)`` worst
         Memory complexity:
-            ``O(segments_count)``,
-            where ``segments_count = len(multisegment)``.
+            ``O(segments_count)``
+
+        where ``segments_count = len(multisegment.segments)``
+
         Reference:
             https://doi.org/10.1016%2F0925-7721%2891%2990012-4
             https://www.cs.princeton.edu/courses/archive/fall05/cos528/handouts/A%20Simple%20and%20fast.pdf
@@ -101,11 +102,19 @@ class Graph:
 
         Time complexity:
             ``O(vertices_count * log vertices_count)`` expected,
-            ``O(vertices_count ** 2)`` worst,
-            where ``vertices_count = len(border) + sum(map(len, holes))``.
+            ``O(vertices_count ** 2)`` worst
         Memory complexity:
-            ``O(vertices_count)``,
-            where ``vertices_count = len(border) + sum(map(len, holes))``.
+            ``O(vertices_count)``
+
+        where
+
+            .. code-block:: python
+
+                vertices_count = (len(polygon.border.vertices)
+                                  + sum(len(hole.vertices)
+                                        for hole in polygon.holes)
+                                  + len(extra_points) + len(extra_constraints))
+
         Reference:
             https://doi.org/10.1016%2F0925-7721%2891%2990012-4
             https://www.cs.princeton.edu/courses/archive/fall05/cos528/handouts/A%20Simple%20and%20fast.pdf
