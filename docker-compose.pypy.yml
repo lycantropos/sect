@@ -7,7 +7,7 @@ services:
       args:
         - IMAGE_NAME=${PYPY_IMAGE_NAME}
         - IMAGE_VERSION=${PYPY_IMAGE_VERSION}
-    image: lycantropos/sect-pypy:4.0.0-alpha
+    image: lycantropos/sect-pypy:4.0.0
     volumes:
       - ./pytest.ini:/opt/sect/pytest.ini
       - ./README.md:/opt/sect/README.md
