@@ -115,9 +115,9 @@ class Triangulation:
                                                  for hole in holes),
                                          extra_points)),
                               context=context)
-        border_edges = context.contour_edges(border)
+        border_edges = context.contour_segments(border)
         constrain(result, chain(border_edges,
-                                flatten(map(context.contour_edges, holes)),
+                                flatten(map(context.contour_segments, holes)),
                                 extra_constraints))
         bound(result, border_edges)
         cut(result, holes)
