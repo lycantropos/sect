@@ -2,10 +2,10 @@ from abc import (ABC,
                  abstractmethod)
 from typing import List
 
+from ground.base import Location
 from ground.hints import Point
 
 from .edge import Edge
-from .location import Location
 from .trapezoid import Trapezoid
 
 

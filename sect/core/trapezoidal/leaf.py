@@ -1,8 +1,8 @@
+from ground.base import Location
 from ground.hints import Point
 from reprit.base import generate_repr
 
 from .edge import Edge
-from .location import Location
 from .node import Node
 from .trapezoid import Trapezoid
 

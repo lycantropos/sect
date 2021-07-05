@@ -2,6 +2,7 @@ import random
 from typing import List
 
 from ground.base import (Context,
+                         Location,
                          Orientation)
 from ground.hints import (Box,
                           Multisegment,
@@ -14,7 +15,6 @@ from sect.core.utils import (contour_to_edges_endpoints,
 from .edge import Edge
 from .hints import Shuffler
 from .leaf import Leaf
-from .location import Location
 from .node import Node
 from .trapezoid import Trapezoid
 from .x_node import XNode
