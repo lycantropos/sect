@@ -104,7 +104,7 @@ True
 True
 >>> Point(3, 3) in graph
 False
->>> from sect.decomposition import Location
+>>> from ground.base import Location
 >>> graph.locate(Point(0, 0)) is Location.BOUNDARY
 True
 >>> graph.locate(Point(1, 1)) is Location.INTERIOR
