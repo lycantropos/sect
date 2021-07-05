@@ -14,7 +14,7 @@ from typing import (Callable,
 
 from decision.partition import coin_change
 from ground.base import (Context,
-                         Orientation,
+                         Location, Orientation,
                          Relation)
 from ground.hints import (Contour,
                           Point,
@@ -25,7 +25,7 @@ from reprit.base import generate_repr
 from sect.core.utils import (flatten,
                              pairwise)
 from .events_queue import EventsQueue
-from .hints import (QuaternaryPointPredicate,
+from .hints import (PointInCircleLocator,
                     SegmentsRelater)
 from .quad_edge import (QuadEdge,
                         edge_to_neighbours,
@@ -231,19 +231,21 @@ def bound(triangulation: Triangulation,
 
 
 def connect(base_edge: QuadEdge,
-            incircle_test: QuaternaryPointPredicate) -> None:
+            point_in_circle_locator: PointInCircleLocator) -> None:
     while True:
         left_candidate, right_candidate = (
-            to_left_candidate(base_edge, incircle_test),
-            to_right_candidate(base_edge, incircle_test))
+            to_left_candidate(base_edge, point_in_circle_locator),
+            to_right_candidate(base_edge, point_in_circle_locator))
         if left_candidate is right_candidate is None:
             break
         base_edge = (
             right_candidate.connect(base_edge.opposite)
             if (left_candidate is None
                 or right_candidate is not None
-                and incircle_test(left_candidate.end, base_edge.end,
-                                  base_edge.start, right_candidate.end) > 0)
+                and (point_in_circle_locator(left_candidate.end, base_edge.end,
+                                             base_edge.start,
+                                             right_candidate.end)
+                     is Location.INTERIOR))
             else base_edge.opposite.connect(left_candidate.opposite))
 
 
@@ -251,8 +253,8 @@ def constrain(triangulation: Triangulation,
               constraints: Iterable[Segment]) -> None:
     endpoints = {to_endpoints(edge) for edge in to_edges(triangulation)}
     inner_edges = to_unique_inner_edges(triangulation)
-    incircle_test, segments_relater = (
-        triangulation.context.point_point_point_incircle_test,
+    point_in_circle_locator, segments_relater = (
+        triangulation.context.locate_point_in_point_point_point_circle,
         triangulation.context.segments_relation)
     for constraint in constraints:
         constraint_endpoints = to_endpoints(constraint)
@@ -266,7 +268,7 @@ def constrain(triangulation: Triangulation,
         set_criterion({edge
                        for edge in new_edges
                        if to_endpoints(edge) != constraint_endpoints},
-                      incircle_test)
+                      point_in_circle_locator)
         endpoints.update(to_endpoints(edge) for edge in new_edges)
         inner_edges.update(new_edges)
 
@@ -302,13 +304,17 @@ def detect_crossings(inner_edges: Iterable[QuadEdge],
 
 
 def edge_should_be_swapped(edge: QuadEdge,
-                           incircle_test: QuaternaryPointPredicate) -> bool:
+                           point_in_circle_locator: PointInCircleLocator
+                           ) -> bool:
     return (is_convex_quadrilateral_diagonal(edge)
-            and (incircle_test(edge.start, edge.end, edge.left_from_start.end,
-                               edge.right_from_start.end) > 0
-                 or incircle_test(edge.end, edge.start,
-                                  edge.right_from_start.end,
-                                  edge.left_from_start.end) > 0))
+            and (point_in_circle_locator(edge.start, edge.end,
+                                         edge.left_from_start.end,
+                                         edge.right_from_start.end)
+                 is Location.INTERIOR
+                 or (point_in_circle_locator(edge.end, edge.start,
+                                             edge.right_from_start.end,
+                                             edge.left_from_start.end)
+                     is Location.INTERIOR)))
 
 
 def find_base_edge(left: Triangulation, right: Triangulation) -> QuadEdge:
@@ -341,7 +347,7 @@ def is_convex_quadrilateral_diagonal(edge: QuadEdge) -> bool:
 
 def merge(left: Triangulation, right: Triangulation) -> Triangulation:
     connect(find_base_edge(left, right),
-            left.context.point_point_point_incircle_test)
+            left.context.locate_point_in_point_point_point_circle)
     return type(left)(left.left_side, right.right_side, left.context)
 
 
@@ -365,11 +371,12 @@ def resolve_crossings(crossings: List[QuadEdge],
 
 
 def set_criterion(target_edges: Set[QuadEdge],
-                  incircle_test: QuaternaryPointPredicate) -> None:
+                  point_in_circle_locator: PointInCircleLocator) -> None:
     while True:
         edges_to_swap = {edge
                          for edge in target_edges
-                         if edge_should_be_swapped(edge, incircle_test)}
+                         if
+                         edge_should_be_swapped(edge, point_in_circle_locator)}
         if not edges_to_swap:
             break
         for edge in edges_to_swap:
@@ -386,13 +393,14 @@ def to_edges(triangulation: Triangulation) -> Iterable[QuadEdge]:
 
 
 def to_left_candidate(base_edge: QuadEdge,
-                      incircle_test: QuaternaryPointPredicate
+                      point_in_circle_locator: PointInCircleLocator
                       ) -> Optional[QuadEdge]:
     result = base_edge.opposite.left_from_start
     if base_edge.orientation_of(result.end) is not Orientation.CLOCKWISE:
         return None
-    while (incircle_test(base_edge.end, base_edge.start, result.end,
-                         result.left_from_start.end) > 0
+    while (point_in_circle_locator(base_edge.end, base_edge.start, result.end,
+                                   result.left_from_start.end)
+           is Location.INTERIOR
            and (base_edge.orientation_of(result.left_from_start.end)
                 is Orientation.CLOCKWISE)):
         next_candidate = result.left_from_start
@@ -402,14 +410,15 @@ def to_left_candidate(base_edge: QuadEdge,
 
 
 def to_right_candidate(base_edge: QuadEdge,
-                       incircle_test: QuaternaryPointPredicate
+                       point_in_circle_locator: PointInCircleLocator
                        ) -> Optional[QuadEdge]:
     result = base_edge.right_from_start
     if (base_edge.orientation_of(result.end)
             is not Orientation.CLOCKWISE):
         return None
-    while (incircle_test(base_edge.end, base_edge.start, result.end,
-                         result.right_from_start.end) > 0
+    while (point_in_circle_locator(base_edge.end, base_edge.start, result.end,
+                                   result.right_from_start.end)
+           is Location.INTERIOR
            and (base_edge.orientation_of(result.right_from_start.end)
                 is Orientation.CLOCKWISE)):
         next_candidate = result.right_from_start
