@@ -1,13 +1,13 @@
 from typing import Tuple
 
 from ground.base import (Context,
+                         Location,
                          Relation)
 from ground.hints import (Multisegment,
                           Point)
 from hypothesis import given
 
-from sect.decomposition import (Graph,
-                                Location)
+from sect.decomposition import Graph
 from tests.utils import point_in_multisegment
 from . import strategies
 

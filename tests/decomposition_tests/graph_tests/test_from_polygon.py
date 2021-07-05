@@ -1,13 +1,13 @@
 from typing import Tuple
 
 from ground.base import (Context,
+                         Location,
                          Relation)
 from ground.hints import Point
 from hypothesis import given
 from orient.planar import point_in_polygon
 
-from sect.decomposition import (Graph,
-                                Location)
+from sect.decomposition import Graph
 from tests.utils import Polygon
 from . import strategies
 
