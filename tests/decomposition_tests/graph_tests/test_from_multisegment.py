@@ -1,14 +1,13 @@
 from typing import Tuple
 
 from ground.base import (Context,
-                         Location,
-                         Relation)
+                         Location)
 from ground.hints import (Multisegment,
                           Point)
 from hypothesis import given
+from orient.planar import point_in_multisegment
 
 from sect.decomposition import Graph
-from tests.utils import point_in_multisegment
 from . import strategies
 
 
@@ -37,7 +36,7 @@ def test_contains(context: Context,
                                      context=context)
 
     assert (point in result) is (point_in_multisegment(point, multisegment)
-                                 is Relation.COMPONENT)
+                                 is not Location.EXTERIOR)
 
 
 @given(strategies.contexts, strategies.multisegments_with_points)
@@ -48,7 +47,4 @@ def test_locate(context: Context,
     result = Graph.from_multisegment(multisegment,
                                      context=context)
 
-    location = result.locate(point)
-    relation = point_in_multisegment(point, multisegment)
-    assert (location is Location.EXTERIOR) is (relation is Relation.DISJOINT)
-    assert (location is Location.BOUNDARY) is (relation is Relation.COMPONENT)
+    assert result.locate(point) is point_in_multisegment(point, multisegment)

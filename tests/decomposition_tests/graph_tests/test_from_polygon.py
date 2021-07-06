@@ -1,8 +1,7 @@
 from typing import Tuple
 
 from ground.base import (Context,
-                         Location,
-                         Relation)
+                         Location)
 from ground.hints import Point
 from hypothesis import given
 from orient.planar import point_in_polygon
@@ -42,7 +41,7 @@ def test_contains(context: Context,
                                 context=context)
 
     assert ((point in result)
-            is (point_in_polygon(point, polygon) is not Relation.DISJOINT))
+            is (point_in_polygon(point, polygon) is not Location.EXTERIOR))
 
 
 @given(strategies.contexts, strategies.polygons_with_points)
@@ -53,8 +52,4 @@ def test_locate(context: Context,
     result = Graph.from_polygon(polygon,
                                 context=context)
 
-    location = result.locate(point)
-    relation = point_in_polygon(point, polygon)
-    assert (location is Location.EXTERIOR) is (relation is Relation.DISJOINT)
-    assert (location is Location.BOUNDARY) is (relation is Relation.COMPONENT)
-    assert (location is Location.INTERIOR) is (relation is Relation.WITHIN)
+    assert result.locate(point) is point_in_polygon(point, polygon)

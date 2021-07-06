@@ -12,11 +12,9 @@ from typing import (AbstractSet,
 
 from ground.base import (Location,
                          Orientation,
-                         Relation,
                          get_context)
 from hypothesis import strategies
 from hypothesis.strategies import SearchStrategy
-from orient.planar import point_in_segment
 
 from sect.core.delaunay.utils import (complete_vertices as _complete_vertices,
                                       normalize_contour_vertices,
@@ -40,14 +38,6 @@ complete_vertices = partial(_complete_vertices,
 
 def is_contour_triangular(contour: Contour) -> bool:
     return len(contour.vertices) == 3
-
-
-def point_in_multisegment(point: Point,
-                          multisegment: Multisegment) -> Relation:
-    return (Relation.COMPONENT
-            if any(point_in_segment(point, segment) is Relation.COMPONENT
-                   for segment in multisegment.segments)
-            else Relation.DISJOINT)
 
 
 def points_do_not_lie_on_the_same_line(points: Sequence[Point]) -> bool:
