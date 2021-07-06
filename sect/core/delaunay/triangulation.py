@@ -242,9 +242,9 @@ def connect(base_edge: QuadEdge,
             right_candidate.connect(base_edge.opposite)
             if (left_candidate is None
                 or right_candidate is not None
-                and (point_in_circle_locator(left_candidate.end, base_edge.end,
-                                             base_edge.start,
-                                             right_candidate.end)
+                and (point_in_circle_locator(right_candidate.end,
+                                             left_candidate.end, base_edge.end,
+                                             base_edge.start)
                      is Location.INTERIOR))
             else base_edge.opposite.connect(left_candidate.opposite))
 
@@ -307,13 +307,13 @@ def edge_should_be_swapped(edge: QuadEdge,
                            point_in_circle_locator: PointInCircleLocator
                            ) -> bool:
     return (is_convex_quadrilateral_diagonal(edge)
-            and (point_in_circle_locator(edge.start, edge.end,
-                                         edge.left_from_start.end,
-                                         edge.right_from_start.end)
+            and (point_in_circle_locator(edge.right_from_start.end,
+                                         edge.start, edge.end,
+                                         edge.left_from_start.end)
                  is Location.INTERIOR
-                 or (point_in_circle_locator(edge.end, edge.start,
-                                             edge.right_from_start.end,
-                                             edge.left_from_start.end)
+                 or (point_in_circle_locator(edge.left_from_start.end,
+                                             edge.end, edge.start,
+                                             edge.right_from_start.end)
                      is Location.INTERIOR)))
 
 
@@ -398,8 +398,8 @@ def to_left_candidate(base_edge: QuadEdge,
     result = base_edge.opposite.left_from_start
     if base_edge.orientation_of(result.end) is not Orientation.CLOCKWISE:
         return None
-    while (point_in_circle_locator(base_edge.end, base_edge.start, result.end,
-                                   result.left_from_start.end)
+    while (point_in_circle_locator(result.left_from_start.end,
+                                   base_edge.end, base_edge.start, result.end)
            is Location.INTERIOR
            and (base_edge.orientation_of(result.left_from_start.end)
                 is Orientation.CLOCKWISE)):
@@ -416,8 +416,8 @@ def to_right_candidate(base_edge: QuadEdge,
     if (base_edge.orientation_of(result.end)
             is not Orientation.CLOCKWISE):
         return None
-    while (point_in_circle_locator(base_edge.end, base_edge.start, result.end,
-                                   result.right_from_start.end)
+    while (point_in_circle_locator(result.right_from_start.end,
+                                   base_edge.end, base_edge.start, result.end)
            is Location.INTERIOR
            and (base_edge.orientation_of(result.right_from_start.end)
                 is Orientation.CLOCKWISE)):
