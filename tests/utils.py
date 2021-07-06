@@ -10,7 +10,8 @@ from typing import (AbstractSet,
                     Set,
                     TypeVar)
 
-from ground.base import (Orientation,
+from ground.base import (Location,
+                         Orientation,
                          Relation,
                          get_context)
 from hypothesis import strategies
@@ -88,8 +89,9 @@ def is_point_inside_circumcircle(first_vertex: Point,
                                  second_vertex: Point,
                                  third_vertex: Point,
                                  point: Point) -> bool:
-    return context.point_point_point_incircle_test(first_vertex, second_vertex,
-                                                   third_vertex, point) > 0
+    return (context.locate_point_in_point_point_point_circle(
+            first_vertex, second_vertex, third_vertex, point)
+            is Location.INTERIOR)
 
 
 def is_convex_contour(contour: Contour) -> bool:
