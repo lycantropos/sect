@@ -85,12 +85,12 @@ def _to_sub_hull(points: Iterable[Point]) -> List[Point]:
     return result
 
 
-def is_point_inside_circumcircle(first_vertex: Point,
+def is_point_inside_circumcircle(point: Point,
+                                 first_vertex: Point,
                                  second_vertex: Point,
-                                 third_vertex: Point,
-                                 point: Point) -> bool:
+                                 third_vertex: Point) -> bool:
     return (context.locate_point_in_point_point_point_circle(
-            first_vertex, second_vertex, third_vertex, point)
+            point, first_vertex, second_vertex, third_vertex)
             is Location.INTERIOR)
 
 

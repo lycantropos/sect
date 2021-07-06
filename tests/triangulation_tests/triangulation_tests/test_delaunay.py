@@ -40,7 +40,7 @@ def test_delaunay_criterion(context: Context, points: Sequence[Point]) -> None:
     result = Triangulation.delaunay(points,
                                     context=context)
 
-    assert all(not any(is_point_inside_circumcircle(*triangle.vertices, point)
+    assert all(not any(is_point_inside_circumcircle(point, *triangle.vertices)
                        for triangle in result.triangles())
                for point in points)
 
@@ -78,4 +78,4 @@ def test_step(context: Context, points: Sequence[Point]) -> None:
     assert len(triangles) <= len(next_triangles) + 2
     assert all(triangle not in next_triangles
                for triangle in triangles
-               if is_point_inside_circumcircle(*triangle.vertices, last_point))
+               if is_point_inside_circumcircle(last_point, *triangle.vertices))
