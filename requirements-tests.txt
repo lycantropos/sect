@@ -1,4 +1,4 @@
-orient>=5.0.0,<6.0
+orient>=5.1.0,<6.0
 pytest>=6.1.2
 hypothesis>=5.33.2
 hypothesis-geometry>=6.0.0,<7.0
