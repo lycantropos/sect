@@ -1,5 +1,5 @@
 decision>=0.2.0,<1.0
 dendroid>=1.1.1,<2.0
-ground>=7.0.0,<8.0
+ground>=7.1.0,<8.0
 prioq>=0.3.0,<1.0
 reprit>=0.6.0,<1.0
