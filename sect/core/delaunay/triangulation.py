@@ -94,17 +94,6 @@ class Triangulation:
         :returns:
             triangulation of the border, holes & extra points
             considering constraints.
-
-        >>> from ground.base import get_context
-        >>> context = get_context()
-        >>> Contour, Point, Polygon = (context.contour_cls, context.point_cls,
-        ...                            context.polygon_cls)
-        >>> dart = [Point(0, 0), Point(3, 0), Point(1, 1), Point(0, 3)]
-        >>> (Triangulation.constrained_delaunay(Polygon(Contour(dart), []),
-        ...                                     context=context).triangles()
-        ...  == [Contour([Point(0, 0), Point(3, 0), Point(1, 1)]),
-        ...      Contour([Point(0, 0), Point(1, 1), Point(0, 3)])])
-        True
         """
         border, holes = polygon.border, polygon.holes
         if extra_points:
@@ -147,17 +136,6 @@ class Triangulation:
         :param points: 3 or more points to triangulate.
         :param context: geometric context.
         :returns: triangulation of the points.
-
-        >>> from ground.base import get_context
-        >>> context = get_context()
-        >>> Contour, Point = context.contour_cls, context.point_cls
-        >>> dart = [Point(0, 0), Point(3, 0), Point(1, 1), Point(0, 3)]
-        >>> (Triangulation.delaunay(dart,
-        ...                         context=context).triangles()
-        ...  == [Contour([Point(0, 0), Point(3, 0), Point(1, 1)]),
-        ...      Contour([Point(0, 0), Point(1, 1), Point(0, 3)]),
-        ...      Contour([Point(0, 3), Point(1, 1), Point(3, 0)])])
-        True
         """
         points = sorted(to_distinct(points))
         lengths = coin_change(len(points), base_cases)
