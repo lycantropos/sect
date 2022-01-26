@@ -20,11 +20,9 @@ def point_point_segment_circle_exists(first_point_site: Site,
                                       segment_index: int,
                                       context: Context) -> bool:
     if segment_index == 2:
-        return (not context.segment_contains_point(segment_site.start,
-                                                   segment_site.end,
+        return (not context.segment_contains_point(segment_site,
                                                    first_point_site.start)
-                or not context.segment_contains_point(segment_site.start,
-                                                      segment_site.end,
+                or not context.segment_contains_point(segment_site,
                                                       second_point_site.start))
     else:
         first_point, second_point = (first_point_site.start,

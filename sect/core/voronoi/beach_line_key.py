@@ -3,8 +3,8 @@ from typing import Tuple
 
 from ground.base import (Context,
                          Orientation)
-from ground.hints import (Coordinate,
-                          Point)
+from ground.hints import (Point,
+                          Scalar)
 from reprit.base import generate_repr
 
 from sect.core.hints import Orienteer
@@ -98,7 +98,7 @@ class BeachLineKey:
 
 def distance_to_point_arc(point_site: Site,
                           point: Point,
-                          dot_producer: DotProducer) -> Coordinate:
+                          dot_producer: DotProducer) -> Scalar:
     site_point = point_site.start
     return robust_divide(to_segment_squared_length(point, site_point,
                                                    dot_producer),
@@ -108,7 +108,7 @@ def distance_to_point_arc(point_site: Site,
 def distance_to_segment_arc(segment_site: Site,
                             point: Point,
                             cross_producer: CrossProducer,
-                            dot_producer: DotProducer) -> Coordinate:
+                            dot_producer: DotProducer) -> Scalar:
     if segment_site.is_vertical:
         return robust_evenly_divide(segment_site.start.x - point.x, 2)
     else:

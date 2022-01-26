@@ -1,10 +1,7 @@
 from functools import partial
 
-from bentley_ottmann.planar import (segments_cross_or_overlap,
-                                    segments_intersect)
-from clipping.planar import segments_to_multisegment
 from ground.base import get_context
-from ground.hints import Coordinate
+from ground.hints import Scalar
 from hypothesis import strategies
 from hypothesis_geometry import planar
 
@@ -23,7 +20,7 @@ rational_contours = (rational_coordinates_strategies
 empty_multisegments = strategies.builds(Multisegment, strategies.builds(list))
 
 
-def coordinates_to_multisegments(coordinates: Strategy[Coordinate],
+def coordinates_to_multisegments(coordinates: Strategy[Scalar],
                                  *,
                                  min_size: int = 0) -> Strategy[Multisegment]:
     return planar.multisegments(coordinates,

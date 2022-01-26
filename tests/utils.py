@@ -159,8 +159,7 @@ def multisegment_pop_left(multisegment: Multisegment
     return first_segment, Multisegment(rest_segments)
 
 
-def segment_contains_point(segment: Segment, point: Point) -> bool:
-    return context.segment_contains_point(segment.start, segment.end, point)
+segment_contains_point = context.segment_contains_point
 
 
 _T = TypeVar('_T',
