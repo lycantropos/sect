@@ -1,7 +1,7 @@
 sect
 ====
 
-[![](https://dev.azure.com/lycantropos/sect/_apis/build/status/lycantropos.sect?branchName=master)](https://dev.azure.com/lycantropos/sect/_build/latest?definitionId=23&branchName=master "Azure Pipelines")
+[![](https://github.com/lycantropos/sect/workflows/CI/badge.svg)](https://github.com/lycantropos/sect/actions/workflows/ci.yml "Github Actions")
 [![](https://readthedocs.org/projects/sect/badge/?version=latest)](https://sect.readthedocs.io/en/latest "Documentation")
 [![](https://codecov.io/gh/lycantropos/sect/branch/master/graph/badge.svg)](https://codecov.io/gh/lycantropos/sect "Codecov")
 [![](https://img.shields.io/github/license/lycantropos/sect.svg)](https://github.com/lycantropos/sect/blob/master/LICENSE "License")
