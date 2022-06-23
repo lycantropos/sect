@@ -97,12 +97,14 @@ class EventsQueue:
                 (event, below_event)
                 if starts_equal or (self._queue.key(event)
                                     < self._queue.key(below_event))
-                else (below_event, event))
+                else (below_event, event)
+            )
             end_min, end_max = (
                 (event.right, below_event.right)
                 if ends_equal or (self._queue.key(event.right)
                                   < self._queue.key(below_event.right))
-                else (below_event.right, event.right))
+                else (below_event.right, event.right)
+            )
             if starts_equal:
                 # both line segments are equal or share the left endpoint
                 event.is_overlap = below_event.is_overlap = True
@@ -135,7 +137,8 @@ class EventsQueue:
                       from_first: bool,
                       is_counterclockwise_contour: bool) -> None:
         start_event = LeftEvent.from_segment_endpoints(
-                to_endpoints(edge), from_first, is_counterclockwise_contour)
+                to_endpoints(edge), from_first, is_counterclockwise_contour
+        )
         start_event.edge = edge
         self.push(start_event)
         self.push(start_event.right)
@@ -146,7 +149,8 @@ class EventsQueue:
                          from_first: bool,
                          is_counterclockwise_contour: bool) -> None:
         start_event = LeftEvent.from_segment_endpoints(
-                endpoints, from_first, is_counterclockwise_contour)
+                endpoints, from_first, is_counterclockwise_contour
+        )
         self.push(start_event)
         self.push(start_event.right)
 

@@ -180,7 +180,8 @@ class Triangulation:
                 if (edge.left_from_start.end
                     == edge.opposite.right_from_start.end
                     and (edge.orientation_of(edge.left_from_start.end)
-                         is Orientation.COUNTERCLOCKWISE)))
+                         is Orientation.COUNTERCLOCKWISE))
+        )
         contour_cls, orienteer = (self.context.contour_cls,
                                   self.context.angle_orientation)
         return [contour_cls(normalize_contour_vertices(list(vertices),
@@ -227,7 +228,8 @@ def connect(base_edge: QuadEdge,
                                              left_candidate.end, base_edge.end,
                                              base_edge.start)
                      is Location.INTERIOR))
-            else base_edge.opposite.connect(left_candidate.opposite))
+            else base_edge.opposite.connect(left_candidate.opposite)
+        )
 
 
 def constrain(triangulation: Triangulation,
@@ -236,7 +238,8 @@ def constrain(triangulation: Triangulation,
     inner_edges = to_unique_inner_edges(triangulation)
     point_in_circle_locator, segments_relater = (
         triangulation.context.locate_point_in_point_point_point_circle,
-        triangulation.context.segments_relation)
+        triangulation.context.segments_relation
+    )
     for constraint in constraints:
         constraint_endpoints = to_endpoints(constraint)
         if constraint_endpoints in endpoints:
@@ -267,7 +270,8 @@ def cut(triangulation: Triangulation, holes: Sequence[Contour]) -> None:
         for endpoints in contour_to_oriented_edges_endpoints(
                 hole,
                 clockwise=True,
-                orienteer=orienteer):
+                orienteer=orienteer
+        ):
             events_queue.register_segment(endpoints,
                                           from_first=False,
                                           is_counterclockwise_contour=False)
@@ -298,21 +302,21 @@ def edge_should_be_swapped(edge: QuadEdge,
                      is Location.INTERIOR)))
 
 
-def find_base_edge(left: Triangulation, right: Triangulation) -> QuadEdge:
+def find_base_edge(first: Triangulation, second: Triangulation) -> QuadEdge:
     while True:
-        if (left.right_side.orientation_of(right.left_side.start)
+        if (first.right_side.orientation_of(second.left_side.start)
                 is Orientation.COUNTERCLOCKWISE):
-            left.right_side = left.right_side.left_from_end
-        elif (right.left_side.orientation_of(left.right_side.start)
+            first.right_side = first.right_side.left_from_end
+        elif (second.left_side.orientation_of(first.right_side.start)
               is Orientation.CLOCKWISE):
-            right.left_side = right.left_side.right_from_end
+            second.left_side = second.left_side.right_from_end
         else:
             break
-    base_edge = right.left_side.opposite.connect(left.right_side)
-    if left.right_side.start == left.left_side.start:
-        left.left_side = base_edge.opposite
-    if right.left_side.start == right.right_side.start:
-        right.right_side = base_edge
+    base_edge = second.left_side.opposite.connect(first.right_side)
+    if first.right_side.start == first.left_side.start:
+        first.left_side = base_edge.opposite
+    if second.left_side.start == second.right_side.start:
+        second.right_side = base_edge
     return base_edge
 
 
@@ -320,16 +324,18 @@ def is_convex_quadrilateral_diagonal(edge: QuadEdge) -> bool:
     return (edge.right_from_start.orientation_of(edge.end)
             is Orientation.COUNTERCLOCKWISE
             is edge.right_from_end.opposite.orientation_of(
-                    edge.left_from_start.end)
+                    edge.left_from_start.end
+            )
             is edge.left_from_end.orientation_of(edge.start)
             is edge.left_from_start.opposite.orientation_of(
-                    edge.right_from_start.end))
+                    edge.right_from_start.end
+            ))
 
 
-def merge(left: Triangulation, right: Triangulation) -> Triangulation:
-    connect(find_base_edge(left, right),
-            left.context.locate_point_in_point_point_point_circle)
-    return type(left)(left.left_side, right.right_side, left.context)
+def merge(first: Triangulation, second: Triangulation) -> Triangulation:
+    connect(find_base_edge(first, second),
+            first.context.locate_point_in_point_point_point_circle)
+    return type(first)(first.left_side, second.right_side, first.context)
 
 
 def resolve_crossings(crossings: List[QuadEdge],

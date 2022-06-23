@@ -52,7 +52,8 @@ def to_contours_border_endpoints(contours: Iterable[Contour]
     result = set()
     for contour in contours:
         result.symmetric_difference_update(
-                map(frozenset, contour_to_edges_endpoints(contour)))
+                map(frozenset, contour_to_edges_endpoints(contour))
+        )
     return result
 
 
@@ -79,9 +80,9 @@ def is_point_inside_circumcircle(point: Point,
                                  first_vertex: Point,
                                  second_vertex: Point,
                                  third_vertex: Point) -> bool:
-    return (context.locate_point_in_point_point_point_circle(
-            point, first_vertex, second_vertex, third_vertex)
-            is Location.INTERIOR)
+    return context.locate_point_in_point_point_point_circle(
+            point, first_vertex, second_vertex, third_vertex
+    ) is Location.INTERIOR
 
 
 def is_convex_contour(contour: Contour) -> bool:

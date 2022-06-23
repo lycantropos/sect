@@ -34,10 +34,12 @@ def complete_vertices(border: Contour,
     candidates = sorted(to_distinct(candidates))
     contour_cls, segment_cls, segment_point_relater = (
         context.contour_cls, context.segment_cls,
-        context.segment_contains_point)
+        context.segment_contains_point
+    )
     border, candidates = _complete_contour_vertices(
             border, candidates, contour_cls, segment_cls,
-            segment_point_relater)
+            segment_point_relater
+    )
     completed_holes = []
     for hole in holes:
         hole, candidates = _complete_contour_vertices(

@@ -62,7 +62,8 @@ class Graph:
         >>> graph = Graph.from_multisegment(
         ...     Multisegment([Segment(Point(0, 0), Point(1, 0)),
         ...                   Segment(Point(0, 0), Point(0, 1))]),
-        ...     context=context)
+        ...     context=context
+        ... )
         >>> Point(1, 0) in graph
         True
         >>> Point(0, 1) in graph
@@ -135,7 +136,8 @@ class Graph:
         ...                      Point(0, 6)]),
         ...             [Contour([Point(2, 2), Point(2, 4), Point(4, 4),
         ...                       Point(4, 2)])]),
-        ...     context=context)
+        ...     context=context
+        ... )
         >>> Point(1, 1) in graph
         True
         >>> Point(2, 2) in graph
@@ -165,7 +167,8 @@ class Graph:
         for hole in polygon.holes:
             is_hole_negatively_oriented = (
                     to_contour_orientation(hole, orienteer)
-                    is Orientation.CLOCKWISE)
+                    is Orientation.CLOCKWISE
+            )
             edges.extend(
                     Edge.from_endpoints(start, end,
                                         is_hole_negatively_oriented,
@@ -175,7 +178,8 @@ class Graph:
                     Edge.from_endpoints(end, start,
                                         not is_hole_negatively_oriented,
                                         context)
-                    for start, end in contour_to_edges_endpoints(hole))
+                    for start, end in contour_to_edges_endpoints(hole)
+            )
         shuffler(edges)
         result = cls(box_to_node(context.contour_box(border), context))
         for edge in edges:
@@ -315,13 +319,15 @@ def add_edge(graph: Graph, edge: Edge) -> None:
                 below.lower_left = (
                     prev_below
                     if trapezoid.lower_left is prev_trapezoid
-                    else trapezoid.lower_left)
+                    else trapezoid.lower_left
+                )
             if above is not prev_above:
                 above.lower_left = prev_above
                 above.upper_left = (
                     prev_above
                     if trapezoid.upper_left is prev_trapezoid
-                    else trapezoid.upper_left)
+                    else trapezoid.upper_left
+                )
         else:
             # middle trapezoid,
             # old trapezoid is neither the first
@@ -346,14 +352,16 @@ def add_edge(graph: Graph, edge: Edge) -> None:
                 below.lower_left = (
                     prev_below
                     if trapezoid.lower_left is prev_trapezoid
-                    else trapezoid.lower_left)
+                    else trapezoid.lower_left
+                )
             if above is not prev_above:
                 # above is new
                 above.lower_left = prev_above
                 above.upper_left = (
                     prev_above
                     if trapezoid.upper_left is prev_trapezoid
-                    else trapezoid.upper_left)
+                    else trapezoid.upper_left
+                )
             below.lower_right = trapezoid.lower_right
             above.upper_right = trapezoid.upper_right
         candidate = YNode(edge,
@@ -384,14 +392,15 @@ def box_to_node(box: Box, context: Context) -> Leaf:
     min_x, min_y, max_x, max_y = (min_x - delta_x, min_y - delta_y,
                                   max_x + delta_x, max_y + delta_y)
     point_cls = context.point_cls
-    return Leaf(Trapezoid(
-            point_cls(min_x, min_y), point_cls(max_x, min_y),
-            Edge.from_endpoints(point_cls(min_x, min_y),
-                                point_cls(max_x, min_y), False,
-                                context),
-            Edge.from_endpoints(point_cls(min_x, max_y),
-                                point_cls(max_x, max_y), True,
-                                context)))
+    return Leaf(
+            Trapezoid(point_cls(min_x, min_y), point_cls(max_x, min_y),
+                      Edge.from_endpoints(point_cls(min_x, min_y),
+                                          point_cls(max_x, min_y), False,
+                                          context),
+                      Edge.from_endpoints(point_cls(min_x, max_y),
+                                          point_cls(max_x, max_y), True,
+                                          context))
+    )
 
 
 def find_intersecting_trapezoids(graph: Graph, edge: Edge) -> List[Trapezoid]:

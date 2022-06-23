@@ -47,7 +47,8 @@ def test_sizes(context: Context,
                                        *[hole.vertices
                                          for hole in polygon.holes],
                                        extra_points))) - 1)
-            - len(context.points_convex_hull(polygon.border.vertices)))
+            - len(context.points_convex_hull(polygon.border.vertices))
+    )
     assert all(is_contour_triangular(triangle) for triangle in triangles)
 
 

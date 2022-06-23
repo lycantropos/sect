@@ -23,7 +23,8 @@ class Edge:
                  context: Context) -> None:
         assert left < right, 'Incorrect endpoints order'
         self.context, self.interior_to_left, self.left, self.right = (
-            context, interior_to_left, left, right)
+            context, interior_to_left, left, right
+        )
 
     def __lt__(self, other: 'Edge') -> bool:
         """Checks if the edge is lower than the other."""
