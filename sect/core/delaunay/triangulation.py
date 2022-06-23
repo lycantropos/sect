@@ -14,7 +14,8 @@ from typing import (Callable,
 
 from decision.partition import coin_change
 from ground.base import (Context,
-                         Location, Orientation,
+                         Location,
+                         Orientation,
                          Relation)
 from ground.hints import (Contour,
                           Point,
@@ -98,7 +99,8 @@ class Triangulation:
         border, holes = polygon.border, polygon.holes
         if extra_points:
             border, holes, extra_points = complete_vertices(
-                    border, holes, extra_points, context)
+                    border, holes, extra_points, context
+            )
         result = cls.delaunay(list(chain(border.vertices,
                                          flatten(hole.vertices
                                                  for hole in holes),
@@ -113,7 +115,8 @@ class Triangulation:
         result._triangular_holes_vertices.update(
                 frozenset(hole.vertices)
                 for hole in holes
-                if len(hole.vertices) == 3)
+                if len(hole.vertices) == 3
+        )
         return result
 
     @classmethod
@@ -139,8 +142,7 @@ class Triangulation:
         """
         points = sorted(to_distinct(points))
         lengths = coin_change(len(points), base_cases)
-        result = [cls._initialize_triangulation(points[start:stop],
-                                                context)
+        result = [cls._initialize_triangulation(points[start:stop], context)
                   for start, stop in pairwise(accumulate((0,) + lengths))]
         for _ in repeat(None, ceil_log2(len(result))):
             parts_to_merge_count = len(result) // 2 * 2
@@ -213,7 +215,8 @@ def connect(base_edge: QuadEdge,
     while True:
         left_candidate, right_candidate = (
             to_left_candidate(base_edge, point_in_circle_locator),
-            to_right_candidate(base_edge, point_in_circle_locator))
+            to_right_candidate(base_edge, point_in_circle_locator)
+        )
         if left_candidate is right_candidate is None:
             break
         base_edge = (

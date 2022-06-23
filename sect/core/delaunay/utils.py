@@ -42,7 +42,8 @@ def complete_vertices(border: Contour,
     for hole in holes:
         hole, candidates = _complete_contour_vertices(
                 hole, candidates, contour_cls, segment_cls,
-                segment_point_relater)
+                segment_point_relater
+        )
         completed_holes.append(hole)
     return border, completed_holes, candidates
 
@@ -93,7 +94,8 @@ def _complete_contour_vertices(contour: Contour,
             candidate_index
             for candidate_index in range(start_index, end_index)
             if _is_inner_segment_point(start, end, candidates[candidate_index],
-                                       segment_cls, containment_checker)]
+                                       segment_cls, containment_checker)
+        ]
         if extra_vertices_indices:
             extra_vertices[index] = [candidates[index]
                                      for index in extra_vertices_indices]
@@ -111,7 +113,8 @@ def _complete_contour_vertices(contour: Contour,
                               else extra_vertices[index][::-1]) + [vertex]
                              if index in extra_vertices
                              else [vertex]
-                             for index, vertex in enumerate(vertices))))
+                             for index, vertex in enumerate(vertices)))
+        )
     return contour, candidates
 
 

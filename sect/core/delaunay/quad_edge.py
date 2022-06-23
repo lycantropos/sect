@@ -134,9 +134,11 @@ class QuadEdge:
         alpha = self.left_from_start.rotated
         beta = other.left_from_start.rotated
         self._left_from_start, other._left_from_start = (
-            other.left_from_start, self.left_from_start)
+            other.left_from_start, self.left_from_start
+        )
         alpha._left_from_start, beta._left_from_start = (
-            beta.left_from_start, alpha.left_from_start)
+            beta.left_from_start, alpha.left_from_start
+        )
 
     def swap(self) -> None:
         """
