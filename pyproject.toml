@@ -1,0 +1,54 @@
+[project]
+name = "sect"
+description = "Geometries partitioning."
+authors = [{ name = "Azat Ibrakov", email = "azatibrakov@gmail.com" }]
+readme = "README.md"
+license = { file = "LICENSE" }
+classifiers = [
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3.7",
+    "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: Implementation :: CPython",
+    "Programming Language :: Python :: Implementation :: PyPy",
+    "Programming Language :: Python :: Implementation :: CPython",
+    "Programming Language :: Python :: Implementation :: PyPy"
+]
+requires-python = ">=3.7"
+dependencies = [
+    "decision>=0.3.1,<1.0",
+    "dendroid>=1.6.1,<2.0",
+    "ground>=9.0.0,<10.0",
+    "prioq>=0.6.0,<1.0",
+    "reprit>=0.9.0,<1.0"
+]
+dynamic = ["version"]
+
+[project.optional-dependencies]
+tests = [
+    "hypothesis>=6.75.2,<7.0",
+    "hypothesis-geometry>=8.0.0,<9.0",
+    "orient>=7.0.0,<8.0",
+    "pytest>=7.3.1,<8.0"
+]
+
+[build-system]
+requires = [
+    "setuptools",
+    "wheel"
+]
+build-backend = "setuptools.build_meta"
+
+[tool.coverage.run]
+source = ["sect"]
+
+[tool.mypy]
+strict = true
+
+[tool.pytest.ini_options]
+addopts = "--verbose -s --hypothesis-profile=default"
+
+[tool.setuptools.dynamic]
+version = { attr = "sect.__version__" }

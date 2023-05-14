@@ -7,8 +7,8 @@ sect
 [![](https://img.shields.io/github/license/lycantropos/sect.svg)](https://github.com/lycantropos/sect/blob/master/LICENSE "License")
 [![](https://badge.fury.io/py/sect.svg)](https://badge.fury.io/py/sect "PyPI")
 
-In what follows `python` is an alias for `python3.6` or `pypy3.6`
-or any later version (`python3.7`, `pypy3.7` and so on).
+In what follows `python` is an alias for `python3.7` or `pypy3.7`
+or any later version (`python3.8`, `pypy3.8` and so on).
 
 Installation
 ------------
