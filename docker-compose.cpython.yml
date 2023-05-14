@@ -9,10 +9,8 @@ services:
         - IMAGE_VERSION=${CPYTHON_IMAGE_VERSION}
     image: lycantropos/sect-cpython:6.1.0
     volumes:
-      - ./pytest.ini:/opt/sect/pytest.ini
+      - ./pyproject.toml:/opt/sect/pyproject.toml
       - ./README.md:/opt/sect/README.md
-      - ./requirements-tests.txt:/opt/sect/requirements-tests.txt
-      - ./requirements.txt:/opt/sect/requirements.txt
       - ./sect:/opt/sect/sect
       - ./setup.py:/opt/sect/setup.py
       - ./tests:/opt/sect/tests
