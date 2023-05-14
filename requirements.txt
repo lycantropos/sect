@@ -1,5 +1,5 @@
-decision>=0.3.0,<1.0
-dendroid>=1.2.0,<2.0
-ground>=8.1.0,<9.0
-prioq>=0.4.0,<1.0
-reprit>=0.7.0,<1.0
+decision>=0.3.1,<1.0
+dendroid>=1.6.1,<2.0
+ground>=9.0.0,<10.0
+prioq>=0.6.0,<1.0
+reprit>=0.9.0,<1.0
