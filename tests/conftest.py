@@ -1,12 +1,12 @@
 import os
-import platform
+import sys
 from datetime import timedelta
 
 import pytest
 from hypothesis import (HealthCheck,
                         settings)
 
-is_pypy = platform.python_implementation() == 'PyPy'
+is_pypy = sys.implementation.name == 'pypy'
 on_ci = bool(os.getenv('CI', False))
 max_examples = (-(-settings.default.max_examples
                   // (10 if is_pypy else 2))
