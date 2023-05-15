@@ -44,13 +44,6 @@ class QuadEdge:
         return self._context
 
     @property
-    def left_from_start(self) -> 'QuadEdge':
-        """
-        aka "Onext" in L. Guibas and J. Stolfi notation.
-        """
-        return self._left_from_start
-
-    @property
     def end(self) -> Point:
         """
         aka "Dest" in L. Guibas and J. Stolfi notation.
@@ -63,6 +56,13 @@ class QuadEdge:
         aka "Lnext" in L. Guibas and J. Stolfi notation.
         """
         return self.rotated.opposite.left_from_start.rotated
+
+    @property
+    def left_from_start(self) -> 'QuadEdge':
+        """
+        aka "Onext" in L. Guibas and J. Stolfi notation.
+        """
+        return self._left_from_start
 
     @property
     def opposite(self) -> 'QuadEdge':

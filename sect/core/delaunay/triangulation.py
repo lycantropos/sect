@@ -246,8 +246,7 @@ def constrain(triangulation: Triangulation,
             continue
         crossings = detect_crossings(inner_edges, constraint, segments_relater)
         inner_edges.difference_update(crossings)
-        endpoints.difference_update(to_endpoints(edge)
-                                    for edge in crossings)
+        endpoints.difference_update(to_endpoints(edge) for edge in crossings)
         new_edges = resolve_crossings(crossings, constraint, segments_relater)
         set_criterion({edge
                        for edge in new_edges
@@ -360,10 +359,11 @@ def resolve_crossings(crossings: List[QuadEdge],
 def set_criterion(target_edges: Set[QuadEdge],
                   point_in_circle_locator: PointInCircleLocator) -> None:
     while True:
-        edges_to_swap = {edge
-                         for edge in target_edges
-                         if
-                         edge_should_be_swapped(edge, point_in_circle_locator)}
+        edges_to_swap = {
+            edge
+            for edge in target_edges
+            if edge_should_be_swapped(edge, point_in_circle_locator)
+        }
         if not edges_to_swap:
             break
         for edge in edges_to_swap:
