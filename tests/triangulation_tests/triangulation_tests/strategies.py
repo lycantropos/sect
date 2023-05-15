@@ -19,17 +19,13 @@ from tests.utils import (Point,
                          sub_lists)
 
 contexts = strategies.just(get_context())
-to_points_lists = partial(strategies.lists,
-                          unique=True)
-points_lists = (coordinates_strategies
-                .map(planar.points)
-                .flatmap(partial(to_points_lists,
-                                 min_size=3))
+points_lists = (coordinates_strategies.map(planar.points)
+                .flatmap(partial(strategies.lists,
+                                 min_size=1))
                 .filter(points_do_not_lie_on_the_same_line))
-non_triangle_points_lists = (coordinates_strategies
-                             .map(planar.points)
-                             .flatmap(partial(to_points_lists,
-                                              min_size=4))
+non_triangle_points_lists = (coordinates_strategies.map(planar.points)
+                             .flatmap(partial(strategies.lists,
+                                              min_size=2))
                              .filter(points_do_not_lie_on_the_same_line))
 triangles = coordinates_strategies.flatmap(planar.triangular_contours)
 polygons = coordinates_strategies.flatmap(planar.polygons)
