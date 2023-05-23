@@ -85,7 +85,8 @@ class Graph:
             if segment.start < segment.end
             else Edge.from_endpoints(segment.end, segment.start, False,
                                      context)
-            for segment in multisegment.segments]
+            for segment in multisegment.segments
+        ]
         shuffler(edges)
         result = cls(box_to_node(context.segments_box(multisegment.segments),
                                  context))
@@ -166,7 +167,8 @@ class Graph:
             else Edge.from_endpoints(end, start,
                                      not is_border_positively_oriented,
                                      context)
-            for start, end in contour_to_edges_endpoints(border)]
+            for start, end in contour_to_edges_endpoints(border)
+        ]
         for hole in polygon.holes:
             is_hole_negatively_oriented = (
                     to_contour_orientation(hole, orienteer)
@@ -174,8 +176,7 @@ class Graph:
             )
             edges.extend(
                     Edge.from_endpoints(start, end,
-                                        is_hole_negatively_oriented,
-                                        context)
+                                        is_hole_negatively_oriented, context)
                     if start < end
                     else
                     Edge.from_endpoints(end, start,
