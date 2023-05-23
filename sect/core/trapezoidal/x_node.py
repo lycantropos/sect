@@ -8,13 +8,11 @@ from .trapezoid import Trapezoid
 
 
 class XNode(Node):
-    __slots__ = 'point', 'left', 'right'
+    __slots__ = 'left', 'point', 'right'
 
     def __init__(self, point: Point, left: Node, right: Node) -> None:
         super().__init__()
-        self.point = point
-        self.left = left
-        self.right = right
+        self.left, self.point, self.right = left, point, right
         self.left._add_parent(self)
         self.right._add_parent(self)
 
