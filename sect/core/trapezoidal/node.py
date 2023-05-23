@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from abc import (ABC,
                  abstractmethod)
 from typing import List
@@ -35,7 +37,7 @@ class Node(ABC):
         which contains the left endpoint of the given segment.
         """
 
-    def replace_with(self, other: 'Node') -> None:
+    def replace_with(self, other: Node) -> None:
         """
         Replaces the node with given one in all parents.
         """
@@ -44,11 +46,11 @@ class Node(ABC):
             other._add_parent(parent)
         self._parents.clear()
 
-    def _add_parent(self, parent: 'Node') -> None:
+    def _add_parent(self, parent: Node) -> None:
         self._parents.append(parent)
 
     @abstractmethod
-    def _replace_child(self, current: 'Node', replacement: 'Node') -> None:
+    def _replace_child(self, current: Node, replacement: Node) -> None:
         """
         Replaces child node with given one.
         """

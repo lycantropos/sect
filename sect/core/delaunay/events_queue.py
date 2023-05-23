@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from functools import partial
 from typing import (Iterable,
                     Optional)
@@ -26,7 +28,7 @@ class EventsQueueKey:
 
     __repr__ = generate_repr(__init__)
 
-    def __lt__(self, other: 'EventsQueueKey') -> bool:
+    def __lt__(self, other: EventsQueueKey) -> bool:
         event, other_event = self.event, other.event
         start, other_start = event.start, other_event.start
         if start.x != other_start.x:

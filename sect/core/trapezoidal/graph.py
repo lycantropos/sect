@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import random
 from typing import List
 
@@ -29,7 +31,7 @@ class Graph:
                           multisegment: Multisegment,
                           *,
                           shuffler: Shuffler = random.shuffle,
-                          context: Context) -> 'Graph':
+                          context: Context) -> Graph:
         """
         Constructs trapezoidal decomposition graph of given multisegment.
 
@@ -95,7 +97,7 @@ class Graph:
                      polygon: Polygon,
                      *,
                      shuffler: Shuffler = random.shuffle,
-                     context: Context) -> 'Graph':
+                     context: Context) -> Graph:
         """
         Constructs trapezoidal decomposition graph of given polygon.
 

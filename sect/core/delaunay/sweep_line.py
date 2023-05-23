@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from functools import partial
 from typing import Optional
 
@@ -49,7 +51,7 @@ class SweepLineKey:
 
     __repr__ = generate_repr(__init__)
 
-    def __lt__(self, other: 'SweepLineKey') -> bool:
+    def __lt__(self, other: SweepLineKey) -> bool:
         """
         Checks if the segment (or at least the point) associated with event
         is lower than other's.

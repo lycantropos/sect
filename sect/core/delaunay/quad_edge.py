@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from typing import (Iterable,
                     List,
                     Optional)
@@ -19,9 +21,11 @@ class QuadEdge:
     """
 
     @classmethod
-    def from_endpoints(cls, start: Point, end: Point,
+    def from_endpoints(cls,
+                       start: Point,
+                       end: Point,
                        *,
-                       context: Context) -> 'QuadEdge':
+                       context: Context) -> QuadEdge:
         """Creates new edge from endpoints."""
         result, opposite = (cls(start,
                                 context=context),
@@ -51,42 +55,42 @@ class QuadEdge:
         return self.opposite.start
 
     @property
-    def left_from_end(self) -> 'QuadEdge':
+    def left_from_end(self) -> QuadEdge:
         """
         aka "Lnext" in L. Guibas and J. Stolfi notation.
         """
         return self.rotated.opposite.left_from_start.rotated
 
     @property
-    def left_from_start(self) -> 'QuadEdge':
+    def left_from_start(self) -> QuadEdge:
         """
         aka "Onext" in L. Guibas and J. Stolfi notation.
         """
         return self._left_from_start
 
     @property
-    def opposite(self) -> 'QuadEdge':
+    def opposite(self) -> QuadEdge:
         """
         aka "Sym" in L. Guibas and J. Stolfi notation.
         """
         return self.rotated.rotated
 
     @property
-    def right_from_end(self) -> 'QuadEdge':
+    def right_from_end(self) -> QuadEdge:
         """
         aka "Rprev" in L. Guibas and J. Stolfi notation.
         """
         return self.opposite.left_from_start
 
     @property
-    def right_from_start(self) -> 'QuadEdge':
+    def right_from_start(self) -> QuadEdge:
         """
         aka "Oprev" in L. Guibas and J. Stolfi notation.
         """
         return self.rotated.left_from_start.rotated
 
     @property
-    def rotated(self) -> 'QuadEdge':
+    def rotated(self) -> QuadEdge:
         """
         aka "Rot" in L. Guibas and J. Stolfi notation.
         """
@@ -103,8 +107,8 @@ class QuadEdge:
 
     def __init__(self,
                  start: Optional[Point] = None,
-                 left_from_start: Optional['QuadEdge'] = None,
-                 rotated: Optional['QuadEdge'] = None,
+                 left_from_start: Optional[QuadEdge] = None,
+                 rotated: Optional[QuadEdge] = None,
                  *,
                  context: Context) -> None:
         (self._context, self._left_from_start, self._rotated,
@@ -112,7 +116,7 @@ class QuadEdge:
 
     __repr__ = generate_repr(from_endpoints)
 
-    def connect(self, other: 'QuadEdge') -> 'QuadEdge':
+    def connect(self, other: QuadEdge) -> QuadEdge:
         """Connects the edge with the other."""
         result = self.from_endpoints(self.end, other.start,
                                      context=self.context)
@@ -129,7 +133,7 @@ class QuadEdge:
         """Returns orientation of the point relative to the edge."""
         return self.context.angle_orientation(self.start, self.end, point)
 
-    def splice(self, other: 'QuadEdge') -> None:
+    def splice(self, other: QuadEdge) -> None:
         """Splices the edge with the other."""
         alpha = self.left_from_start.rotated
         beta = other.left_from_start.rotated

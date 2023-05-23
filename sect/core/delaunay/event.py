@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from abc import (ABC,
                  abstractmethod)
 from reprlib import recursive_repr
@@ -38,11 +40,12 @@ class LeftEvent(Event):
     is_left = True
 
     @classmethod
-    def from_segment_endpoints(cls,
-                               endpoints: SegmentEndpoints,
-                               from_first: bool,
-                               is_counterclockwise_contour: bool
-                               ) -> 'LeftEvent':
+    def from_segment_endpoints(
+            cls,
+            endpoints: SegmentEndpoints,
+            from_first: bool,
+            is_counterclockwise_contour: bool
+    ) -> LeftEvent:
         start, end = endpoints
         interior_to_left = is_counterclockwise_contour
         if start > end:
@@ -57,7 +60,7 @@ class LeftEvent(Event):
 
     def __init__(self,
                  start: Point,
-                 right: Optional['RightEvent'],
+                 right: Optional[RightEvent],
                  from_first: bool,
                  interior_to_left: bool,
                  edge: Optional[QuadEdge] = None) -> None:
@@ -88,7 +91,7 @@ class LeftEvent(Event):
     def start(self) -> Point:
         return self._start
 
-    def divide(self, point: Point) -> 'LeftEvent':
+    def divide(self, point: Point) -> LeftEvent:
         tail = self.right.left = LeftEvent(point, self.right, True,
                                            self.interior_to_left, self.edge)
         self.right = RightEvent(point, self)

@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from collections import deque
 from functools import partial
 from itertools import (accumulate,
@@ -48,7 +50,7 @@ class Triangulation:
                              *,
                              extra_constraints: Sequence[Segment] = (),
                              extra_points: Sequence[Point] = (),
-                             context: Context) -> 'Triangulation':
+                             context: Context) -> Triangulation:
         """
         Constructs constrained Delaunay triangulation of given polygon
         (with potentially extra points and constraints).
@@ -123,7 +125,7 @@ class Triangulation:
     def delaunay(cls,
                  points: Sequence[Point],
                  *,
-                 context: Context) -> 'Triangulation':
+                 context: Context) -> Triangulation:
         """
         Constructs Delaunay triangulation of given points.
 
@@ -192,7 +194,7 @@ class Triangulation:
     @classmethod
     def _initialize_triangulation(cls,
                                   points: Sequence[Point],
-                                  context: Context) -> 'Triangulation':
+                                  context: Context) -> Triangulation:
         return base_cases[len(points)](cls, points, context)
 
 
@@ -445,8 +447,9 @@ def to_unique_inner_edges(triangulation: Triangulation) -> Set[QuadEdge]:
             .difference(to_boundary_edges(triangulation)))
 
 
-BaseCase = Callable[[Type[Triangulation], Sequence[Point], Context],
-                    Triangulation]
+BaseCase = Callable[
+    [Type[Triangulation], Sequence[Point], Context], Triangulation
+]
 base_cases = {}  # type: Dict[int, BaseCase]
 register_base_case = partial(partial, base_cases.setdefault)
 
