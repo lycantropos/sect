@@ -413,8 +413,7 @@ def find_intersecting_trapezoids(graph: Graph, edge: Edge) -> List[Trapezoid]:
         trapezoid = ((trapezoid.upper_right or trapezoid.lower_right)
                      if (edge.orientation_of(trapezoid.right)
                          is Orientation.CLOCKWISE)
-                     else (
-                trapezoid.lower_right or trapezoid.upper_right))
+                     else (trapezoid.lower_right or trapezoid.upper_right))
         assert trapezoid is not None, ('Expected neighbour trapezoid, '
                                        'but none found.')
         result.append(trapezoid)
