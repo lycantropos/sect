@@ -15,7 +15,7 @@ class Node(ABC):
     __slots__ = '_parents',
 
     def __init__(self) -> None:
-        self._parents = []  # type: List['Node']
+        self._parents: List[Node] = []
 
     @property
     @abstractmethod
