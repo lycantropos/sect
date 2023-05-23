@@ -9,15 +9,13 @@ from .trapezoid import Trapezoid
 
 
 class YNode(Node):
-    __slots__ = 'edge', 'above', 'below'
+    __slots__ = 'above', 'below', 'edge'
 
     def __init__(self, edge: Edge, below: Node, above: Node) -> None:
         super().__init__()
-        self.edge = edge
-        self.below = below
-        self.above = above
-        self.below._add_parent(self)
+        self.above, self.below, self.edge = above, below, edge
         self.above._add_parent(self)
+        self.below._add_parent(self)
 
     __repr__ = generate_repr(__init__)
 
