@@ -7,8 +7,8 @@ from ground.hints import Point
 from reprit.base import generate_repr
 
 if TYPE_CHECKING:
-    from .node import Node
     from .edge import Edge
+    from .node import Node
 
 
 class Trapezoid:
