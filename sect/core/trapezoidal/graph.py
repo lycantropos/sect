@@ -264,9 +264,8 @@ def add_edge_to_first_trapezoid(graph: Graph,
     above = Trapezoid(edge.left, trapezoid.right, edge, trapezoid.above)
     below = Trapezoid(edge.left, trapezoid.right, trapezoid.below, edge)
     replacement_node = YNode(edge, Leaf(below), Leaf(above))
-    have_left = edge.left != trapezoid.left
     # set pairs of trapezoid neighbours
-    if have_left:
+    if edge.left != trapezoid.left:
         left = Trapezoid(trapezoid.left, edge.left, trapezoid.below,
                          trapezoid.above)
         left.lower_left = trapezoid.lower_left
