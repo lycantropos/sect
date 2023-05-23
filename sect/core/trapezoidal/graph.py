@@ -1,7 +1,8 @@
 from __future__ import annotations
 
 import random
-from typing import List
+from typing import (List,
+                    Tuple)
 
 from ground.base import (Context,
                          Location,
@@ -235,155 +236,196 @@ class Graph:
 
 def add_edge(graph: Graph, edge: Edge) -> None:
     trapezoids = find_intersecting_trapezoids(graph, edge)
-    edge_left, edge_right = edge.left, edge.right
-    prev_trapezoid = prev_below = prev_above = None
-    for index, trapezoid in enumerate(trapezoids):
-        is_first, is_last = index == 0, index == len(trapezoids) - 1
-        have_left, have_right = (is_first and edge_left != trapezoid.left,
-                                 is_last and edge_right != trapezoid.right)
-        left = right = None
-        if is_first and is_last:
-            if have_left:
-                left = Trapezoid(trapezoid.left, edge_left, trapezoid.below,
-                                 trapezoid.above)
-            below = Trapezoid(edge_left, edge_right, trapezoid.below, edge)
-            above = Trapezoid(edge_left, edge_right, edge, trapezoid.above)
-            if have_right:
-                right = Trapezoid(edge_right, trapezoid.right, trapezoid.below,
-                                  trapezoid.above)
-            if have_left:
-                left.lower_left = trapezoid.lower_left
-                left.upper_left = trapezoid.upper_left
-                left.lower_right = below
-                left.upper_right = above
-            else:
-                below.lower_left = trapezoid.lower_left
-                above.upper_left = trapezoid.upper_left
-            if have_right:
-                right.lower_right = trapezoid.lower_right
-                right.upper_right = trapezoid.upper_right
-                below.lower_right = right
-                above.upper_right = right
-            else:
-                below.lower_right = trapezoid.lower_right
-                above.upper_right = trapezoid.upper_right
-        elif is_first:
-            # old trapezoid is the first of 2+ trapezoids
-            # that the segment intersects
-            if have_left:
-                left = Trapezoid(trapezoid.left, edge_left, trapezoid.below,
-                                 trapezoid.above)
-            below = Trapezoid(edge_left, trapezoid.right, trapezoid.below,
-                              edge)
-            above = Trapezoid(edge_left, trapezoid.right, edge,
-                              trapezoid.above)
-            # set pairs of trapezoid neighbours
-            if have_left:
-                left.lower_left = trapezoid.lower_left
-                left.upper_left = trapezoid.upper_left
-                left.lower_right = below
-                left.upper_right = above
-            else:
-                below.lower_left = trapezoid.lower_left
-                above.upper_left = trapezoid.upper_left
-            below.lower_right = trapezoid.lower_right
-            above.upper_right = trapezoid.upper_right
-        elif is_last:
-            # old trapezoid is the last of 2+ trapezoids
-            # that the segment intersects
-            if prev_below.below is trapezoid.below:
-                below = prev_below
-                below.right = edge_right
-            else:
-                below = Trapezoid(trapezoid.left, edge_right, trapezoid.below,
-                                  edge)
-            if prev_above.above is trapezoid.above:
-                above = prev_above
-                above.right = edge_right
-            else:
-                above = Trapezoid(trapezoid.left, edge_right, edge,
-                                  trapezoid.above)
-            if have_right:
-                right = Trapezoid(edge_right, trapezoid.right, trapezoid.below,
-                                  trapezoid.above)
-            # set pairs of trapezoid neighbours
-            if have_right:
-                right.lower_right = trapezoid.lower_right
-                right.upper_right = trapezoid.upper_right
-                below.lower_right = right
-                above.upper_right = right
-            else:
-                below.lower_right = trapezoid.lower_right
-                above.upper_right = trapezoid.upper_right
-            # connect to new trapezoids replacing old
-            if below is not prev_below:
-                below.upper_left = prev_below
-                below.lower_left = (
-                    prev_below
-                    if trapezoid.lower_left is prev_trapezoid
-                    else trapezoid.lower_left
-                )
-            if above is not prev_above:
-                above.lower_left = prev_above
-                above.upper_left = (
-                    prev_above
-                    if trapezoid.upper_left is prev_trapezoid
-                    else trapezoid.upper_left
-                )
-        else:
-            # middle trapezoid,
-            # old trapezoid is neither the first
-            # nor last of the 3+ trapezoids
-            # that the segment intersects
-            if prev_below.below is trapezoid.below:
-                below = prev_below
-                below.right = trapezoid.right
-            else:
-                below = Trapezoid(trapezoid.left, trapezoid.right,
-                                  trapezoid.below, edge)
-            if prev_above.above is trapezoid.above:
-                above = prev_above
-                above.right = trapezoid.right
-            else:
-                above = Trapezoid(trapezoid.left, trapezoid.right, edge,
-                                  trapezoid.above)
-            # connect to new trapezoids replacing prev_trapezoid
-            if below is not prev_below:
-                # below is new
-                below.upper_left = prev_below
-                below.lower_left = (
-                    prev_below
-                    if trapezoid.lower_left is prev_trapezoid
-                    else trapezoid.lower_left
-                )
-            if above is not prev_above:
-                # above is new
-                above.lower_left = prev_above
-                above.upper_left = (
-                    prev_above
-                    if trapezoid.upper_left is prev_trapezoid
-                    else trapezoid.upper_left
-                )
-            below.lower_right = trapezoid.lower_right
-            above.upper_right = trapezoid.upper_right
-        candidate = YNode(edge,
-                          below.node
-                          if below is prev_below
-                          else Leaf(below),
-                          above.node
-                          if above is prev_above
-                          else Leaf(above))
-        if have_right:
-            candidate = XNode(edge_right, candidate, Leaf(right))
-        if have_left:
-            candidate = XNode(edge_left, Leaf(left), candidate)
-        trapezoid_node = trapezoid.node
-        if trapezoid_node is graph.root:
-            graph.root = candidate
-        else:
-            trapezoid_node.replace_with(candidate)
-        # prepare for next loop
-        prev_trapezoid, prev_above, prev_below = trapezoid, above, below
+    first_trapezoid = trapezoids[0]
+    if len(trapezoids) == 1:
+        add_edge_to_single_trapezoid(graph, first_trapezoid, edge)
+    else:
+        prev_above, prev_below = add_edge_to_first_trapezoid(
+                graph, first_trapezoid, edge
+        )
+        # prepare for the loop
+        prev_trapezoid = first_trapezoid
+        for middle_trapezoid in trapezoids[1:-1]:
+            prev_above, prev_below = add_edge_to_middle_trapezoid(
+                    graph, middle_trapezoid, edge, prev_above, prev_below,
+                    prev_trapezoid
+            )
+            # prepare for next loop
+            prev_trapezoid = middle_trapezoid
+        add_edge_to_last_trapezoid(graph, trapezoids[-1], edge, prev_above,
+                                   prev_below, prev_trapezoid)
+
+
+def add_edge_to_first_trapezoid(graph: Graph,
+                                trapezoid: Trapezoid,
+                                edge: Edge) -> Tuple[Trapezoid, Trapezoid]:
+    # old trapezoid is the first of 2+ trapezoids
+    # that the segment intersects
+    above = Trapezoid(edge.left, trapezoid.right, edge, trapezoid.above)
+    below = Trapezoid(edge.left, trapezoid.right, trapezoid.below, edge)
+    replacement_node = YNode(edge, Leaf(below), Leaf(above))
+    have_left = edge.left != trapezoid.left
+    # set pairs of trapezoid neighbours
+    if have_left:
+        left = Trapezoid(trapezoid.left, edge.left, trapezoid.below,
+                         trapezoid.above)
+        left.lower_left = trapezoid.lower_left
+        left.upper_left = trapezoid.upper_left
+        left.lower_right = below
+        left.upper_right = above
+
+        replacement_node = XNode(edge.left, Leaf(left), replacement_node)
+    else:
+        above.upper_left = trapezoid.upper_left
+        below.lower_left = trapezoid.lower_left
+    above.upper_right = trapezoid.upper_right
+    below.lower_right = trapezoid.lower_right
+    replace_node(graph, trapezoid.node, replacement_node)
+    return above, below
+
+
+def add_edge_to_last_trapezoid(
+        graph: Trapezoid,
+        trapezoid: Trapezoid,
+        edge: Edge,
+        prev_above: Trapezoid,
+        prev_below: Trapezoid,
+        prev_trapezoid: Trapezoid
+) -> Tuple[Trapezoid, Trapezoid]:
+    # old trapezoid is the last of 2+ trapezoids
+    # that the segment intersects
+    if prev_below.below is trapezoid.below:
+        below = prev_below
+        below.right = edge.right
+    else:
+        below = Trapezoid(trapezoid.left, edge.right, trapezoid.below, edge)
+    if prev_above.above is trapezoid.above:
+        above = prev_above
+        above.right = edge.right
+    else:
+        above = Trapezoid(trapezoid.left, edge.right, edge, trapezoid.above)
+    replacement_node = YNode(edge,
+                             below.node
+                             if below is prev_below
+                             else Leaf(below),
+                             above.node
+                             if above is prev_above
+                             else Leaf(above))
+    # set pairs of trapezoid neighbours
+    if edge.right != trapezoid.right:
+        right = Trapezoid(edge.right, trapezoid.right, trapezoid.below,
+                          trapezoid.above)
+        right.lower_right = trapezoid.lower_right
+        right.upper_right = trapezoid.upper_right
+        above.upper_right = below.lower_right = right
+
+        replacement_node = XNode(edge.right, replacement_node, Leaf(right))
+    else:
+        above.upper_right = trapezoid.upper_right
+        below.lower_right = trapezoid.lower_right
+    # connect to new trapezoids replacing old
+    if above is not prev_above:
+        above.lower_left = prev_above
+        above.upper_left = (prev_above
+                            if trapezoid.upper_left is prev_trapezoid
+                            else trapezoid.upper_left)
+    if below is not prev_below:
+        below.upper_left = prev_below
+        below.lower_left = (prev_below
+                            if trapezoid.lower_left is prev_trapezoid
+                            else trapezoid.lower_left)
+    replace_node(graph, trapezoid.node, replacement_node)
+
+
+def add_edge_to_middle_trapezoid(
+        graph: Graph,
+        trapezoid: Trapezoid,
+        edge: Edge,
+        prev_above: Trapezoid,
+        prev_below: Trapezoid,
+        prev_trapezoid: Trapezoid
+) -> Tuple[Trapezoid, Trapezoid]:
+    # middle trapezoid,
+    # old trapezoid is neither the first
+    # nor last of the 3+ trapezoids
+    # that the segment intersects
+    if prev_below.below is trapezoid.below:
+        below = prev_below
+        below.right = trapezoid.right
+    else:
+        below = Trapezoid(trapezoid.left, trapezoid.right, trapezoid.below,
+                          edge)
+    if prev_above.above is trapezoid.above:
+        above = prev_above
+        above.right = trapezoid.right
+    else:
+        above = Trapezoid(trapezoid.left, trapezoid.right, edge,
+                          trapezoid.above)
+    # connect to new trapezoids replacing old
+    if above is not prev_above:
+        # above is new
+        above.lower_left = prev_above
+        above.upper_left = (prev_above
+                            if trapezoid.upper_left is prev_trapezoid
+                            else trapezoid.upper_left)
+    if below is not prev_below:
+        # below is new
+        below.upper_left = prev_below
+        below.lower_left = (prev_below
+                            if trapezoid.lower_left is prev_trapezoid
+                            else trapezoid.lower_left)
+    above.upper_right = trapezoid.upper_right
+    below.lower_right = trapezoid.lower_right
+    replacement_node = YNode(edge,
+                             below.node
+                             if below is prev_below
+                             else Leaf(below),
+                             above.node
+                             if above is prev_above
+                             else Leaf(above))
+    replace_node(graph, trapezoid.node, replacement_node)
+    return above, below
+
+
+def add_edge_to_single_trapezoid(graph: Graph,
+                                 trapezoid: Trapezoid,
+                                 edge: Edge) -> None:
+    above = Trapezoid(edge.left, edge.right, edge, trapezoid.above)
+    below = Trapezoid(edge.left, edge.right, trapezoid.below, edge)
+
+    replacement_node = YNode(edge, Leaf(below), Leaf(above))
+    if edge.right != trapezoid.right:
+        right = Trapezoid(edge.right, trapezoid.right, trapezoid.below,
+                          trapezoid.above)
+        right.lower_right = trapezoid.lower_right
+        right.upper_right = trapezoid.upper_right
+        below.lower_right = right
+        above.upper_right = right
+
+        replacement_node = XNode(edge.right, replacement_node, Leaf(right))
+    else:
+        below.lower_right = trapezoid.lower_right
+        above.upper_right = trapezoid.upper_right
+    if edge.left != trapezoid.left:
+        left = Trapezoid(trapezoid.left, edge.left, trapezoid.below,
+                         trapezoid.above)
+        left.lower_left = trapezoid.lower_left
+        left.upper_left = trapezoid.upper_left
+        left.lower_right = below
+        left.upper_right = above
+
+        replacement_node = XNode(edge.left, Leaf(left), replacement_node)
+    else:
+        below.lower_left = trapezoid.lower_left
+        above.upper_left = trapezoid.upper_left
+    replace_node(graph, trapezoid.node, replacement_node)
+
+
+def replace_node(graph: Graph, node: Node, replacement: Node) -> None:
+    if node is graph.root:
+        graph.root = replacement
+    else:
+        node.replace_with(replacement)
 
 
 def box_to_node(box: Box, context: Context) -> Leaf:
