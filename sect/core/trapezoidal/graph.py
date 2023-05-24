@@ -260,8 +260,6 @@ def add_edge(graph: Graph, edge: Edge) -> None:
 def add_edge_to_first_trapezoid(graph: Graph,
                                 trapezoid: Trapezoid,
                                 edge: Edge) -> Tuple[Trapezoid, Trapezoid]:
-    # old trapezoid is the first of 2+ trapezoids
-    # that the segment intersects
     above = Trapezoid(edge.left, trapezoid.right, edge, trapezoid.above)
     below = Trapezoid(edge.left, trapezoid.right, trapezoid.below, edge)
     replacement_node = YNode(edge, Leaf(below), Leaf(above))
@@ -292,18 +290,24 @@ def add_edge_to_last_trapezoid(
         prev_below: Trapezoid,
         prev_trapezoid: Trapezoid
 ) -> Tuple[Trapezoid, Trapezoid]:
-    # old trapezoid is the last of 2+ trapezoids
-    # that the segment intersects
-    if prev_below.below is trapezoid.below:
-        below = prev_below
-        below.right = edge.right
-    else:
-        below = Trapezoid(trapezoid.left, edge.right, trapezoid.below, edge)
     if prev_above.above is trapezoid.above:
         above = prev_above
         above.right = edge.right
     else:
         above = Trapezoid(trapezoid.left, edge.right, edge, trapezoid.above)
+        above.lower_left = prev_above
+        above.upper_left = (prev_above
+                            if trapezoid.upper_left is prev_trapezoid
+                            else trapezoid.upper_left)
+    if prev_below.below is trapezoid.below:
+        below = prev_below
+        below.right = edge.right
+    else:
+        below = Trapezoid(trapezoid.left, edge.right, trapezoid.below, edge)
+        below.upper_left = prev_below
+        below.lower_left = (prev_below
+                            if trapezoid.lower_left is prev_trapezoid
+                            else trapezoid.lower_left)
     replacement_node = YNode(edge,
                              below.node
                              if below is prev_below
@@ -323,17 +327,6 @@ def add_edge_to_last_trapezoid(
     else:
         above.upper_right = trapezoid.upper_right
         below.lower_right = trapezoid.lower_right
-    # connect to new trapezoids replacing old
-    if above is not prev_above:
-        above.lower_left = prev_above
-        above.upper_left = (prev_above
-                            if trapezoid.upper_left is prev_trapezoid
-                            else trapezoid.upper_left)
-    if below is not prev_below:
-        below.upper_left = prev_below
-        below.lower_left = (prev_below
-                            if trapezoid.lower_left is prev_trapezoid
-                            else trapezoid.lower_left)
     replace_node(graph, trapezoid.node, replacement_node)
 
 
@@ -345,31 +338,22 @@ def add_edge_to_middle_trapezoid(
         prev_below: Trapezoid,
         prev_trapezoid: Trapezoid
 ) -> Tuple[Trapezoid, Trapezoid]:
-    # middle trapezoid,
-    # old trapezoid is neither the first
-    # nor last of the 3+ trapezoids
-    # that the segment intersects
-    if prev_below.below is trapezoid.below:
-        below = prev_below
-        below.right = trapezoid.right
-    else:
-        below = Trapezoid(trapezoid.left, trapezoid.right, trapezoid.below,
-                          edge)
     if prev_above.above is trapezoid.above:
         above = prev_above
         above.right = trapezoid.right
     else:
         above = Trapezoid(trapezoid.left, trapezoid.right, edge,
                           trapezoid.above)
-    # connect to new trapezoids replacing old
-    if above is not prev_above:
-        # above is new
         above.lower_left = prev_above
         above.upper_left = (prev_above
                             if trapezoid.upper_left is prev_trapezoid
                             else trapezoid.upper_left)
-    if below is not prev_below:
-        # below is new
+    if prev_below.below is trapezoid.below:
+        below = prev_below
+        below.right = trapezoid.right
+    else:
+        below = Trapezoid(trapezoid.left, trapezoid.right, trapezoid.below,
+                          edge)
         below.upper_left = prev_below
         below.lower_left = (prev_below
                             if trapezoid.lower_left is prev_trapezoid
