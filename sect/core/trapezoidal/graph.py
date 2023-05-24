@@ -283,7 +283,7 @@ def add_edge_to_first_trapezoid(graph: Graph,
 
 
 def add_edge_to_last_trapezoid(
-        graph: Trapezoid,
+        graph: Graph,
         trapezoid: Trapezoid,
         edge: Edge,
         prev_above: Trapezoid,
