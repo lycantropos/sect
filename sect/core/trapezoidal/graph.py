@@ -265,7 +265,10 @@ def add_edge_to_first_trapezoid(graph: Graph,
     below = Trapezoid(edge.left, trapezoid.right, trapezoid.below, edge)
     replacement_node = YNode(edge, Leaf(below), Leaf(above))
     # set pairs of trapezoid neighbours
-    if edge.left != trapezoid.left:
+    if edge.left == trapezoid.left:
+        above.upper_left = trapezoid.upper_left
+        below.lower_left = trapezoid.lower_left
+    else:
         left = Trapezoid(trapezoid.left, edge.left, trapezoid.below,
                          trapezoid.above)
         left.lower_left = trapezoid.lower_left
@@ -274,9 +277,6 @@ def add_edge_to_first_trapezoid(graph: Graph,
         left.upper_right = above
 
         replacement_node = XNode(edge.left, Leaf(left), replacement_node)
-    else:
-        above.upper_left = trapezoid.upper_left
-        below.lower_left = trapezoid.lower_left
     above.upper_right = trapezoid.upper_right
     below.lower_right = trapezoid.lower_right
     assert trapezoid.node is not graph.root
@@ -318,7 +318,10 @@ def add_edge_to_last_trapezoid(
                              if above is prev_above
                              else Leaf(above))
     # set pairs of trapezoid neighbours
-    if edge.right != trapezoid.right:
+    if edge.right == trapezoid.right:
+        above.upper_right = trapezoid.upper_right
+        below.lower_right = trapezoid.lower_right
+    else:
         right = Trapezoid(edge.right, trapezoid.right, trapezoid.below,
                           trapezoid.above)
         right.lower_right = trapezoid.lower_right
@@ -326,9 +329,6 @@ def add_edge_to_last_trapezoid(
         above.upper_right = below.lower_right = right
 
         replacement_node = XNode(edge.right, replacement_node, Leaf(right))
-    else:
-        above.upper_right = trapezoid.upper_right
-        below.lower_right = trapezoid.lower_right
     assert trapezoid.node is not graph.root
     trapezoid.node.replace_with(replacement_node)
 
@@ -382,7 +382,10 @@ def add_edge_to_single_trapezoid(graph: Graph,
     below = Trapezoid(edge.left, edge.right, trapezoid.below, edge)
 
     replacement_node = YNode(edge, Leaf(below), Leaf(above))
-    if edge.right != trapezoid.right:
+    if edge.right == trapezoid.right:
+        below.lower_right = trapezoid.lower_right
+        above.upper_right = trapezoid.upper_right
+    else:
         right = Trapezoid(edge.right, trapezoid.right, trapezoid.below,
                           trapezoid.above)
         right.lower_right = trapezoid.lower_right
@@ -391,10 +394,10 @@ def add_edge_to_single_trapezoid(graph: Graph,
         above.upper_right = right
 
         replacement_node = XNode(edge.right, replacement_node, Leaf(right))
+    if edge.left == trapezoid.left:
+        below.lower_left = trapezoid.lower_left
+        above.upper_left = trapezoid.upper_left
     else:
-        below.lower_right = trapezoid.lower_right
-        above.upper_right = trapezoid.upper_right
-    if edge.left != trapezoid.left:
         left = Trapezoid(trapezoid.left, edge.left, trapezoid.below,
                          trapezoid.above)
         left.lower_left = trapezoid.lower_left
@@ -403,9 +406,6 @@ def add_edge_to_single_trapezoid(graph: Graph,
         left.upper_right = above
 
         replacement_node = XNode(edge.left, Leaf(left), replacement_node)
-    else:
-        below.lower_left = trapezoid.lower_left
-        above.upper_left = trapezoid.upper_left
     if trapezoid.node is graph.root:
         assert graph.height == 0
         graph.root = replacement_node
