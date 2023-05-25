@@ -241,6 +241,7 @@ def add_edge(graph: Graph, edge: Edge) -> None:
     if len(trapezoids) == 1:
         add_edge_to_single_trapezoid(graph, first_trapezoid, edge)
     else:
+        assert graph.height > 0
         prev_above, prev_below = add_edge_to_first_trapezoid(
                 graph, first_trapezoid, edge
         )
@@ -278,7 +279,8 @@ def add_edge_to_first_trapezoid(graph: Graph,
         below.lower_left = trapezoid.lower_left
     above.upper_right = trapezoid.upper_right
     below.lower_right = trapezoid.lower_right
-    replace_node(graph, trapezoid.node, replacement_node)
+    assert trapezoid.node is not graph.root
+    trapezoid.node.replace_with(replacement_node)
     return above, below
 
 
@@ -327,7 +329,8 @@ def add_edge_to_last_trapezoid(
     else:
         above.upper_right = trapezoid.upper_right
         below.lower_right = trapezoid.lower_right
-    replace_node(graph, trapezoid.node, replacement_node)
+    assert trapezoid.node is not graph.root
+    trapezoid.node.replace_with(replacement_node)
 
 
 def add_edge_to_middle_trapezoid(
@@ -367,7 +370,8 @@ def add_edge_to_middle_trapezoid(
                              above.node
                              if above is prev_above
                              else Leaf(above))
-    replace_node(graph, trapezoid.node, replacement_node)
+    assert trapezoid.node is not graph.root
+    trapezoid.node.replace_with(replacement_node)
     return above, below
 
 
@@ -402,14 +406,12 @@ def add_edge_to_single_trapezoid(graph: Graph,
     else:
         below.lower_left = trapezoid.lower_left
         above.upper_left = trapezoid.upper_left
-    replace_node(graph, trapezoid.node, replacement_node)
-
-
-def replace_node(graph: Graph, node: Node, replacement: Node) -> None:
-    if node is graph.root:
-        graph.root = replacement
+    if trapezoid.node is graph.root:
+        assert graph.height == 0
+        graph.root = replacement_node
     else:
-        node.replace_with(replacement)
+        assert graph.height > 0
+        trapezoid.node.replace_with(replacement_node)
 
 
 def box_to_node(box: Box, context: Context) -> Leaf:
