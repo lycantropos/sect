@@ -289,9 +289,9 @@ def detect_crossings(inner_edges: Iterable[QuadEdge],
             if segments_relater(edge, constraint) is Relation.CROSS]
 
 
-def edge_should_be_swapped(edge: QuadEdge,
-                           point_in_circle_locator: PointInCircleLocator
-                           ) -> bool:
+def edge_should_be_swapped(
+        edge: QuadEdge, point_in_circle_locator: PointInCircleLocator
+) -> bool:
     return (is_convex_quadrilateral_diagonal(edge)
             and (point_in_circle_locator(edge.right_from_start.end,
                                          edge.start, edge.end,
@@ -381,9 +381,9 @@ def to_edges(triangulation: Triangulation) -> Iterable[QuadEdge]:
     return edges_with_opposites(to_unique_edges(triangulation))
 
 
-def to_left_candidate(base_edge: QuadEdge,
-                      point_in_circle_locator: PointInCircleLocator
-                      ) -> Optional[QuadEdge]:
+def to_left_candidate(
+        base_edge: QuadEdge, point_in_circle_locator: PointInCircleLocator
+) -> Optional[QuadEdge]:
     result = base_edge.opposite.left_from_start
     if base_edge.orientation_of(result.end) is not Orientation.CLOCKWISE:
         return None
@@ -398,9 +398,9 @@ def to_left_candidate(base_edge: QuadEdge,
     return result
 
 
-def to_right_candidate(base_edge: QuadEdge,
-                       point_in_circle_locator: PointInCircleLocator
-                       ) -> Optional[QuadEdge]:
+def to_right_candidate(
+        base_edge: QuadEdge, point_in_circle_locator: PointInCircleLocator
+) -> Optional[QuadEdge]:
     result = base_edge.right_from_start
     if (base_edge.orientation_of(result.end)
             is not Orientation.CLOCKWISE):
@@ -416,8 +416,9 @@ def to_right_candidate(base_edge: QuadEdge,
     return result
 
 
-def to_unique_boundary_edges(triangulation: Triangulation
-                             ) -> Iterable[QuadEdge]:
+def to_unique_boundary_edges(
+        triangulation: Triangulation
+) -> Iterable[QuadEdge]:
     start = triangulation.left_side
     edge = start
     while True:

@@ -26,11 +26,12 @@ def ceil_log2(number: int) -> int:
     return number.bit_length() - (not (number & (number - 1)))
 
 
-def complete_vertices(border: Contour,
-                      holes: Sequence[Contour],
-                      candidates: Sequence[Point],
-                      context: Context
-                      ) -> Tuple[Contour, Sequence[Contour], Sequence[Point]]:
+def complete_vertices(
+        border: Contour,
+        holes: Sequence[Contour],
+        candidates: Sequence[Point],
+        context: Context
+) -> Tuple[Contour, Sequence[Contour], Sequence[Point]]:
     candidates = sorted(to_distinct(candidates))
     contour_cls, segment_cls, segment_point_relater = (
         context.contour_cls, context.segment_cls,
@@ -50,11 +51,12 @@ def complete_vertices(border: Contour,
     return border, completed_holes, candidates
 
 
-def contour_to_oriented_edges_endpoints(contour: Contour,
-                                        *,
-                                        clockwise: bool,
-                                        orienteer: Orienteer
-                                        ) -> Iterable[SegmentEndpoints]:
+def contour_to_oriented_edges_endpoints(
+        contour: Contour,
+        *,
+        clockwise: bool,
+        orienteer: Orienteer
+) -> Iterable[SegmentEndpoints]:
     vertices = contour.vertices
     return (((vertices[index - 1], vertices[index])
              for index in range(len(vertices)))
@@ -78,12 +80,13 @@ def normalize_contour_vertices(vertices: Sequence[Point],
 to_distinct = dict.fromkeys
 
 
-def _complete_contour_vertices(contour: Contour,
-                               candidates: Sequence[Point],
-                               contour_cls: Type[Contour],
-                               segment_cls: Type[Segment],
-                               containment_checker: SegmentContainmentChecker
-                               ) -> Tuple[Contour, Sequence[Point]]:
+def _complete_contour_vertices(
+        contour: Contour,
+        candidates: Sequence[Point],
+        contour_cls: Type[Contour],
+        segment_cls: Type[Segment],
+        containment_checker: SegmentContainmentChecker
+) -> Tuple[Contour, Sequence[Point]]:
     extra_vertices = {}
     vertices = contour.vertices
     start = vertices[-1]
@@ -120,12 +123,13 @@ def _complete_contour_vertices(contour: Contour,
     return contour, candidates
 
 
-def _is_inner_segment_point(start: Point,
-                            end: Point,
-                            point: Point,
-                            segment_cls: Type[Segment],
-                            containment_checker: SegmentContainmentChecker
-                            ) -> bool:
+def _is_inner_segment_point(
+        start: Point,
+        end: Point,
+        point: Point,
+        segment_cls: Type[Segment],
+        containment_checker: SegmentContainmentChecker
+) -> bool:
     return (point != start and point != end
             and containment_checker(segment_cls(start, end), point))
 
