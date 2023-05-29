@@ -291,7 +291,7 @@ def add_edge_to_last_trapezoid(
         prev_above: Trapezoid,
         prev_below: Trapezoid,
         prev_trapezoid: Trapezoid
-) -> Tuple[Trapezoid, Trapezoid]:
+) -> None:
     if prev_above.above is trapezoid.above:
         above = prev_above
         above.right = edge.right
