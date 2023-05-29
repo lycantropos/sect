@@ -75,7 +75,7 @@ def normalize_contour_vertices(vertices: Sequence[Point],
             else vertices)
 
 
-to_distinct = (OrderedDict if sys.version_info < (3, 6) else dict).fromkeys
+to_distinct = dict.fromkeys
 
 
 def _complete_contour_vertices(contour: Contour,
