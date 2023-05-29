@@ -8,16 +8,6 @@ from .trapezoid import Trapezoid
 
 
 class XNode(Node):
-    __slots__ = 'left', 'point', 'right'
-
-    def __init__(self, point: Point, left: Node, right: Node) -> None:
-        super().__init__()
-        self.left, self.point, self.right = left, point, right
-        self.left._add_parent(self)
-        self.right._add_parent(self)
-
-    __repr__ = generate_repr(__init__)
-
     @property
     def height(self) -> int:
         return max(self.left.height, self.right.height) + 1
@@ -33,6 +23,16 @@ class XNode(Node):
         return (self.right
                 if self.point <= edge.left
                 else self.left).search_edge(edge)
+
+    __slots__ = 'left', 'point', 'right'
+
+    def __init__(self, point: Point, left: Node, right: Node) -> None:
+        super().__init__()
+        self.left, self.point, self.right = left, point, right
+        self.left._add_parent(self)
+        self.right._add_parent(self)
+
+    __repr__ = generate_repr(__init__)
 
     def _replace_child(self, current: Node, replacement: Node) -> None:
         if self.left is current:

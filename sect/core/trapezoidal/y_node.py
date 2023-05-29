@@ -9,16 +9,6 @@ from .trapezoid import Trapezoid
 
 
 class YNode(Node):
-    __slots__ = 'above', 'below', 'edge'
-
-    def __init__(self, edge: Edge, below: Node, above: Node) -> None:
-        super().__init__()
-        self.above, self.below, self.edge = above, below, edge
-        self.above._add_parent(self)
-        self.below._add_parent(self)
-
-    __repr__ = generate_repr(__init__)
-
     @property
     def height(self) -> int:
         return max(self.below.height, self.above.height) + 1
@@ -35,6 +25,16 @@ class YNode(Node):
         return (self.above
                 if self.edge < edge
                 else self.below).search_edge(edge)
+
+    __slots__ = 'above', 'below', 'edge'
+
+    def __init__(self, edge: Edge, below: Node, above: Node) -> None:
+        super().__init__()
+        self.above, self.below, self.edge = above, below, edge
+        self.above._add_parent(self)
+        self.below._add_parent(self)
+
+    __repr__ = generate_repr(__init__)
 
     def _replace_child(self, current: Node, replacement: Node) -> None:
         if self.below is current:

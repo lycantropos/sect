@@ -16,6 +16,10 @@ class Edge:
         """Constructs edge given its endpoints."""
         return cls(left, right, interior_to_left, context)
 
+    def orientation_of(self, point: Point) -> Orientation:
+        """Returns orientation of the point relative to the edge."""
+        return self.context.angle_orientation(self.left, self.right, point)
+
     __slots__ = 'context', 'interior_to_left', 'left', 'right'
 
     def __init__(self,
@@ -51,7 +55,3 @@ class Edge:
                     else NotImplemented)
 
     __repr__ = generate_repr(__init__)
-
-    def orientation_of(self, point: Point) -> Orientation:
-        """Returns orientation of the point relative to the edge."""
-        return self.context.angle_orientation(self.left, self.right, point)
