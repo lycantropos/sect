@@ -19,12 +19,12 @@ class Trapezoid:
                  left: Point,
                  right: Point,
                  below: Edge,
-                 above: Edge) -> None:
+                 above: Edge,
+                 node: Node) -> None:
         assert left < right, 'Incorrect endpoints order'
-        self.above, self.below, self.left, self.right = (
-            above, below, left, right
+        self.above, self.below, self.left, self.node, self.right = (
+            above, below, left, node, right
         )
-        self.node: Optional[Node] = None
         self._lower_left: Optional[Trapezoid] = None
         self._lower_right: Optional[Trapezoid] = None
         self._upper_left: Optional[Trapezoid] = None
