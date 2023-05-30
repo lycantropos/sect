@@ -63,6 +63,10 @@ jobs:
           architecture: ${{ matrix.platform.python_architecture }}
       - name: 'Install in editable mode'
         run: python -m pip -v install -e .[tests]
+      - name: 'Install Mypy'
+        run: python -m pip install -U mypy
+      - name: 'Run Mypy'
+        run: python -m mypy ${{ github.event.repository.name }}
       - name: 'Install coverage dependencies'
         run: python -m pip install -U coverage[toml]
       - name: 'Run doctests'
