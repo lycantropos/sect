@@ -1,8 +1,7 @@
-import sys
 from bisect import bisect
-from collections import OrderedDict
 from typing import (FrozenSet,
                     Iterable,
+                    List,
                     Sequence,
                     Tuple,
                     Type)
@@ -16,7 +15,7 @@ from ground.hints import (Contour,
 from sect.core.hints import Orienteer
 from sect.core.utils import (arg_min,
                              flatten,
-                             rotate_sequence,
+                             rotate_list,
                              to_contour_orientation)
 from .hints import (SegmentContainmentChecker,
                     SegmentEndpoints)
@@ -68,9 +67,9 @@ def contour_to_oriented_edges_endpoints(
                   for index in range(len(vertices) - 1, -1, -1)))
 
 
-def normalize_contour_vertices(vertices: Sequence[Point],
+def normalize_contour_vertices(vertices: List[Point],
                                orienteer: Orienteer) -> Sequence[Point]:
-    vertices = rotate_sequence(vertices, arg_min(vertices))
+    vertices = rotate_list(vertices, arg_min(vertices))
     return (vertices[:1] + vertices[1:][::-1]
             if (orienteer(vertices[-1], vertices[0], vertices[1])
                 is Orientation.CLOCKWISE)
@@ -104,10 +103,10 @@ def _complete_contour_vertices(
         if extra_vertices_indices:
             extra_vertices[index] = [candidates[index]
                                      for index in extra_vertices_indices]
-            extra_vertices_indices = frozenset(extra_vertices_indices)
+            extra_vertices_indices_set = frozenset(extra_vertices_indices)
             candidates = [point
                           for index, point in enumerate(candidates)
-                          if index not in extra_vertices_indices]
+                          if index not in extra_vertices_indices_set]
             if not candidates:
                 break
         start = end

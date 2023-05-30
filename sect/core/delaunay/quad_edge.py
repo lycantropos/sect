@@ -66,7 +66,9 @@ class QuadEdge:
         """
         aka "Onext" in L. Guibas and J. Stolfi notation.
         """
-        return self._left_from_start
+        result = self._left_from_start
+        assert result is not None
+        return result
 
     @property
     def opposite(self) -> QuadEdge:
@@ -94,7 +96,9 @@ class QuadEdge:
         """
         aka "Rot" in L. Guibas and J. Stolfi notation.
         """
-        return self._rotated
+        result = self._rotated
+        assert result is not None
+        return result
 
     @property
     def start(self) -> Point:

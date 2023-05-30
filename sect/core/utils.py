@@ -1,9 +1,7 @@
+import typing as _t
 from itertools import chain
-from typing import (Iterable,
-                    List,
-                    Sequence,
-                    Tuple)
 
+import typing_extensions as _te
 from ground.base import Orientation
 from ground.hints import (Contour,
                           Point)
@@ -12,12 +10,22 @@ from .hints import (Domain,
                     Orienteer)
 
 
-def arg_min(sequence: Sequence[Domain]) -> int:
+class _Sortable(_te.Protocol):
+    def __lt__(self, other: _te.Self) -> _t.Any:
+        ...
+
+
+_SortableT = _t.TypeVar('_SortableT',
+                        bound=_Sortable)
+
+
+def arg_min(sequence: _t.Sequence[_SortableT]) -> int:
     return min(range(len(sequence)),
                key=sequence.__getitem__)
 
 
-def contour_to_edges_endpoints(contour: Contour) -> List[Tuple[Point, Point]]:
+def contour_to_edges_endpoints(contour: Contour) -> _t.List[
+    _t.Tuple[Point, Point]]:
     vertices = contour.vertices
     return [(vertices[index - 1], vertices[index])
             for index in range(len(vertices))]
@@ -26,19 +34,21 @@ def contour_to_edges_endpoints(contour: Contour) -> List[Tuple[Point, Point]]:
 flatten = chain.from_iterable
 
 
-def pairwise(iterable: Iterable[Domain]) -> Iterable[Tuple[Domain, Domain]]:
+def pairwise(
+        iterable: _t.Iterable[Domain]
+) -> _t.Iterable[_t.Tuple[Domain, Domain]]:
     iterator = iter(iterable)
-    element = next(iterator, None)
+    try:
+        element = next(iterator)
+    except StopIteration:
+        return
     for next_element in iterator:
         yield element, next_element
         element = next_element
 
 
-def rotate_sequence(sequence: Sequence[Domain],
-                    index: int) -> Sequence[Domain]:
-    return (sequence[index:] + sequence[:index]
-            if index
-            else sequence)
+def rotate_list(value: _t.List[Domain], index: int) -> _t.List[Domain]:
+    return value[index:] + value[:index] if index else value
 
 
 def to_contour_orientation(contour: Contour,

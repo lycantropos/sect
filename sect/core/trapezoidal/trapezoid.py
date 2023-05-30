@@ -72,9 +72,7 @@ class Trapezoid:
         self.above, self.below, self.left, self.node, self.right = (
             above, below, left, node, right
         )
-        self._lower_left: Optional[Trapezoid] = None
-        self._lower_right: Optional[Trapezoid] = None
-        self._upper_left: Optional[Trapezoid] = None
-        self._upper_right: Optional[Trapezoid] = None
+        self._lower_left = self._lower_right = None
+        self._upper_left = self._upper_right = None
 
     __repr__ = generate_repr(__init__)

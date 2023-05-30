@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+from typing import Any
+
 from ground.base import (Context,
                          Orientation)
 from ground.hints import Point
@@ -32,7 +34,7 @@ class Edge:
             context, interior_to_left, left, right
         )
 
-    def __lt__(self, other: Edge) -> bool:
+    def __lt__(self, other: Edge) -> Any:
         """Checks if the edge is lower than the other."""
         other_left_orientation = self.orientation_of(other.left)
         other_right_orientation = self.orientation_of(other.right)

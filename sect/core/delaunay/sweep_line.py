@@ -4,6 +4,7 @@ from functools import partial
 from typing import Optional
 
 from dendroid import red_black
+from dendroid.hints import KeyedSet
 from ground.base import (Context,
                          Orientation)
 from reprit.base import generate_repr
@@ -16,8 +17,10 @@ class SweepLine:
     __slots__ = 'context', '_tree'
 
     def __init__(self, context: Context) -> None:
-        self._tree = red_black.set_(key=partial(SweepLineKey,
-                                                context.angle_orientation))
+        self._tree: KeyedSet[SweepLineKey, LeftEvent] = red_black.set_(
+                key=partial(SweepLineKey,
+                            context.angle_orientation)
+        )
 
     __repr__ = generate_repr(__init__)
 

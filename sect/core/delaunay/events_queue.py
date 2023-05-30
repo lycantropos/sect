@@ -1,8 +1,6 @@
 from __future__ import annotations
 
-from functools import partial
-from typing import (Iterable,
-                    Optional)
+import typing as _t
 
 from ground.base import (Context,
                          Orientation,
@@ -13,11 +11,11 @@ from reprit.base import generate_repr
 
 from sect.core.hints import Orienteer
 from .event import (Event,
-                    LeftEvent)
+                    LeftEvent,
+                    RightEvent)
 from .hints import SegmentEndpoints
 from .quad_edge import QuadEdge
 from .sweep_line import SweepLine
-from .utils import to_endpoints
 
 
 class EventsQueueKey:
@@ -28,7 +26,7 @@ class EventsQueueKey:
 
     __repr__ = generate_repr(__init__)
 
-    def __lt__(self, other: EventsQueueKey) -> bool:
+    def __lt__(self, other: EventsQueueKey) -> _t.Any:
         event, other_event = self.event, other.event
         start, other_start = event.start, other_event.start
         if start.x != other_start.x:
@@ -58,15 +56,19 @@ class EventsQueueKey:
 
 
 class EventsQueue:
-    __slots__ = 'context', '_queue'
+    __slots__ = 'context', '_key', '_queue'
 
     def __init__(self, context: Context) -> None:
         self.context = context
-        self._queue = PriorityQueue(key=partial(EventsQueueKey,
-                                                context.angle_orientation))
+        self._key: _t.Callable[[Event], EventsQueueKey] = lambda event: (
+            EventsQueueKey(context.angle_orientation, event)
+        )
+        self._queue: PriorityQueue[EventsQueueKey, Event] = PriorityQueue(
+                key=self._key
+        )
 
     @staticmethod
-    def compute_position(below_event: Optional[LeftEvent],
+    def compute_position(below_event: _t.Optional[LeftEvent],
                          event: LeftEvent) -> None:
         if below_event is not None:
             event.other_interior_to_left = (below_event.other_interior_to_left
@@ -97,14 +99,13 @@ class EventsQueue:
             ends_equal = below_event.end == event.end
             start_min, start_max = (
                 (event, below_event)
-                if starts_equal or (self._queue.key(event)
-                                    < self._queue.key(below_event))
+                if starts_equal or self._key(event) < self._key(below_event)
                 else (below_event, event)
             )
             end_min, end_max = (
                 (event.right, below_event.right)
-                if ends_equal or (self._queue.key(event.right)
-                                  < self._queue.key(below_event.right))
+                if ends_equal or (self._key(event.right)
+                                  < self._key(below_event.right))
                 else (below_event.right, event.right)
             )
             if starts_equal:
@@ -139,7 +140,7 @@ class EventsQueue:
                       from_first: bool,
                       is_counterclockwise_contour: bool) -> None:
         start_event = LeftEvent.from_segment_endpoints(
-                to_endpoints(edge), from_first, is_counterclockwise_contour
+                (edge.start, edge.end), from_first, is_counterclockwise_contour
         )
         start_event.edge = edge
         self.push(start_event)
@@ -156,12 +157,13 @@ class EventsQueue:
         self.push(start_event)
         self.push(start_event.right)
 
-    def sweep(self) -> Iterable[LeftEvent]:
+    def sweep(self) -> _t.Iterable[LeftEvent]:
         sweep_line = SweepLine(self.context)
         queue = self._queue
         while queue:
             event = queue.pop()
             if event.is_left:
+                assert isinstance(event, LeftEvent)
                 sweep_line.add(event)
                 above_event, below_event = (sweep_line.above(event),
                                             sweep_line.below(event))
@@ -174,6 +176,7 @@ class EventsQueue:
                     self.compute_position(sweep_line.below(below_event),
                                           below_event)
             else:
+                assert isinstance(event, RightEvent)
                 event = event.left
                 if event in sweep_line:
                     above_event, below_event = (sweep_line.above(event),
