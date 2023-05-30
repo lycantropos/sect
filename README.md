@@ -68,30 +68,36 @@ True
 ...      Contour([Point(0, 0), Point(1, 0), Point(0, 1)])])
 True
 >>> Polygon = context.polygon_cls
->>> (Triangulation.constrained_delaunay(
-...      Polygon(Contour([Point(0, 0), Point(1, 0), Point(0, 1)]), []),
-...      context=context
-...  ).triangles()
-...  == [Contour([Point(0, 0), Point(1, 0), Point(0, 1)])])
+>>> (
+...      Triangulation.constrained_delaunay(
+...          Polygon(Contour([Point(0, 0), Point(1, 0), Point(0, 1)]), []),
+...          context=context
+...      ).triangles()
+...      == [Contour([Point(0, 0), Point(1, 0), Point(0, 1)])]
+... )
 True
->>> (Triangulation.constrained_delaunay(
-...      Polygon(Contour([Point(0, 0), Point(3, 0), Point(1, 1), Point(0, 3)]),
-...              []),
-...      context=context
-...  ).triangles()
-...  == [Contour([Point(0, 0), Point(3, 0), Point(1, 1)]),
-...      Contour([Point(0, 0), Point(1, 1), Point(0, 3)])])
+>>> (
+...      Triangulation.constrained_delaunay(
+...          Polygon(Contour([Point(0, 0), Point(3, 0), Point(1, 1),
+...                           Point(0, 3)]),
+...                  []),
+...          context=context
+...      ).triangles()
+...      == [Contour([Point(0, 0), Point(3, 0), Point(1, 1)]),
+...          Contour([Point(0, 0), Point(1, 1), Point(0, 3)])]
+... )
 True
->>> (Triangulation.constrained_delaunay(
-...      Polygon(Contour([Point(0, 0), Point(4, 0), Point(0, 4)]),
-...              [Contour([Point(0, 0), Point(1, 2),
-...                        Point(2, 1)])]),
-...      context=context
-...  ).triangles()
-...  == [Contour([Point(0, 0), Point(4, 0), Point(2, 1)]),
-...      Contour([Point(1, 2), Point(2, 1), Point(4, 0)]),
-...      Contour([Point(0, 4), Point(1, 2), Point(4, 0)]),
-...      Contour([Point(0, 0), Point(1, 2), Point(0, 4)])])
+>>> (
+...      Triangulation.constrained_delaunay(
+...          Polygon(Contour([Point(0, 0), Point(4, 0), Point(0, 4)]),
+...                  [Contour([Point(0, 0), Point(1, 2), Point(2, 1)])]),
+...          context=context
+...      ).triangles()
+...      == [Contour([Point(0, 0), Point(4, 0), Point(2, 1)]),
+...          Contour([Point(1, 2), Point(2, 1), Point(4, 0)]),
+...          Contour([Point(0, 4), Point(1, 2), Point(4, 0)]),
+...          Contour([Point(0, 0), Point(1, 2), Point(0, 4)])]
+... )
 True
 >>> from sect.decomposition import Graph
 >>> graph = Graph.from_polygon(Polygon(Contour([Point(0, 0), Point(6, 0),
