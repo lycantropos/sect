@@ -87,12 +87,10 @@ class Graph:
                                      context)
             for segment in multisegment.segments
         ]
-        shuffler(edges)
-        result = cls(box_to_leaf(context.segments_box(multisegment.segments),
-                                 context))
-        for edge in edges:
-            add_edge(result, edge)
-        return result
+        return cls._from_box_with_edges(
+                context.segments_box(multisegment.segments), edges, shuffler,
+                context
+        )
 
     @classmethod
     def from_polygon(cls,
@@ -184,11 +182,8 @@ class Graph:
                                         context)
                     for start, end in contour_to_edges_endpoints(hole)
             )
-        shuffler(edges)
-        result = cls(box_to_leaf(context.contour_box(border), context))
-        for edge in edges:
-            add_edge(result, edge)
-        return result
+        return cls._from_box_with_edges(context.contour_box(border), edges,
+                                        shuffler, context)
 
     @property
     def height(self) -> int:
@@ -196,6 +191,17 @@ class Graph:
         Returns height of the root node.
         """
         return self.root.height
+
+    def locate(self, point: Point) -> Location:
+        """
+        Finds location of point relative to decomposed geometry.
+
+        Time complexity:
+            ``O(self.height)``
+        Memory complexity:
+            ``O(1)``
+        """
+        return self.root.locate(point)
 
     __slots__ = 'root',
 
@@ -223,48 +229,57 @@ class Graph:
 
     __repr__ = generate_repr(__init__)
 
-    def locate(self, point: Point) -> Location:
-        """
-        Finds location of point relative to decomposed geometry.
-
-        Time complexity:
-            ``O(self.height)``
-        Memory complexity:
-            ``O(1)``
-        """
-        return self.root.locate(point)
+    @classmethod
+    def _from_box_with_edges(cls,
+                             box: Box,
+                             edges: List[Edge],
+                             shuffler: Shuffler,
+                             context: Context) -> Graph:
+        shuffler(edges)
+        edges_iterator = iter(edges)
+        result = cls(
+                to_single_trapezoid_node_replacement(
+                        box_to_leaf(box, context).trapezoid,
+                        next(edges_iterator)
+                )
+        )
+        for edge in edges_iterator:
+            add_edge(result, edge)
+        return result
 
 
 def add_edge(graph: Graph, edge: Edge) -> None:
+    assert graph.height > 0
     trapezoids = find_intersecting_trapezoids(graph, edge)
     first_trapezoid = trapezoids[0]
     if len(trapezoids) == 1:
-        add_edge_to_single_trapezoid(graph, first_trapezoid, edge)
-    else:
-        assert graph.height > 0
-        prev_above, prev_below = add_edge_to_first_trapezoid(
-                graph, first_trapezoid, edge
+        replacement_node = to_single_trapezoid_node_replacement(
+                first_trapezoid, edge
         )
+        first_trapezoid.node.replace_with(replacement_node)
+    else:
+        prev_above, prev_below = add_edge_to_first_trapezoid(first_trapezoid,
+                                                             edge)
         # prepare for the loop
         prev_trapezoid = first_trapezoid
         for middle_trapezoid in trapezoids[1:-1]:
             prev_above, prev_below = add_edge_to_middle_trapezoid(
-                    graph, middle_trapezoid, edge, prev_above, prev_below,
+                    middle_trapezoid, edge, prev_above, prev_below,
                     prev_trapezoid
             )
             # prepare for next loop
             prev_trapezoid = middle_trapezoid
-        add_edge_to_last_trapezoid(graph, trapezoids[-1], edge, prev_above,
+        add_edge_to_last_trapezoid(trapezoids[-1], edge, prev_above,
                                    prev_below, prev_trapezoid)
 
 
-def add_edge_to_first_trapezoid(graph: Graph,
-                                trapezoid: Trapezoid,
+def add_edge_to_first_trapezoid(trapezoid: Trapezoid,
                                 edge: Edge) -> Tuple[Trapezoid, Trapezoid]:
     above_node, below_node = (
         Leaf(edge.left, trapezoid.right, edge, trapezoid.above),
         Leaf(edge.left, trapezoid.right, trapezoid.below, edge)
     )
+    replacement_node: Node
     replacement_node = YNode(edge, below_node, above_node)
     above, below = above_node.trapezoid, below_node.trapezoid
     # set pairs of trapezoid neighbours
@@ -282,13 +297,11 @@ def add_edge_to_first_trapezoid(graph: Graph,
         replacement_node = XNode(edge.left, left_node, replacement_node)
     above.upper_right = trapezoid.upper_right
     below.lower_right = trapezoid.lower_right
-    assert trapezoid.node is not graph.root
     trapezoid.node.replace_with(replacement_node)
     return above, below
 
 
 def add_edge_to_last_trapezoid(
-        graph: Graph,
         trapezoid: Trapezoid,
         edge: Edge,
         prev_above: Trapezoid,
@@ -317,6 +330,7 @@ def add_edge_to_last_trapezoid(
         below.lower_left = (prev_below
                             if trapezoid.lower_left is prev_trapezoid
                             else trapezoid.lower_left)
+    replacement_node: Node
     replacement_node = YNode(edge, below_node, above_node)
     # set pairs of trapezoid neighbours
     if edge.right == trapezoid.right:
@@ -330,12 +344,10 @@ def add_edge_to_last_trapezoid(
         right.upper_right = trapezoid.upper_right
         above.upper_right = below.lower_right = right
         replacement_node = XNode(edge.right, replacement_node, right_node)
-    assert trapezoid.node is not graph.root
     trapezoid.node.replace_with(replacement_node)
 
 
 def add_edge_to_middle_trapezoid(
-        graph: Graph,
         trapezoid: Trapezoid,
         edge: Edge,
         prev_above: Trapezoid,
@@ -369,19 +381,18 @@ def add_edge_to_middle_trapezoid(
     above.upper_right = trapezoid.upper_right
     below.lower_right = trapezoid.lower_right
     replacement_node = YNode(edge, below_node, above_node)
-    assert trapezoid.node is not graph.root
     trapezoid.node.replace_with(replacement_node)
     return above, below
 
 
-def add_edge_to_single_trapezoid(graph: Graph,
-                                 trapezoid: Trapezoid,
-                                 edge: Edge) -> None:
+def to_single_trapezoid_node_replacement(trapezoid: Trapezoid,
+                                         edge: Edge) -> Node:
     above_node, below_node = (
         Leaf(edge.left, edge.right, edge, trapezoid.above),
         Leaf(edge.left, edge.right, trapezoid.below, edge)
     )
-    replacement_node = YNode(edge, below_node, above_node)
+    result: Node
+    result = YNode(edge, below_node, above_node)
     above, below = above_node.trapezoid, below_node.trapezoid
     if edge.right == trapezoid.right:
         below.lower_right = trapezoid.lower_right
@@ -394,7 +405,7 @@ def add_edge_to_single_trapezoid(graph: Graph,
         right.upper_right = trapezoid.upper_right
         below.lower_right = right
         above.upper_right = right
-        replacement_node = XNode(edge.right, replacement_node, right_node)
+        result = XNode(edge.right, result, right_node)
     if edge.left == trapezoid.left:
         below.lower_left = trapezoid.lower_left
         above.upper_left = trapezoid.upper_left
@@ -406,13 +417,8 @@ def add_edge_to_single_trapezoid(graph: Graph,
         left.upper_left = trapezoid.upper_left
         left.lower_right = below
         left.upper_right = above
-        replacement_node = XNode(edge.left, left_node, replacement_node)
-    if trapezoid.node is graph.root:
-        assert graph.height == 0
-        graph.root = replacement_node
-    else:
-        assert graph.height > 0
-        trapezoid.node.replace_with(replacement_node)
+        result = XNode(edge.left, left_node, result)
+    return result
 
 
 def box_to_leaf(box: Box, context: Context) -> Leaf:
@@ -435,11 +441,12 @@ def find_intersecting_trapezoids(graph: Graph, edge: Edge) -> List[Trapezoid]:
     result = [trapezoid]
     right = edge.right
     while trapezoid.right < right:
-        trapezoid = ((trapezoid.upper_right or trapezoid.lower_right)
+        candidate = ((trapezoid.upper_right or trapezoid.lower_right)
                      if (edge.orientation_of(trapezoid.right)
                          is Orientation.CLOCKWISE)
                      else (trapezoid.lower_right or trapezoid.upper_right))
-        assert trapezoid is not None, ('Expected neighbour trapezoid, '
+        assert candidate is not None, ('Expected neighbour trapezoid, '
                                        'but none found.')
+        trapezoid = candidate
         result.append(trapezoid)
     return result
