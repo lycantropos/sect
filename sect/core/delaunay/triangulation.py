@@ -217,10 +217,11 @@ def connect(base_edge: QuadEdge,
             break
         elif (left_candidate is not None
               and (right_candidate is None
-                   or (point_in_circle_locator(right_candidate.end,
-                                               left_candidate.end,
-                                               base_edge.end, base_edge.start)
-                       is Location.INTERIOR))):
+                   or not (point_in_circle_locator(right_candidate.end,
+                                                   left_candidate.end,
+                                                   base_edge.end,
+                                                   base_edge.start)
+                           is Location.INTERIOR))):
             base_edge = base_edge.opposite.connect(left_candidate.opposite)
         else:
             assert right_candidate is not None
