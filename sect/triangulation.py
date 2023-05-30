@@ -1,5 +1,5 @@
-from .core.delaunay.quad_edge import QuadEdge
-from .core.delaunay.triangulation import Triangulation
+from .core.delaunay.quad_edge import QuadEdge as _QuadEdge
+from .core.delaunay.triangulation import Triangulation as _Triangulation
 
-QuadEdge = QuadEdge
-Triangulation = Triangulation
+QuadEdge = _QuadEdge
+Triangulation = _Triangulation
