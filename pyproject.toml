@@ -45,6 +45,10 @@ build-backend = "setuptools.build_meta"
 [tool.coverage.run]
 source = ["sect"]
 
+[tool.mypy]
+ignore_missing_imports = true
+strict = true
+
 [tool.pytest.ini_options]
 addopts = "--verbose -s --hypothesis-profile=default"
 
